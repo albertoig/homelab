@@ -1,0 +1,35 @@
+k3s_cluster:
+    children:
+        server:
+            hosts:
+                10.0.0.200: null
+        agent:
+            hosts:
+                10.0.0.201: null
+    vars:
+        ansible_port: ENC[AES256_GCM,data:hzM=,iv:m7nYMXq9jptYEW0LvQ+DMWhcEuzdd8OTF0aW1xFBNp8=,tag:ls7T1Upxrl0uIErJ8NksAA==,type:int]
+        ansible_user: ENC[AES256_GCM,data:3AmRR3AN,iv:5ZLPW18klx2y9uRCdZcFEUP1XJ2BDC0/0M1AvhPsbeM=,tag:fOGnbrq9bc/Vt0AVJNpxvg==,type:str]
+        ansible_ssh_private_key_file: ENC[AES256_GCM,data:ypTbj4y4eN64DxqbWIQ=,iv:dKozNE47JtDKiW1P2wX+v/+WckGhnvsCThPYnAZeuiY=,tag:8C5oIAhaDLGkIkKu/+hZIg==,type:str]
+        become: ENC[AES256_GCM,data:Pwp8Lw==,iv:8TEmg6B9Vv0wt59zfCOSjFEEVSr56CY90AMMl8U4+tU=,tag:+M14Da6mO/I/ktKPZ/kBrg==,type:bool]
+        ansible_become_method: ENC[AES256_GCM,data:HaOX1w==,iv:nou1/qfnXbALyDkdftfE65cVGQQIpyvLd9ys+LUtfJw=,tag:4oh4+uC5icHScTAc18UP6Q==,type:str]
+        k3s_version: ENC[AES256_GCM,data:zp5TXpv+WCzlomcB,iv:+qR2YSPP6oYezQ8HnvFusIdnhziCQYEmqbLeJgNhzmY=,tag:H3WWONRnt7Vpuhv9YY3Z+g==,type:str]
+        token: ENC[AES256_GCM,data:0IG3uGQyRZyzizKopkvMmaW6YI/3ccZiEJTFIC3p4hUOEfJmxXo3pPH/pzsvosctM9YJownaoRXQfPnd13rpH9LWSavjn9iq8ryecP27WByKvb2Rs8ceig==,iv:k0V+LIYFSU69O3UXMgFBi0C3qHJgBDYgw6KfVtIYapM=,tag:KkdnIS28+LkBiPc9TnZJbQ==,type:str]
+        api_endpoint: ENC[AES256_GCM,data:BB0DKRuiJjn07fCB/CslA+SkyLYBVuu/4Hh2Cpakf7jvZPLi1UOCU0sUFOeX54gJqE5cYP6Iu6QrO/eH7ZB2hSofpAL/6la8RkHimj9cc+sXOQ==,iv:dZwxjYG4WHRTXNGsptQzpHZS1KvF4OGRNOWCmNuuCpU=,tag:2GsNR/8nweCBc/M20LJAxA==,type:str]
+sops:
+    lastmodified: "2026-03-02T20:23:30Z"
+    mac: ENC[AES256_GCM,data:h2vtviQqZ84PEhldnS7i9mM1FEZx1Hgk3Kto0y+cpqmASNrd8DPEN3K8qe5oHs/+U8ss+7As6RFfEEBcbFNPDsAHz/cvHIvdv/4j4oHNCddyjHedNFYa3xApVe9G5Agk6oM0run4Dy1Yu7xk769NV14u0K13do+UFg0hu+/jcAU=,iv:pH50fIdlhNmHq8lhXLeiMhs3gXwseTQdYe+JkWtWOUk=,tag:vAxBZOP6j8viTZ7CAU6Ukw==,type:str]
+    pgp:
+        - created_at: "2026-03-02T20:23:30Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4Drti3Uh53xz4SAQdAqwwR03y071FdlFszAAEfWxGUombvIODeYxojIAVK4Ucw
+            fd+yP74zDAsWZ+SEq2w0Bur7yuXb7p091/ySrH5M2BEX8kNSnaC+XCpsHL9WhiGc
+            1GgBCQIQTVissvDNyguYDmi1m06t7IAaX1g44npo5tpMV3Viq/x0BlDjWHKOnolO
+            BDbpF8kqkWSt/SZx/WMDB47fArZ+JVLhiQoZV0Q0nBe3Sznpg07T5VQXg+mntoml
+            FtAxd+oLG6YKaQ==
+            =Apo7
+            -----END PGP MESSAGE-----
+          fp: 8152E60988488774
+    unencrypted_suffix: _unencrypted
+    version: 3.12.1

@@ -1,3 +1,36 @@
-node_modules/
+## GENERAL
 .env
 *.log
+
+## NODE
+node_modules/
+
+## ANSIBLE
+metal/k3s/inventory.yml
+metal/k3s/.ansible/
+metal/k3s/collections/
+*.retry
+
+## SSH keys
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+## SOPS
+keys.txt
+
+## VAULT
+.vault_pass
+.vault_password
+
+## MACOS
+.DS_Store
+
+## EDITOR
+.vscode/
+.idea/
+*.swp
+*.swo
