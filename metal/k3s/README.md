@@ -23,6 +23,8 @@ brew install age           # macOS
 sudo apt install age       # Debian/Ubuntu
 ```
 
+---
+
 ## Part 1 - Prepare Your Machines
 
 Do this once per machine before running any Ansible commands.
@@ -94,31 +96,6 @@ echo "ubuntu ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ubuntu
 sudo whoami
 ```
 
-### 1.4 - Harden SSH (Disable Password Login)
-
-Once keys are set up (next section) you should disable password
-authentication on each node. Run this **after** copying your SSH key.
-
-```bash
-sudo nano /etc/ssh/sshd_config
-```
-
-Change or add these lines:
-
-```ini
-PasswordAuthentication no
-PubkeyAuthentication yes
-PermitRootLogin no
-```
-
-```bash
-# Apply changes
-sudo systemctl restart sshd
-```
-
-> ⚠️ Make sure your SSH key login works before doing this or
-> you will lock yourself out.
-
 ---
 
 ## Part 2 - Set Up SSH Keys
@@ -145,10 +122,37 @@ ssh-copy-id -i ~/.ssh/homelab.pub ubuntu@192.168.1.10   # server
 ssh-copy-id -i ~/.ssh/homelab.pub ubuntu@192.168.1.11   # agent 1
 ssh-copy-id -i ~/.ssh/homelab.pub ubuntu@192.168.1.12   # agent 2
 
-# Test passwordless login works
+# Test passwordless login works - should log in with no password prompt
 ssh -i ~/.ssh/homelab ubuntu@192.168.1.10
-# Should log in without any password prompt
 ```
+
+### 2.3 - Harden SSH (Disable Password Login)
+
+Now that your key is working, disable password authentication on each node
+so only SSH key login is allowed.
+
+```bash
+# SSH into each node
+ssh -i ~/.ssh/homelab ubuntu@YOUR_NODE_IP
+
+sudo nano /etc/ssh/sshd_config
+```
+
+Change or add these lines:
+
+```ini
+PasswordAuthentication no
+PubkeyAuthentication yes
+PermitRootLogin no
+```
+
+```bash
+# Apply changes
+sudo systemctl restart sshd
+```
+
+> ⚠️ Verify your key login works in a second terminal before closing
+> your current session or you will lock yourself out.
 
 ---
 
@@ -157,7 +161,7 @@ ssh -i ~/.ssh/homelab ubuntu@192.168.1.10
 ### 3.1 - Set Up SOPS Encryption
 
 Your inventory contains sensitive values like the cluster token.
-SOPS encrypts it so you can safely commit it to your repository.
+SOPS encrypts it so you can safely commit it to a public repository.
 
 ```bash
 # Generate an age key pair
@@ -233,13 +237,13 @@ chmod +x metal/k3s/run.sh
 # 5. Validate the inventory
 # 6. Ping all nodes to verify connectivity
 # 7. Run the k3s-ansible playbook
-# 8. Clean up the plaintext inventory
+# 8. Clean up the plaintext inventory on exit
 ```
 
 ### Verify the Cluster
 
 ```bash
-# Should be copied to your machine automatically by the playbook
+# kubeconfig is copied to your machine automatically by the playbook
 kubectl get nodes
 
 # Expected output:
@@ -280,9 +284,9 @@ Passwordless sudo is not configured on the node. See section 1.3.
 SSH key is not copied to the node. See section 2.2.
 
 ### `No config file found`
-Always run via `./metal/k3s/run.sh` not directly with `ansible-playbook`
-from a different directory. The script `cd`s into the right directory
-so `ansible.cfg` is picked up correctly.
+Always run via `./metal/k3s/run.sh` and not directly with `ansible-playbook`
+from a different directory. The script `cd`s into the correct directory
+so `ansible.cfg` is picked up automatically.
 
 ### `Could not reach one or more nodes`
 - Check the node is powered on: `ping YOUR_NODE_IP`
