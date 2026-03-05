@@ -34,3 +34,7 @@ keys.txt
 .idea/
 *.swp
 *.swo
+
+## SECRETS
+*.secrets.yaml
+!*.secrets.enc.yaml
