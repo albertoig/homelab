@@ -49,10 +49,38 @@ Make sure you have the following tools installed:
 - [sops](https://github.com/mozilla/sops#installation)
 - [age](https://github.com/FiloSottile/age#installation)
 
-### Setup
+### Required Helm Plugins
 
-#### 1. Clone the Repository
+After installing Helm, make sure to install the following plugins:
 
 ```bash
-git clone https://github.com/albertoig/homelab.git
-cd homelab
+# Create a secure directory for GPG keys
+mkdir -p ~/.config/helm/keys
+chmod 700 ~/.config/helm/keys
+
+# Import GPG key for helm-secrets plugin
+curl -fsSL https://github.com/jkroepke.gpg -o ~/.config/helm/keys/jkroepke.gpg.raw
+
+# Convert key to legacy GPG format
+gpg --dearmor < ~/.config/helm/keys/jkroepke.gpg.raw > ~/.config/helm/keys/jkroepke.gpg
+chmod 600 ~/.config/helm/keys/jkroepke.gpg
+
+# Verify the key is valid
+gpg --no-default-keyring --keyring ~/.config/helm/keys/jkroepke.gpg --list-keys
+
+# Install helm-secrets plugin
+helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
+
+# Install helm-secrets getter plugin
+helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-getter-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
+
+# Install helm-secrets post-renderer plugin
+helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-post-renderer-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
+
+# Install helm-diff plugin
+helm plugin install https://github.com/databus23/helm-diff --verify false
+
+# Cleanup raw key file after use
+rm ~/.config/helm/keys/jkroepke.gpg.raw
+
+```

@@ -18,6 +18,7 @@ GitOps-driven environment.
 ---
 
 ## 🚧 In Progress
+- [ ] Generate kube config and copy it to the local machine pre configured. (also the  pluging diff and secrets)
 - [ ] Helmfile configuration
 - [ ] Centralize scripting to run everything with one command.
 - [ ] Monitoring stack (Prometheus + Grafana)
