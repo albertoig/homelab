@@ -1,0 +1,40 @@
+releases:
+  # Install Prometheus CRDs before the stack to avoid race conditions on first install.
+  # https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-operator-crds
+  - name: prometheus-operator-crds
+    namespace: prometheus
+    chart: prometheus-community/prometheus-operator-crds
+    version: "27.0.0"
+    wait: true
+    waitForJobs: true
+    labels:
+      app: monitoring
+
+  # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
+  - name: prometheus-stack
+    namespace: prometheus
+    chart: prometheus-community/kube-prometheus-stack
+    version: "82.10.3"
+    wait: true
+    waitForJobs: true
+    disableValidationOnInstall: true
+    labels:
+      app: monitoring
+    needs:
+      - prometheus/prometheus-operator-crds
+    inherit:
+    - template: values_gotmpl_and_secrets
+
+  # https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+  - name: grafana
+    namespace: prometheus
+    chart: grafana/grafana
+    version: "7.3.7"
+    wait: true
+    waitForJobs: true
+    labels:
+      app: monitoring
+    needs:
+      - prometheus/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets

@@ -1,0 +1,5 @@
+environments:
+  dev:
+    kubeContext: homelab-dev
+  prod:
+    kubeContext: homelab-prod

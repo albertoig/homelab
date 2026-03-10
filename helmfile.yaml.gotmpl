@@ -1,0 +1,19 @@
+
+bases:
+- helmfile/environments.yaml
+- helmfile/repositories.yaml
+- helmfile/templates.yaml
+- helmfile/common/common.yaml.gotmpl
+- helmfile/environments/{{ .Environment.Name }}/{{ .Environment.Name }}.yaml
+
+---
+
+lockFilePath: helmfile/locks/helmfile-{{ .Environment.Name }}.lock
+
+helmDefaults:
+  wait: true
+  timeout: 600
+  cleanupOnFail: true
+
+commonLabels:
+  stack: homelab

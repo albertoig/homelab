@@ -1,6 +1,0 @@
-storageClass: gp2
-prometheusRetention: 30d
-prometheusStorageSize: 50Gi
-grafanaStorageSize: 10Gi
-ingressEnabled: true
-replicas: 1

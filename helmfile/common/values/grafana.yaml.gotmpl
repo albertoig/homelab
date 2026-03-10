@@ -1,0 +1,68 @@
+adminUser: admin
+adminPassword: {{ .Values.grafanaAdminPassword }}   # From secrets
+
+grafana.ini:
+  security:
+    secret_key: {{ .Values.grafanaSecretKey }}       # From secrets
+  server:
+    root_url: "%(protocol)s://%(domain)s/"
+  auth:
+    disable_login_form: false
+  auth.anonymous:
+    enabled: false
+  analytics:
+    check_for_updates: false
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Connect to prometheus-stack's Prometheus instance as a datasource
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-stack-kube-prom-prometheus.prometheus.svc.cluster.local:9090
+        access: proxy
+        isDefault: true
+        jsonData:
+          timeInterval: "30s"
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: "default"
+        orgId: 1
+        folder: ""
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+dashboards:
+  default:
+    kubernetes-cluster:
+      gnetId: 7249
+      revision: 1
+      datasource: Prometheus
+    node-exporter:
+      gnetId: 1860
+      revision: 37
+      datasource: Prometheus
+    kubernetes-pods:
+      gnetId: 6417
+      revision: 1
+      datasource: Prometheus
