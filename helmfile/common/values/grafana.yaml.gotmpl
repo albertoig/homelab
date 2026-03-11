@@ -1,9 +1,6 @@
 adminUser: admin
-adminPassword: {{ .Values.grafanaAdminPassword }}   # From secrets
 
 grafana.ini:
-  security:
-    secret_key: {{ .Values.grafanaSecretKey }}       # From secrets
   server:
     root_url: "%(protocol)s://%(domain)s/"
   auth:
@@ -15,6 +12,7 @@ grafana.ini:
 
 persistence:
   enabled: true
+  storageClassName: local-path
   accessModes:
     - ReadWriteOnce
 

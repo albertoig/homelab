@@ -1,8 +1,8 @@
 
 bases:
-- helmfile/environments.yaml
+- helmfile/templates.yaml.gotmpl
+- helmfile/environments.yaml.gotmpl
 - helmfile/repositories.yaml
-- helmfile/templates.yaml
 - helmfile/common/common.yaml.gotmpl
 - helmfile/environments/{{ .Environment.Name }}/{{ .Environment.Name }}.yaml
 
@@ -14,6 +14,8 @@ helmDefaults:
   wait: true
   timeout: 600
   cleanupOnFail: true
+  diffArgs:
+    - "--dry-run=server"
 
 commonLabels:
   stack: homelab
