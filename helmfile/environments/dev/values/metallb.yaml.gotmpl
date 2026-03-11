@@ -1,0 +1,22 @@
+C# MetalLB IPAddressPool for dev environment
+# Using Layer 2 mode (ARP) for simplicity in home lab
+# https://metallb.universe.tf/configuration/crd/
+
+resources:
+  - apiVersion: metallb.io/v1beta1
+    kind: IPAddressPool
+    metadata:
+      name: default
+      namespace: metallb-system
+    spec:
+      addresses:
+        - 10.0.0.150-10.0.0.160
+      autoAssign: true
+  - apiVersion: metallb.io/v1beta1
+    kind: L2Advertisement
+    metadata:
+      name: default
+      namespace: metallb-system
+    spec:
+      ipAddressPools:
+        - default

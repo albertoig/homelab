@@ -24,6 +24,19 @@ resources:
     memory: "512Mi"
     cpu: "500m"
 
+# Expose Grafana via MetalLB LoadBalancer
+service:
+  enabled: true
+  type: LoadBalancer
+  port: 80
+  targetPort: 3000
+  annotations:
+    # Tell K3s to NOT use built-in klipper-lb, let MetalLB handle it
+    k3s.cattle.io/balancer: ""
+    # MetalLB configuration
+    metallb.universe.tf/address-pool: default
+    metallb.universe.tf/allow-zero-ips: "true"
+
 # Connect to prometheus-stack's Prometheus instance as a datasource
 datasources:
   datasources.yaml:

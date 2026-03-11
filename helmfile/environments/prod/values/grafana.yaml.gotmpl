@@ -3,6 +3,11 @@ replicas: 1
 persistence:
   size: 10Gi
 
+# Use port 30080 to avoid conflict with Traefik on port 80
+service:
+  port: 30080
+  targetPort: 3000
+
 ingress:
   enabled: false
 

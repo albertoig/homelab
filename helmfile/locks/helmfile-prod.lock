@@ -6,8 +6,11 @@ dependencies:
   - name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
     version: 82.10.3
+  - name: metallb
+    repository: https://metallb.github.io/metallb
+    version: 0.15.3
   - name: prometheus-operator-crds
     repository: https://prometheus-community.github.io/helm-charts
     version: 27.0.0
-digest: sha256:992acd0840ad4fe92793cfc41f96483a5deb5d8257b1be43a60652113626c6e6
-generated: "2026-03-10T11:28:31.091369829-04:00"
+digest: sha256:b69c74ec26051d02909299c0a7512ca6604ce2d3ded7ddda999fd9ad4a19de04
+generated: "2026-03-11T01:20:34.113288791-04:00"

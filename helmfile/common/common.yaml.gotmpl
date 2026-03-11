@@ -1,4 +1,16 @@
 releases:
+  # MetalLB - Load balancer for Kubernetes
+  # https://github.com/metallb/helm-charts/blob/main/charts/metallb/values.yaml
+  - name: metallb
+    namespace: metallb-system
+    chart: metallb/metallb
+    version: "0.15.3"
+    wait: true
+    labels:
+      app: networking
+    inherit:
+    - template: values_gotmpl_and_secrets
+
   # Install Prometheus CRDs before the stack to avoid race conditions on first install.
   # https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-operator-crds
   - name: prometheus-operator-crds

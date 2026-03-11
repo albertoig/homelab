@@ -1,0 +1,28 @@
+# MetalLB Configuration
+# https://github.com/metallb/helm-charts/blob/main/charts/metallb/values.yaml
+
+# Set the log level for MetalLB components
+logLevel: info
+
+# Configure the frr (Free Range Routing) container for BGP mode
+frr:
+  enabled: false
+
+# Enable Prometheus metrics
+prometheus:
+  enabled: true
+  namespace: ""
+
+# Speaker configuration
+speaker:
+  tolerateMaster: true
+  nodeSelector:
+    kubernetes.io/os: linux
+
+# Controller configuration
+controller:
+  nodeSelector:
+    kubernetes.io/os: linux
+
+# Note: AddressPool configuration is handled separately via the metallb-addresspool release
+# This uses CRDs (AddressPool) which require the MetalLB chart to be installed first
