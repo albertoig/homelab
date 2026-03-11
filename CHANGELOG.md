@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/albertoig/homelab/compare/v1.1.0...v1.2.0) (2026-03-11)
+
+
+### Features
+
+* **metal/k3s:** disable built-in Traefik and klipper-lb in K3s cluster ([1d39235](https://github.com/albertoig/homelab/commit/1d3923514d3fa9dddc84d24b4e11b5c64d74ce2e))
+
 # [1.1.0](https://github.com/albertoig/homelab/compare/v1.0.0...v1.1.0) (2026-03-11)
 
 
