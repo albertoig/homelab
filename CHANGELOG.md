@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/albertoig/homelab/compare/v1.0.0...v1.1.0) (2026-03-11)
+
+
+### Features
+
+* **monitoring:** add MetalLB load balancer for K3s cluster ([facd763](https://github.com/albertoig/homelab/commit/facd76357ce1e3ff1e7185ec6fd44145ef48a723))
+
 # 1.0.0 (2026-03-10)
 
 
