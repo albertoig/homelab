@@ -8,11 +8,11 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: gp2
+          storageClassName: local-path
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 50Gi
+              storage: 20Gi
 
 alertmanager:
   alertmanagerSpec:
@@ -20,7 +20,7 @@ alertmanager:
     storage:
       volumeClaimTemplate:
         spec:
-          storageClassName: gp2
+          storageClassName: local-path
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
