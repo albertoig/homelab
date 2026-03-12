@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/albertoig/homelab/compare/v1.2.1...v1.3.0) (2026-03-12)
+
+
+### Features
+
+* **helmfile:** add Longhorn storage, Loki logging, and Tempo tracing with breaking storage migration ([5201014](https://github.com/albertoig/homelab/commit/5201014391eb3f61b2683129db16594f755ac497))
+
 ## [1.2.1](https://github.com/albertoig/homelab/compare/v1.2.0...v1.2.1) (2026-03-11)
 
 
