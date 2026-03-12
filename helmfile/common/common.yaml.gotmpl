@@ -24,8 +24,8 @@ releases:
   # MetalLB Configuration - IP Address Pool and L2 Advertisement
   - name: metallb-config
     namespace: metallb-system
-    chart: manifests/metallb-config
-    version: "0.1.0"
+    chart: charts/metallb-config
+    version: "0.15.3"
     wait: true
     disableValidation: true
     labels:
