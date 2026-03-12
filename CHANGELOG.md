@@ -1,3 +1,11 @@
+# [1.4.0](https://github.com/albertoig/homelab/compare/v1.3.0...v1.4.0) (2026-03-12)
+
+
+### Features
+
+* **grafana:** add MetalLB, Longhorn, and CoreDNS dashboards with updated node-exporter revision ([1ba1507](https://github.com/albertoig/homelab/commit/1ba1507e47ee40165029f0b0a6f30a269f2b5916))
+* **longhorn:** add Longhorn configuration with MetalLB UI exposure and Prometheus metrics ([258bfeb](https://github.com/albertoig/homelab/commit/258bfebe118cadb602a507926b9edd2dfcd6b525))
+
 # [1.3.0](https://github.com/albertoig/homelab/compare/v1.2.1...v1.3.0) (2026-03-12)
 
 
