@@ -1,4 +1,14 @@
 releases:
+  # Longhorn - Cloud-native distributed block storage for Kubernetes
+  # https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
+  - name: longhorn
+    namespace: longhorn-system
+    chart: longhorn/longhorn
+    version: "1.7.1"
+    wait: true
+    labels:
+      app: storage
+
   # MetalLB - Load balancer for Kubernetes
   # https://github.com/metallb/helm-charts/blob/main/charts/metallb/values.yaml
   - name: metallb
@@ -11,16 +21,19 @@ releases:
     inherit:
     - template: values_gotmpl_and_secrets
 
-  # Install Prometheus CRDs before the stack to avoid race conditions on first install.
-  # https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-operator-crds
-  - name: prometheus-operator-crds
-    namespace: prometheus
-    chart: prometheus-community/prometheus-operator-crds
-    version: "27.0.0"
+  # MetalLB Configuration - IP Address Pool and L2 Advertisement
+  - name: metallb-config
+    namespace: metallb-system
+    chart: manifests/metallb-config
+    version: "0.1.0"
     wait: true
-    waitForJobs: true
+    disableValidation: true
     labels:
-      app: monitoring
+      app: networking
+    needs:
+      - metallb-system/metallb
+    inherit:
+    - template: values_gotmpl_and_secrets
 
   # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
   - name: prometheus-stack
@@ -33,20 +46,63 @@ releases:
     labels:
       app: monitoring
     needs:
-      - prometheus/prometheus-operator-crds
+      - longhorn-system/longhorn
     inherit:
     - template: values_gotmpl_and_secrets
 
   # https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
   - name: grafana
     namespace: prometheus
-    chart: grafana/grafana
-    version: "7.3.7"
+    chart: grafana-community/grafana
+    version: "11.3.2"
     wait: true
     waitForJobs: true
     labels:
       app: monitoring
     needs:
+      - prometheus/prometheus-stack
+      - longhorn-system/longhorn
+      - metallb-system/metallb
+      - metallb-system/metallb-config
+    inherit:
+    - template: values_gotmpl_and_secrets
+    # Hook to clean up stuck MetalLB services before grafana installation
+    hooks:
+      - events: ["prepare"]
+        command: /bin/sh
+        args:
+          - "-c"
+          - |
+            for svc in $(kubectl get svc -n prometheus -l app.kubernetes.io/name=grafana -o name 2>/dev/null); do
+              kubectl patch "$svc" -n prometheus -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
+            done
+
+  # Loki - Log aggregation system
+  # https://github.com/grafana/helm-charts/blob/main/charts/loki/values.yaml
+  - name: loki
+    namespace: prometheus
+    chart: grafana/loki
+    version: "6.54.0"
+    wait: true
+    labels:
+      app: logging
+    needs:
+      - longhorn-system/longhorn
+      - prometheus/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets
+
+  # Tempo - Distributed tracing system
+  # https://github.com/grafana/helm-charts/blob/main/charts/tempo/values.yaml
+  - name: tempo
+    namespace: prometheus
+    chart: grafana-community/tempo
+    version: "2.0.0"
+    wait: true
+    labels:
+      app: tracing
+    needs:
+      - longhorn-system/longhorn
       - prometheus/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets

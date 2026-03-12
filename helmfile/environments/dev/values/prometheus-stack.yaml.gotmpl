@@ -8,7 +8,7 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: local-path
+          storageClassName: longhorn
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
@@ -20,7 +20,7 @@ alertmanager:
     storage:
       volumeClaimTemplate:
         spec:
-          storageClassName: local-path
+          storageClassName: longhorn
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:

@@ -7,14 +7,20 @@ grafana.ini:
     disable_login_form: false
   auth.anonymous:
     enabled: false
+  auth.token_rotation: 
+    enabled: false
   analytics:
     check_for_updates: false
+  security:
+    disable_initial_admin_creation: false
+    admin_user: admin
 
 persistence:
   enabled: true
-  storageClassName: local-path
+  storageClassName: longhorn
   accessModes:
     - ReadWriteOnce
+  size: 10Gi
 
 resources:
   requests:
@@ -49,6 +55,13 @@ datasources:
         isDefault: true
         jsonData:
           timeInterval: "30s"
+      - name: Loki
+        type: loki
+        url: http://loki-gateway.prometheus.svc.cluster.local
+        access: proxy
+        jsonData:
+          httpMethod: GET
+          timeout: 60
 
 dashboardProviders:
   dashboardproviders.yaml:

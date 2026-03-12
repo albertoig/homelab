@@ -8,10 +8,16 @@ bases:
 
 ---
 
+helmfiles:
+- path: helmfile/crds.helmfile.yaml
+
+---
+
 lockFilePath: helmfile/locks/helmfile-{{ .Environment.Name }}.lock
 
 helmDefaults:
   wait: true
+  waitForJobs: true
   timeout: 600
   cleanupOnFail: true
   diffArgs:

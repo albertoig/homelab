@@ -1,0 +1,47 @@
+# Loki Configuration
+# https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
+
+
+# Loki storage configuration (required for single binary mode)
+loki:
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+    bucketNames:
+      chunks: "chunks"
+      ruler: "ruler"
+      admin: "admin"
+  schemaConfig:  # was schema_config (wrong key)
+    configs:
+      - from: "2024-01-01"
+        store: tsdb           # boltdb-shipper is deprecated, use tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+
+# Single binary deployment for home lab
+deploymentMode: SingleBinary
+
+singleBinary:   # this should be at root level, not under loki:
+  replicas: 1
+  persistence:
+    enabled: true
+    storageClass: longhorn
+    size: 10Gi
+
+# Disable scalable components
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+
+# Enable service monitor for Prometheus scraping
+serviceMonitor:
+  enabled: true
+  annotations:
+    prometheus.io/scrape: "true"

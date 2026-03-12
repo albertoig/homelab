@@ -1,16 +1,25 @@
 version: 1.4.1
 dependencies:
   - name: grafana
-    repository: https://grafana.github.io/helm-charts
-    version: 7.3.7
+    repository: https://grafana-community.github.io/helm-charts
+    version: 11.3.2
   - name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
     version: 82.10.3
+  - name: loki
+    repository: https://grafana.github.io/helm-charts
+    version: 6.54.0
+  - name: longhorn
+    repository: https://charts.longhorn.io
+    version: 1.7.1
   - name: metallb
     repository: https://metallb.github.io/metallb
     version: 0.15.3
   - name: prometheus-operator-crds
     repository: https://prometheus-community.github.io/helm-charts
     version: 27.0.0
-digest: sha256:b69c74ec26051d02909299c0a7512ca6604ce2d3ded7ddda999fd9ad4a19de04
-generated: "2026-03-11T01:20:34.113288791-04:00"
+  - name: tempo
+    repository: https://grafana-community.github.io/helm-charts
+    version: 2.0.0
+digest: sha256:110b5de98cba39674594493ef05d0675b2456547107146bf20ad20521bf831e7
+generated: "2026-03-11T12:01:46.951894381-04:00"
