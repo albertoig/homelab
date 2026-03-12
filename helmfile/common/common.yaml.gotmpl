@@ -1,6 +1,6 @@
 releases:
-  # Longhorn - Cloud-native distributed block storage for Kubernetes
-  # https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
+   # Longhorn - Cloud-native distributed block storage for Kubernetes
+   # https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
   - name: longhorn
     namespace: longhorn-system
     chart: longhorn/longhorn
@@ -8,6 +8,8 @@ releases:
     wait: true
     labels:
       app: storage
+    inherit:
+    - template: values_gotmpl_and_secrets
 
   # MetalLB - Load balancer for Kubernetes
   # https://github.com/metallb/helm-charts/blob/main/charts/metallb/values.yaml
