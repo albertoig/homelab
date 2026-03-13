@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/albertoig/homelab/compare/v1.5.0...v1.6.0) (2026-03-13)
+
+
+### Features
+
+* **helmfile:** add postgresql database deployment ([e2e5136](https://github.com/albertoig/homelab/commit/e2e5136aa33fb3137cb500e34297d844fa298ccf))
+
 # [1.5.0](https://github.com/albertoig/homelab/compare/v1.4.1...v1.5.0) (2026-03-13)
 
 
