@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/albertoig/homelab/compare/v2.0.0...v2.1.0) (2026-03-13)
+
+
+### Features
+
+* **authentik:** add Authentik identity provider to homelab ([9be209c](https://github.com/albertoig/homelab/commit/9be209cd7eef2d4e69b2e1432067f61df05bd37f))
+
 # [2.0.0](https://github.com/albertoig/homelab/compare/v1.6.0...v2.0.0) (2026-03-13)
 
 
