@@ -1,0 +1,44 @@
+# Redis values
+# https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+
+architecture: standalone
+
+auth:
+  enabled: true
+  password: ""  # Set via secrets: auth.password
+
+# Master configuration
+master:
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+
+# Replica configuration
+replica:
+  replicaCount: 0
+
+# Service configuration
+service:
+  type: ClusterIP
+
+# Metrics - Enable Prometheus metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: "prometheus"
+    scrapeInterval: 30s
+    additionalLabels:
+      release: prometheus-stack
+
+# Resources
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi

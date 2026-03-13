@@ -15,11 +15,11 @@ dependencies:
   - name: metallb
     repository: https://metallb.github.io/metallb
     version: 0.15.3
-  - name: prometheus-operator-crds
-    repository: https://prometheus-community.github.io/helm-charts
-    version: 27.0.0
+  - name: redis
+    repository: https://charts.bitnami.com/bitnami
+    version: 25.3.2
   - name: tempo
     repository: https://grafana-community.github.io/helm-charts
     version: 2.0.0
-digest: sha256:110b5de98cba39674594493ef05d0675b2456547107146bf20ad20521bf831e7
-generated: "2026-03-11T12:01:46.951894381-04:00"
+digest: sha256:f1c4f247bc09161e9423cb459e3972222d9cee3d572f899bca3d14245fae70fb
+generated: "2026-03-12T22:09:03.650769738-04:00"
