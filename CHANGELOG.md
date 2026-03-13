@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/albertoig/homelab/compare/v1.4.0...v1.4.1) (2026-03-13)
+
+
+### Bug Fixes
+
+* **grafana:** add correctly the admin password for grafana ([520340b](https://github.com/albertoig/homelab/commit/520340b47139ba903b62d65a7d3068aac47719df))
+
 # [1.4.0](https://github.com/albertoig/homelab/compare/v1.3.0...v1.4.0) (2026-03-12)
 
 
