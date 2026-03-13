@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/albertoig/homelab/compare/v1.4.1...v1.5.0) (2026-03-13)
+
+
+### Features
+
+* **redis:** add bitnami redis chart to helmfile ([de459d4](https://github.com/albertoig/homelab/commit/de459d4ce0a493d3e858107521cae982f65c16b1))
+
 ## [1.4.1](https://github.com/albertoig/homelab/compare/v1.4.0...v1.4.1) (2026-03-13)
 
 
