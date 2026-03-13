@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/albertoig/homelab/compare/v1.6.0...v2.0.0) (2026-03-13)
+
+
+### chore
+
+* remove postgres and redis dependencies ([8d20c14](https://github.com/albertoig/homelab/commit/8d20c14a2e3d06fc9d6768159f86d3b9416c5c65))
+
+
+### BREAKING CHANGES
+
+* postgres and redis have been removed from the infrastructure.
+
 # [1.6.0](https://github.com/albertoig/homelab/compare/v1.5.0...v1.6.0) (2026-03-13)
 
 
