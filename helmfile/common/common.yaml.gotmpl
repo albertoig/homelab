@@ -123,3 +123,18 @@ releases:
       - prometheus/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
+
+  # PostgreSQL - Open source relational database
+  # https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
+  - name: postgresql
+    namespace: postgresql
+    chart: bitnami/postgresql
+    version: "18.5.6"
+    wait: true
+    labels:
+      app: database
+    needs:
+      - longhorn-system/longhorn
+      - prometheus/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets

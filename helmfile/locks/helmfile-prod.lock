@@ -15,11 +15,14 @@ dependencies:
   - name: metallb
     repository: https://metallb.github.io/metallb
     version: 0.15.3
+  - name: postgresql
+    repository: https://charts.bitnami.com/bitnami
+    version: 18.5.6
   - name: redis
     repository: https://charts.bitnami.com/bitnami
     version: 25.3.2
   - name: tempo
     repository: https://grafana-community.github.io/helm-charts
     version: 2.0.0
-digest: sha256:f1c4f247bc09161e9423cb459e3972222d9cee3d572f899bca3d14245fae70fb
-generated: "2026-03-12T22:09:03.650769738-04:00"
+digest: sha256:3ed4d4bf237e454e10e5dc055208b2f6adfa004fe989a92625d7f0a7b902dd2e
+generated: "2026-03-12T22:27:24.042096763-04:00"
