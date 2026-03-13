@@ -1,5 +1,8 @@
 version: 1.4.1
 dependencies:
+  - name: authentik
+    repository: https://charts.goauthentik.io
+    version: 2026.2.1
   - name: grafana
     repository: https://grafana-community.github.io/helm-charts
     version: 11.3.2
@@ -18,5 +21,5 @@ dependencies:
   - name: tempo
     repository: https://grafana-community.github.io/helm-charts
     version: 2.0.0
-digest: sha256:d6b67ee4a11942c14cd6021e7f4415ae3847b467c0e6fe76e6c5f8e92e7dc4f9
-generated: "2026-03-13T13:04:00.377051682-04:00"
+digest: sha256:e0b31eb741b23527a1734122f189a5277d5f68b4db676586e7b33a346b59cbe2
+generated: "2026-03-13T13:12:14.220762703-04:00"

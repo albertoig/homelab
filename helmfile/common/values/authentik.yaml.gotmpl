@@ -1,0 +1,39 @@
+# Authentik values
+# https://github.com/goauthentik/helm/blob/authentik-2026.2.1/charts/authentik/values.yaml
+
+authentik:
+  # Secret key used for cryptographic operations
+  secret_key: "" # Set via secrets: authentik.secret_key
+
+  # Email settings
+  email:
+    host: "" # Set via secrets: authentik.email.host
+    port: 587
+    username: "" # Set via secrets: authentik.email.username
+    password: ""  # Set via secrets: authentik.email.password
+    use_tls: true
+    use_ssl: false
+    from: "authentik@example.com" # Set via secrets: authentik.email.from
+
+server:
+  # Expose Grafana via MetalLB LoadBalancer 
+  service:
+    enabled: true
+    type: LoadBalancer
+    port: 80
+    targetPort: 3000
+    annotations:
+      # Tell K3s to NOT use built-in klipper-lb, let MetalLB handle it
+      k3s.cattle.io/balancer: ""
+      # MetalLB configuration
+      metallb.universe.tf/address-pool: default
+      metallb.universe.tf/allow-zero-ips: "true"
+
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    storageClassName: longhorn
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi

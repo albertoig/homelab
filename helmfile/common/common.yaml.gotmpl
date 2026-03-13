@@ -93,6 +93,25 @@ releases:
       - prometheus/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
+    # Hook to clean up stuck pods with Longhorn volume mount issues
+    hooks:
+      - events: ["prepare"]
+        command: /bin/sh
+        args:
+          - "-c"
+          - |
+            for pod in $(kubectl get pods -n prometheus -o name 2>/dev/null); do
+              case $pod in
+                *loki*)
+                  status=$(kubectl get $pod -n prometheus -o jsonpath='{.status.phase}' 2>/dev/null)
+                  if [ "$status" = "Pending" ] || [ "$status" = "ContainerCreating" ]; then
+                    echo "Force deleting stuck pod: $pod"
+                    kubectl delete $pod -n prometheus --force --grace-period=0 2>/dev/null || true
+                  fi
+                  ;;
+              esac
+            done
+            sleep 5
 
   # Tempo - Distributed tracing system
   # https://github.com/grafana/helm-charts/blob/main/charts/tempo/values.yaml
@@ -103,6 +122,40 @@ releases:
     wait: true
     labels:
       app: tracing
+    needs:
+      - longhorn-system/longhorn
+      - prometheus/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets
+    # Hook to clean up stuck pods with Longhorn volume mount issues
+    hooks:
+      - events: ["prepare"]
+        command: /bin/sh
+        args:
+          - "-c"
+          - |
+            for pod in $(kubectl get pods -n prometheus -o name 2>/dev/null); do
+              case $pod in
+                *tempo*)
+                  status=$(kubectl get $pod -n prometheus -o jsonpath='{.status.phase}' 2>/dev/null)
+                  if [ "$status" = "Pending" ] || [ "$status" = "ContainerCreating" ]; then
+                    echo "Force deleting stuck pod: $pod"
+                    kubectl delete $pod -n prometheus --force --grace-period=0 2>/dev/null || true
+                  fi
+                  ;;
+              esac
+            done
+            sleep 5
+
+  # Authentik - Open Source Identity Provider
+  # https://github.com/goauthentik/helm/blob/authentik-2026.2.1/charts/authentik/values.yaml
+  - name: authentik
+    namespace: authentik
+    chart: authentik/authentik
+    version: "2026.2.1"
+    wait: true
+    labels:
+      app: identity
     needs:
       - longhorn-system/longhorn
       - prometheus/prometheus-stack
