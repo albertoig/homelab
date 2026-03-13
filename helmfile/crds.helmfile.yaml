@@ -4,6 +4,12 @@ bases:
 - environments.yaml.gotmpl
 - repositories.yaml
 
+---
+
+lockFilePath: ../helmfile/locks/helmfile-crds.lock
+
+---
+
 # Install Prometheus Operator CRDs first
 releases:
   - name: prometheus-operator-crds
