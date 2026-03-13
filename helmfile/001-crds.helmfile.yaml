@@ -6,7 +6,7 @@ bases:
 
 ---
 
-lockFilePath: ../helmfile/locks/helmfile-crds.lock
+lockFilePath: ../helmfile/locks/001-crds.helmfile.lock
 
 ---
 

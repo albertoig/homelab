@@ -9,11 +9,11 @@ bases:
 ---
 
 helmfiles:
-- path: helmfile/crds.helmfile.yaml
+- path: helmfile/001-crds.helmfile.yaml
 
 ---
 
-lockFilePath: helmfile/locks/helmfile-{{ .Environment.Name }}.lock
+lockFilePath: helmfile/locks/envs/{{ .Environment.Name }}.helmfile.lock
 
 helmDefaults:
   wait: true
