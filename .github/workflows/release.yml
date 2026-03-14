@@ -10,7 +10,6 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
-  id-token: write
 
 jobs:
   release:
@@ -24,28 +23,35 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          node-version: "lts/*"
-          cache: "npm"
-          cache-dependency-path: package-lock.json
+          python-version: '3.14'
 
-      - name: Cache node_modules
-        id: cache-node-modules
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache Poetry virtualenv
         uses: actions/cache@v4
         with:
-          path: node_modules
-          key: |
-            npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          path: |
+            ~/.cache/pypoetry
+            kseed/.venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('kseed/poetry.lock') }}
           restore-keys: |
-            npm-${{ runner.os }}-
+            poetry-${{ runner.os }}-
 
       - name: Install dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm clean-install
+        working-directory: kseed
+        run: poetry install
 
       - name: Run Semantic Release
+        working-directory: kseed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+        run: |
+          poetry run semantic-release version
+          poetry run semantic-release publish
