@@ -1,9 +1,0 @@
-apiVersion: v2
-name: metallb-config
-description: MetalLB pool configuration
-type: application
-version: 0.1.0
-appVersion: "0.15.3"
-keywords:
-  - metallb
-  - loadbalancer
