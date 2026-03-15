@@ -51,7 +51,7 @@ jobs:
       - name: Run Semantic Release
         working-directory: kseed
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           poetry run semantic-release version
           poetry run semantic-release publish
