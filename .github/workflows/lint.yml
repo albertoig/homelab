@@ -1,0 +1,47 @@
+name: Lint
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pypoetry
+            kseed/.venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('kseed/poetry.lock') }}
+          restore-keys: |
+            poetry-${{ runner.os }}-
+
+      - name: Install dependencies
+        working-directory: kseed
+        run: poetry install
+
+      - name: Run Ruff
+        working-directory: kseed
+        run: poetry run ruff check .
+
+      - name: Run Ruff Format
+        working-directory: kseed
+        run: poetry run ruff format --check .

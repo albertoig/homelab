@@ -17,9 +17,10 @@ rich = "^13.9.0"
 textual = ">=0.1.0"
 pyyaml = "^6.0.2"
 pydantic = "^2.10.0"
+kubernetes = "^32.0.0"
 
 [tool.poetry.scripts]
-kseed = "kseed.cli:main"
+kseed = "kseed.cli.commands:app"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
