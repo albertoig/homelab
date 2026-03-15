@@ -1,7 +1,12 @@
 # CHANGELOG
 
 
-## Unreleased
+## v3.1.0 (2026-03-15)
+
+### Bug Fixes
+
+- Semantic release
+  ([`05b7a23`](https://github.com/albertoig/homelab/commit/05b7a232ee765caae85968a3bda74d296250f07f))
 
 ### Chores
 
@@ -9,6 +14,12 @@
   ([`d2c1e3b`](https://github.com/albertoig/homelab/commit/d2c1e3bc1d8e85ed694ca44583bd37a0d9637e13))
 
 ### Features
+
+- Add unit testing to kseed
+  ([`dad27a2`](https://github.com/albertoig/homelab/commit/dad27a216b818cd7cc417076e676703971c3c78e))
+
+- Rename test to diagnose
+  ([`433be8e`](https://github.com/albertoig/homelab/commit/433be8e60c4cbf655e1b2e336c67e121e2dbbcda))
 
 - Testing
   ([`35977ca`](https://github.com/albertoig/homelab/commit/35977cac37e09e3a1f196a87cf759a941fcd6b1e))
