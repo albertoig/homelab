@@ -1,4 +1,4 @@
 name: homelab
 runtime: python
 description: Pulumi infrastructure as code for homelab k3s cluster
-main: megahomelab/
+main: kseed/

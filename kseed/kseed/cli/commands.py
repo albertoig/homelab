@@ -1,4 +1,4 @@
-"""CLI for kseed Pulumi management."""
+"""CLI commands for kseed Pulumi management."""
 
 import os
 import subprocess
@@ -10,9 +10,9 @@ from rich.console import Console
 from rich.table import Table
 
 from kseed import config as kseed_config
-from kseed.config import HomelabConfig
+from kseed.config import KSeedConfig
 
-app = typer.Typer(help="Megahomelab Pulumi CLI")
+app = typer.Typer(help="Kseed CLI")
 console = Console()
 
 
@@ -45,7 +45,7 @@ def configure(
     console.print(f"[bold cyan]Reconfiguring kseed for environment: {environment}[/bold cyan]\n")
 
     # Delete existing config and re-run setup
-    config = HomelabConfig(environment)
+    config = KSeedConfig(environment)
     config.load()
 
     if config.kubeconfig_path or config.kubeconfig_context:
@@ -59,7 +59,7 @@ def status(
     environment: str = typer.Argument(..., help="Environment name"),
 ) -> None:
     """Show configuration status for an environment."""
-    config = HomelabConfig(environment)
+    config = KSeedConfig(environment)
     config.load()
 
     table = Table(title=f"Configuration for {environment}")
@@ -109,7 +109,7 @@ def destroy(
 
 def _run_pulumi(environment: str, command: str, plan_only: bool) -> None:
     """Run a pulumi command with the correct configuration."""
-    config = HomelabConfig(environment)
+    config = KSeedConfig(environment)
     config.load()
 
     # Check if configured
@@ -202,8 +202,3 @@ def _get_kubeconfig_for_context(kubeconfig_path: Path, context_name: str) -> str
     }
 
     return yaml.safe_dump(context_config, default_flow_style=False)
-
-
-def main() -> None:
-    """Main entry point."""
-    app()
