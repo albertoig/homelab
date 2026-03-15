@@ -7,7 +7,6 @@ import pytest
 from typer.testing import CliRunner
 
 from kseed.cli.commands import app
-from kseed.config import KSeedConfig
 
 
 @pytest.fixture

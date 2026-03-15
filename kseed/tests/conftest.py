@@ -1,10 +1,8 @@
 """Pytest configuration and fixtures for kseed tests."""
 
-import os
 import tempfile
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 import yaml

@@ -90,7 +90,9 @@ def _load_kubeconfig(kubeconfig_path: Path, context_name: str) -> ApiClient:
         Path(tmp_path).unlink(missing_ok=True)
 
 
-def check_cluster_health(environment: str, kubeconfig_path: Path, context_name: str) -> ClusterHealth:
+def check_cluster_health(
+    environment: str, kubeconfig_path: Path, context_name: str
+) -> ClusterHealth:
     """Check cluster health for a given environment.
 
     Args:
@@ -114,7 +116,6 @@ def check_cluster_health(environment: str, kubeconfig_path: Path, context_name: 
 
         # Create API clients
         core_v1 = client.CoreV1Api(api_client)
-        rbac_v1 = client.RbacAuthorizationV1Api(api_client)
         apps_v1 = client.AppsV1Api(api_client)
 
         # Test 1: Check if cluster is reachable
@@ -128,7 +129,7 @@ def check_cluster_health(environment: str, kubeconfig_path: Path, context_name: 
 
         # Test 2: Check if user has permissions (try to list namespaces)
         try:
-            namespaces = core_v1.list_namespace(limit=1)
+            core_v1.list_namespace(limit=1)
             result.has_permissions = True
         except ApiException as e:
             result.error_message = f"Permission denied: {e.reason}"

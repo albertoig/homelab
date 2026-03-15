@@ -20,7 +20,7 @@ class TestKSeedConfig:
 
     def test_init_creates_config_dir(self, temp_kseed_dir: Path) -> None:
         """Test that initializing KSeedConfig creates the config directory."""
-        config = KSeedConfig("dev")
+        KSeedConfig("dev")
         assert temp_kseed_dir.exists()
         assert temp_kseed_dir.is_dir()
 
@@ -38,9 +38,7 @@ class TestKSeedConfig:
         assert loaded["kubeconfig_path"] == "/test/kubeconfig"
         assert loaded["kubeconfig_context"] == "dev"
 
-    def test_init_returns_empty_config_when_no_file(
-        self, temp_kseed_dir: Path
-    ) -> None:
+    def test_init_returns_empty_config_when_no_file(self, temp_kseed_dir: Path) -> None:
         """Test that KSeedConfig returns empty dict when no config exists."""
         config = KSeedConfig("dev")
         loaded = config.load()
@@ -67,7 +65,9 @@ class TestKSeedConfig:
         """Test that saving config for one environment preserves others."""
         # Create config file with prod environment
         config_file = temp_kseed_dir / "config"
-        config_data = {"prod": {"kubeconfig_path": "/prod/kubeconfig", "kubeconfig_context": "prod"}}
+        config_data = {
+            "prod": {"kubeconfig_path": "/prod/kubeconfig", "kubeconfig_context": "prod"}
+        }
         with open(config_file, "w") as f:
             yaml.safe_dump(config_data, f)
 
