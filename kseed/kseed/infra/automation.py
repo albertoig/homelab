@@ -16,8 +16,11 @@ from rich.console import Console
 console = Console()
 
 
-def check_pulumi() -> Optional[auto.PulumiCommand]:
+def check_pulumi(verbose: bool = True) -> Optional[auto.PulumiCommand]:
     """Check if Pulumi CLI is installed and return a PulumiCommand if available.
+    
+    Args:
+        verbose: If True, print status messages.
     
     Returns:
         PulumiCommand if pulumi is installed, None otherwise.
@@ -28,10 +31,12 @@ def check_pulumi() -> Optional[auto.PulumiCommand]:
         try:
             # Verify it works and get version
             cmd = auto.PulumiCommand(skip_version_check=True)
-            console.print(f"[green]✓ Pulumi CLI found: {pulumi_path} (v{cmd.version})[/green]")
+            if verbose:
+                console.print(f"[green]✓ Pulumi CLI found: {pulumi_path} (v{cmd.version})[/green]")
             return cmd
         except Exception as e:
-            console.print(f"[yellow]⚠ Pulumi found at {pulumi_path} but failed to initialize: {e}[/yellow]")
+            if verbose:
+                console.print(f"[yellow]⚠ Pulumi found at {pulumi_path} but failed to initialize: {e}[/yellow]")
     
     # Also check in ~/.pulumi/versions/ for installed versions
     home = Path.home()
@@ -45,10 +50,12 @@ def check_pulumi() -> Optional[auto.PulumiCommand]:
                 try:
                     # Create a PulumiCommand with custom root
                     cmd = auto.PulumiCommand(root=str(vdir), skip_version_check=True)
-                    console.print(f"[green]✓ Pulumi CLI found: {potential_pulumi} (v{cmd.version})[/green]")
+                    if verbose:
+                        console.print(f"[green]✓ Pulumi CLI found: {potential_pulumi} (v{cmd.version})[/green]")
                     return cmd
                 except Exception as e:
-                    console.print(f"[yellow]⚠ Pulumi found at {potential_pulumi} but failed: {e}[/yellow]")
+                    if verbose:
+                        console.print(f"[yellow]⚠ Pulumi found at {potential_pulumi} but failed: {e}[/yellow]")
     
     return None
 
