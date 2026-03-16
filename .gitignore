@@ -38,3 +38,8 @@ keys.txt
 ## SECRETS
 *.secrets.yaml
 !*.secrets.enc.yaml
+
+## TESTING / CI
+bandit-report.json
+pytest-report.xml
+coverage.xml
