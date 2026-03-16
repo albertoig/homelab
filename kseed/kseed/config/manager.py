@@ -15,11 +15,13 @@ CONFIG_FILE = KSEED_DIR / "config"
 STATE_DIR = KSEED_DIR / "statefiles"
 DEFAULT_KUBECONFIG_PATH = Path.home() / ".kube" / "config"
 
-# Default project configuration
+# Static project configuration (not stored in config file)
+PROJECT_RUNTIME = "python"  # Static - always python
+
+# Default project settings (for defaults only, not stored)
 DEFAULT_PROJECT = {
     "name": "homelab",
     "description": "KSeed infrastructure",
-    "runtime": "python",
     "main": "kseed/",
 }
 
@@ -30,7 +32,7 @@ class KSeedConfig:
     def __init__(self, environment: str = "dev"):
         self.environment = environment
         self._config: dict[str, Any] = {}
-        self._project_config: dict[str, Any] = {}
+        self._environments: dict[str, Any] = {}
         self._ensure_config_dir()
         self._load_config_file()
 
@@ -43,10 +45,10 @@ class KSeedConfig:
         if CONFIG_FILE.exists():
             with open(CONFIG_FILE) as f:
                 all_config = yaml.safe_load(f) or {}
-            # Get global project config
-            self._project_config = all_config.get("project", {})
-            # Get environment-specific config
-            self._config = all_config.get(self.environment, {})
+            # Get environments section
+            self._environments = all_config.get("environments", {})
+            # Get this environment's config
+            self._config = self._environments.get(self.environment, {})
 
     def _save_config_file(self) -> None:
         """Save configuration to the single config file."""
@@ -56,10 +58,12 @@ class KSeedConfig:
             with open(CONFIG_FILE) as f:
                 all_config = yaml.safe_load(f) or {}
 
-        # Update project config
-        all_config["project"] = self._project_config
+        # Ensure environments section exists
+        if "environments" not in all_config:
+            all_config["environments"] = {}
+        
         # Update this environment's config
-        all_config[self.environment] = self._config
+        all_config["environments"][self.environment] = self._config
 
         with open(CONFIG_FILE, "w") as f:
             yaml.safe_dump(all_config, f, default_flow_style=False)
@@ -95,39 +99,44 @@ class KSeedConfig:
 
     @property
     def project_name(self) -> str:
-        """Get the project name."""
-        return self._project_config.get("name", DEFAULT_PROJECT["name"])
+        """Get the project name from environment config."""
+        project = self._config.get("project", {})
+        return project.get("name", DEFAULT_PROJECT["name"])
 
     @property
     def project_description(self) -> str:
-        """Get the project description."""
-        return self._project_config.get("description", DEFAULT_PROJECT["description"])
+        """Get the project description from environment config."""
+        project = self._config.get("project", {})
+        return project.get("description", DEFAULT_PROJECT["description"])
 
     @property
     def project_runtime(self) -> str:
-        """Get the project runtime."""
-        return self._project_config.get("runtime", DEFAULT_PROJECT["runtime"])
+        """Get the project runtime (always python - static)."""
+        return PROJECT_RUNTIME
 
     @property
     def project_main(self) -> str:
-        """Get the project main path."""
-        return self._project_config.get("main", DEFAULT_PROJECT["main"])
+        """Get the project main path from environment config."""
+        project = self._config.get("project", {})
+        return project.get("main", DEFAULT_PROJECT["main"])
 
     @property
     def components(self) -> list[dict[str, Any]]:
         """Get the components configuration."""
         return self._config.get("components", [])
 
-    def set_project_config(self, name: str = None, description: str = None, runtime: str = None, main: str = None) -> None:
-        """Set project configuration values."""
+    def set_project_config(self, name: str = None, description: str = None, main: str = None) -> None:
+        """Set project configuration values in environment config."""
+        if "project" not in self._config:
+            self._config["project"] = {}
+        
         if name is not None:
-            self._project_config["name"] = name
+            self._config["project"]["name"] = name
         if description is not None:
-            self._project_config["description"] = description
-        if runtime is not None:
-            self._project_config["runtime"] = runtime
+            self._config["project"]["description"] = description
+        # runtime is always static, not stored
         if main is not None:
-            self._project_config["main"] = main
+            self._config["project"]["main"] = main
         self._save_config_file()
 
     def set_components(self, components: list[dict[str, Any]]) -> None:
@@ -137,8 +146,8 @@ class KSeedConfig:
 
     @property
     def state_dir(self) -> Path | None:
-        """Get the state directory from config."""
-        return self._project_config.get("state_dir")
+        """Get the state directory from environment config."""
+        return self._config.get("state_dir")
 
     @property
     def components_list(self) -> list[dict[str, Any]]:
@@ -239,7 +248,7 @@ def setup_environment(environment: str) -> KSeedConfig:
 
     console.print(f"[bold cyan]Setting up environment: {environment}[/bold cyan]\n")
 
-    # Project settings
+    # Project settings (inside environment)
     console.print("[bold]Project Settings[/bold]")
     
     # Project name
@@ -256,14 +265,7 @@ def setup_environment(environment: str) -> KSeedConfig:
         default=default_desc,
     )
     
-    # Runtime
-    default_runtime = config.project_runtime
-    runtime = Prompt.ask(
-        "  [cyan]Runtime[/cyan]",
-        default=default_runtime,
-    )
-    
-    # Main path
+    # Main path (runtime is static - always python)
     default_main = config.project_main
     main_path = Prompt.ask(
         "  [cyan]Main path[/cyan]",
@@ -277,14 +279,13 @@ def setup_environment(environment: str) -> KSeedConfig:
         default=default_state_dir,
     )
 
-    # Save project settings
-    config._project_config = {
+    # Save project settings inside environment config
+    config._config["project"] = {
         "name": project_name,
         "description": project_desc,
-        "runtime": runtime,
         "main": main_path,
-        "state_dir": state_dir,
     }
+    config._config["state_dir"] = state_dir
 
     # Kubeconfig settings
     console.print("\n[bold]Kubernetes Settings[/bold]")
@@ -309,10 +310,8 @@ def setup_environment(environment: str) -> KSeedConfig:
             console.print("[yellow]No contexts available[/yellow]")
     
     # Save environment config
-    config._config = {
-        "kubeconfig_path": str(kube_path) if kube_path.exists() else str(DEFAULT_KUBECONFIG_PATH),
-        "kubeconfig_context": context or "",
-    }
+    config._config["kubeconfig_path"] = str(kube_path) if kube_path.exists() else str(DEFAULT_KUBECONFIG_PATH)
+    config._config["kubeconfig_context"] = context or ""
     
     config._save_config_file()
 

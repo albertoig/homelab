@@ -78,9 +78,14 @@ class TestGetAllConfiguredEnvironments:
 
     def test_returns_environments_from_config(self, tmp_path: Path) -> None:
         """Test returns list of environments from config."""
-        # Create a real config file
+        # Create a real config file with new structure
         config_file = tmp_path / "config"
-        config_data = {"dev": {}, "prod": {"kubeconfig_path": "/test"}}
+        config_data = {
+            "environments": {
+                "dev": {},
+                "prod": {"kubeconfig_path": "/test"}
+            }
+        }
         config_file.write_text(yaml.dump(config_data))
 
         # Patch the CONFIG_FILE to point to our temp file
