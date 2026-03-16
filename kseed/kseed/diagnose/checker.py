@@ -27,6 +27,7 @@ class ClusterHealth:
     has_permissions: bool
     can_install_helm: bool
     cluster_info: str | None = None
+    k8s_version: str | None = None
     error_message: str | None = None
 
 
@@ -123,7 +124,7 @@ def check_cluster_health(
             version_api = client.VersionApi(api_client)
             version = version_api.get_code()
             result.cluster_reachable = True
-            result.cluster_info = f"k3s version: {version.git_version}"
+            result.k8s_version = version.git_version
         except ApiException as e:
             result.error_message = f"Cannot reach cluster: {e.reason}"
             return result
