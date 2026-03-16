@@ -28,7 +28,11 @@ class TestKSeedConfig:
         """Test that KSeedConfig loads existing configuration."""
         # Create config file with existing data
         config_file = temp_kseed_dir / "config"
-        config_data = {"environments": {"dev": {"kubeconfig_path": "/test/kubeconfig", "kubeconfig_context": "dev"}}}
+        config_data = {
+            "environments": {
+                "dev": {"kubeconfig_path": "/test/kubeconfig", "kubeconfig_context": "dev"}
+            }
+        }
         with open(config_file, "w") as f:
             yaml.safe_dump(config_data, f)
 
@@ -150,13 +154,7 @@ class TestKSeedConfig:
     def test_project_main_from_config(self, temp_kseed_dir: Path) -> None:
         """Test that project_main returns value from config."""
         config_file = temp_kseed_dir / "config"
-        config_data = {
-            "environments": {
-                "dev": {
-                    "project": {"main": "custom/"}
-                }
-            }
-        }
+        config_data = {"environments": {"dev": {"project": {"main": "custom/"}}}}
         with open(config_file, "w") as f:
             yaml.safe_dump(config_data, f)
 
@@ -171,13 +169,7 @@ class TestKSeedConfig:
     def test_components_from_config(self, temp_kseed_dir: Path) -> None:
         """Test that components returns value from config."""
         config_file = temp_kseed_dir / "config"
-        config_data = {
-            "environments": {
-                "dev": {
-                    "components": [{"name": "metallb"}]
-                }
-            }
-        }
+        config_data = {"environments": {"dev": {"components": [{"name": "metallb"}]}}}
         with open(config_file, "w") as f:
             yaml.safe_dump(config_data, f)
 
@@ -187,13 +179,7 @@ class TestKSeedConfig:
     def test_state_dir_from_config(self, temp_kseed_dir: Path) -> None:
         """Test that state_dir returns value from config."""
         config_file = temp_kseed_dir / "config"
-        config_data = {
-            "environments": {
-                "dev": {
-                    "state_dir": "/custom/state"
-                }
-            }
-        }
+        config_data = {"environments": {"dev": {"state_dir": "/custom/state"}}}
         with open(config_file, "w") as f:
             yaml.safe_dump(config_data, f)
 
@@ -290,7 +276,7 @@ class TestSetupKubeconfig:
         # Pre-configure
         config = KSeedConfig("dev")
         config.save({"kubeconfig_path": str(kubeconfig_file), "kubeconfig_context": "dev"})
-        
+
         # Reload the config
         mock_select_context.return_value = "new-context"
 

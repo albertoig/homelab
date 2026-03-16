@@ -61,7 +61,7 @@ class KSeedConfig:
         # Ensure environments section exists
         if "environments" not in all_config:
             all_config["environments"] = {}
-        
+
         # Update this environment's config
         all_config["environments"][self.environment] = self._config
 
@@ -125,11 +125,13 @@ class KSeedConfig:
         """Get the components configuration."""
         return self._config.get("components", [])
 
-    def set_project_config(self, name: str = None, description: str = None, main: str = None) -> None:
+    def set_project_config(
+        self, name: str = None, description: str = None, main: str = None
+    ) -> None:
         """Set project configuration values in environment config."""
         if "project" not in self._config:
             self._config["project"] = {}
-        
+
         if name is not None:
             self._config["project"]["name"] = name
         if description is not None:
@@ -239,7 +241,7 @@ def setup_kubeconfig(environment: str, kubeconfig_path: Path | None = None) -> K
 
 def setup_environment(environment: str) -> KSeedConfig:
     """Interactive setup for an environment, prompting for all config values.
-    
+
     If config already exists, uses current values as defaults.
     If config doesn't exist, uses sensible defaults.
     """
@@ -250,28 +252,28 @@ def setup_environment(environment: str) -> KSeedConfig:
 
     # Project settings (inside environment)
     console.print("[bold]Project Settings[/bold]")
-    
+
     # Project name
     default_name = config.project_name
     project_name = Prompt.ask(
         "  [cyan]Project name[/cyan]",
         default=default_name,
     )
-    
+
     # Project description
     default_desc = config.project_description
     project_desc = Prompt.ask(
         "  [cyan]Project description[/cyan]",
         default=default_desc,
     )
-    
+
     # Main path (runtime is static - always python)
     default_main = config.project_main
     main_path = Prompt.ask(
         "  [cyan]Main path[/cyan]",
         default=default_main,
     )
-    
+
     # State directory
     default_state_dir = str(config.state_dir or KSEED_DIR / "statefiles")
     state_dir = Prompt.ask(
@@ -289,7 +291,7 @@ def setup_environment(environment: str) -> KSeedConfig:
 
     # Kubeconfig settings
     console.print("\n[bold]Kubernetes Settings[/bold]")
-    
+
     # Kubeconfig path
     default_kube_path = str(config.kubeconfig_path or DEFAULT_KUBECONFIG_PATH)
     kube_path_str = Prompt.ask(
@@ -297,7 +299,7 @@ def setup_environment(environment: str) -> KSeedConfig:
         default=default_kube_path,
     )
     kube_path = Path(kube_path_str)
-    
+
     if not kube_path.exists():
         console.print(f"[yellow]Warning: Kubeconfig file not found: {kube_path}[/yellow]")
     else:
@@ -308,11 +310,13 @@ def setup_environment(environment: str) -> KSeedConfig:
         except ValueError:
             context = None
             console.print("[yellow]No contexts available[/yellow]")
-    
+
     # Save environment config
-    config._config["kubeconfig_path"] = str(kube_path) if kube_path.exists() else str(DEFAULT_KUBECONFIG_PATH)
+    config._config["kubeconfig_path"] = (
+        str(kube_path) if kube_path.exists() else str(DEFAULT_KUBECONFIG_PATH)
+    )
     config._config["kubeconfig_context"] = context or ""
-    
+
     config._save_config_file()
 
     console.print(f"\n[green]Configuration saved for environment: {environment}[/green]")

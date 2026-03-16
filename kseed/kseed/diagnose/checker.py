@@ -169,5 +169,5 @@ def get_all_configured_environments() -> list[str]:
 
     # Get environments section
     environments = config.get("environments", {})
-    
+
     return list(environments.keys())

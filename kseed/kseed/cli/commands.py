@@ -41,13 +41,11 @@ def init(
     # Check if environment already exists
     config = KSeedConfig(environment)
     config.load()
-    
+
     if config.kubeconfig_path and not force:
         console.print(f"[yellow]Environment '{environment}' is already configured.[/yellow]")
         response = Prompt.ask(
-            f"Do you want to reconfigure '{environment}'?",
-            choices=["y", "n"],
-            default="n"
+            f"Do you want to reconfigure '{environment}'?", choices=["y", "n"], default="n"
         )
         if response.lower() != "y":
             console.print("[yellow]Operation cancelled.[/yellow]")
@@ -126,7 +124,7 @@ def status(
     if components:
         table.add_row("[bold]Components[/bold]", "")
         for comp in components:
-            table.add_row(f"  - {comp.get('name', 'unknown')}", str(comp.get('config', {})))
+            table.add_row(f"  - {comp.get('name', 'unknown')}", str(comp.get("config", {})))
     else:
         table.add_row("components", "[yellow]No components configured[/yellow]")
 
@@ -149,12 +147,12 @@ def diagnose(
     - If the user can install Helm charts
     """
     console.print("[bold cyan]Running diagnostics...[/bold cyan]\n")
-    
+
     # Check Pulumi CLI first
     table = Table(title="Pulumi Status")
     table.add_column("Check", style="cyan")
     table.add_column("Status", style="green")
-    
+
     pulumi_cmd = check_pulumi(verbose=False)
     if pulumi_cmd:
         table.add_row("Pulumi CLI", f"[green]✓ Installed ({pulumi_cmd.version})[/green]")
@@ -162,10 +160,10 @@ def diagnose(
     else:
         table.add_row("Pulumi CLI", "[red]✗ Not installed[/red]")
         table.add_row("Path", "[red]N/A[/red]")
-    
+
     console.print(table)
     console.print()
-    
+
     if environment:
         _test_single_environment(environment)
     else:
@@ -209,7 +207,9 @@ def _run_pulumi(environment: str, command: str, plan_only: bool) -> None:
         console.print(f"Run 'kseed init {environment}' first.")
         raise typer.Exit(1)
 
-    console.print(f"[bold cyan]Running pulumi {command} for environment: {environment}[/bold cyan]\n")
+    console.print(
+        f"[bold cyan]Running pulumi {command} for environment: {environment}[/bold cyan]\n"
+    )
 
     try:
         if command == "up":

@@ -5,10 +5,10 @@ Components can be registered and discovered at runtime.
 
 Usage:
     from kseed.infra.components import ComponentRegistry, BaseComponent
-    
+
     # List available components
     available = ComponentRegistry.list_available()
-    
+
     # Get and deploy a component
     component = ComponentRegistry.get("metallb")
     component.deploy(provider, config)
