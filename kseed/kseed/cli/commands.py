@@ -10,7 +10,7 @@ from rich.table import Table
 from kseed import config as kseed_config  # noqa: F401  # Used by tests for mocking
 from kseed.config import KSeedConfig, setup_environment
 from kseed.diagnose import ClusterHealth, check_cluster_health, get_all_configured_environments
-from kseed.infra.automation import run_up, run_preview, run_destroy
+from kseed.infra.automation import check_pulumi, run_up, run_preview, run_destroy
 from kseed.infra.resources import create_infrastructure
 
 app = typer.Typer(help="Kseed CLI")
@@ -30,6 +30,12 @@ def init(
     """Initialize configuration for an environment."""
     console.print(f"[bold cyan]Initializing kseed for environment: {environment}[/bold cyan]\n")
 
+    # Check for Pulumi CLI
+    pulumi_cmd = check_pulumi()
+    if not pulumi_cmd:
+        console.print("[yellow]Pulumi CLI is not installed![/yellow]")
+        console.print("Would you like kseed to install Pulumi? (y/n)")
+
     try:
         setup_environment(environment)
     except Exception as e:
@@ -43,6 +49,12 @@ def configure(
 ) -> None:
     """Reconfigure kubeconfig for an existing environment."""
     console.print(f"[bold cyan]Reconfiguring kseed for environment: {environment}[/bold cyan]\n")
+
+    # Check for Pulumi CLI
+    pulumi_cmd = check_pulumi()
+    if not pulumi_cmd:
+        console.print("[yellow]Pulumi CLI is not installed![/yellow]")
+        console.print("Would you like kseed to install Pulumi? (y/n)")
 
     try:
         setup_environment(environment)
@@ -62,6 +74,18 @@ def status(
     table = Table(title=f"Configuration for {environment}")
     table.add_column("Setting", style="cyan")
     table.add_column("Value", style="green")
+
+    # Pulumi status
+    table.add_row("[bold]Pulumi[/bold]", "")
+    pulumi_cmd = check_pulumi()
+    if pulumi_cmd:
+        table.add_row("  Status", "[green]✓ Installed[/green]")
+        table.add_row("  Path", pulumi_cmd.command)
+        table.add_row("  Version", str(pulumi_cmd.version))
+    else:
+        table.add_row("  Status", "[red]✗ Not installed[/red]")
+        table.add_row("  Path", "[red]N/A[/red]")
+        table.add_row("  Version", "[red]N/A[/red]")
 
     # Project settings
     table.add_row("[bold]Project Settings[/bold]", "")
@@ -102,10 +126,29 @@ def diagnose(
     """Diagnose the connection to K3s cluster.
 
     Checks:
+    - If Pulumi CLI is installed
     - If the K3s cluster is reachable
     - If the user has permissions to access
     - If the user can install Helm charts
     """
+    console.print("[bold cyan]Running diagnostics...[/bold cyan]\n")
+    
+    # Check Pulumi CLI first
+    table = Table(title="Pulumi Status")
+    table.add_column("Check", style="cyan")
+    table.add_column("Status", style="green")
+    
+    pulumi_cmd = check_pulumi()
+    if pulumi_cmd:
+        table.add_row("Pulumi CLI", f"[green]✓ Installed ({pulumi_cmd.version})[/green]")
+        table.add_row("Path", pulumi_cmd.command)
+    else:
+        table.add_row("Pulumi CLI", "[red]✗ Not installed[/red]")
+        table.add_row("Path", "[red]N/A[/red]")
+    
+    console.print(table)
+    console.print()
+    
     if environment:
         _test_single_environment(environment)
     else:
