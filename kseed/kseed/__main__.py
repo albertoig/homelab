@@ -4,14 +4,14 @@ import sys
 
 # CLI entry point
 if len(sys.argv) > 1 and sys.argv[1] == "infra":
-    # Run Pulumi infrastructure
-    from kseed.infra import create_infrastructure
-    import pulumi
-
-    stack_name = pulumi.get_stack()
-    create_infrastructure(stack_name)
+    # Run Pulumi infrastructure using Automation API
+    from kseed.infra.automation import run_up
+    from kseed.infra.resources import create_infrastructure
+    
+    environment = sys.argv[2] if len(sys.argv) > 2 else "dev"
+    run_up(environment, create_infrastructure)
 else:
     # Run CLI
     from kseed import app
-
+    
     app()
