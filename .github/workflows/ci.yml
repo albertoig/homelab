@@ -33,8 +33,6 @@ jobs:
         with:
           # Fail on known vulnerabilities
           fail-on-severity: high
-          # Allow known vulnerabilities in indirect deps
-          allow-dependencies-licenses: false
 
   # ============================================
   # LINT & FORMAT - Foundation of the pipeline
