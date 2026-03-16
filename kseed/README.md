@@ -37,7 +37,7 @@ This will:
 1. Ask for kubeconfig path (default: `~/.kube/config`)
 2. List available Kubernetes contexts
 3. Allow you to select a context
-4. Store the configuration in `~/.homelab/config` (single file with multiple environments)
+4. Store the configuration in `~/.kseed/config` (single file with multiple environments)
 
 ### Deploy infrastructure
 
@@ -54,8 +54,8 @@ kseed up dev
 
 ## Configuration
 
-- **Config file**: `~/.homelab/config` (single YAML file with multiple environments)
-- **Pulumi state**: `~/.homelab/statefiles/{environment}.state`
+- **Config file**: `~/.kseed/config` (single YAML file with multiple environments)
+- **Pulumi state**: `~/.kseed/statefiles/{environment}.state`
 
 Example config file structure:
 ```yaml

@@ -1,5 +1,12 @@
 # 🏠 Homelab
 
+[![CI Pipeline](https://github.com/<OWNER>/<REPO>/actions/workflows/ci.yml/badge.svg)](https://github.com/<OWNER>/<REPO>/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/<OWNER>/<REPO>/actions/workflows/codeql.yml/badge.svg)](https://github.com/<OWNER>/<REPO>/actions/workflows/codeql.yml)
+[![codecov](https://codecov.io/gh/<OWNER>/<REPO>/branch/main/graph/badge.svg)](https://codecov.io/gh/<OWNER>/<REPO>)
+[![Dependabot](https://img.shields.io/badge/Dependabot-enabled-brightgreen?logo=dependabot)](https://dependabot.com/)
+[![Python Version](https://img.shields.io/badge/Python-3.14+-blue?logo=python)](https://www.python.org/)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue?logo=lock)](./SECURITY.md)
+
 A personal homelab setup using Kubernetes (K3s), Terraform, and GitOps practices.
 
 ---
