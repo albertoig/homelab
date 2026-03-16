@@ -181,7 +181,7 @@ jobs:
           path: kseed/pytest-report.xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           file: kseed/coverage.xml
           flags: unittests
