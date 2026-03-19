@@ -138,7 +138,7 @@ def diagnose(
     table.add_column("Check", style="cyan")
     table.add_column("Status", style="green")
     
-    pulumi_cmd = check_pulumi(verbose=False)
+    pulumi_cmd = check_pulumi()
     if pulumi_cmd:
         table.add_row("Pulumi CLI", f"[green]✓ Installed ({pulumi_cmd.version})[/green]")
         table.add_row("Path", pulumi_cmd.command)
