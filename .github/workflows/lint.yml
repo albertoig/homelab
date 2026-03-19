@@ -1,28 +1,17 @@
-name: CD Pipeline
+name: Lint
 
 on:
-  pull_request:
+  push:
     branches: [main, master]
-    types: [closed]
-
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+  pull_request:
 
 jobs:
-  release:
-    name: Semantic Release
+  lint:
     runs-on: ubuntu-latest
-    # Only run when PR is merged
-    if: github.event.pull_request.merged == true
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -49,10 +38,10 @@ jobs:
         working-directory: kseed
         run: poetry install
 
-      - name: Run Semantic Release
+      - name: Run Ruff
         working-directory: kseed
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          poetry run semantic-release version
-          poetry run semantic-release publish
+        run: poetry run ruff check .
+
+      - name: Run Ruff Format
+        working-directory: kseed
+        run: poetry run ruff format --check .

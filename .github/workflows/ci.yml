@@ -13,6 +13,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  security-events: write
 
 jobs:
   # ============================================
@@ -125,13 +126,13 @@ jobs:
 
       - name: Run Bandit Security Scan
         working-directory: kseed
-        run: poetry run bandit -r kseed/ -x .venv/ -f json -o bandit-report.json --severity-level high
+        run: poetry run bandit -r kseed/ -x .venv/ -f sarif -o bandit.sarif
 
-      - name: Upload Bandit report
-        uses: actions/upload-artifact@v4
+      - name: Upload Bandit SARIF results
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          name: bandit-report
-          path: kseed/bandit-report.json
+          sarif_file: kseed/bandit.sarif
+          category: bandit
 
   # ============================================
   # UNIT TEST - Only runs if lint passes
