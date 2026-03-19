@@ -5,7 +5,6 @@ from pathlib import Path
 import typer
 import yaml
 from rich.console import Console
-from rich.prompt import Prompt
 from rich.table import Table
 
 from kseed import config as kseed_config  # noqa: F401  # Used by tests for mocking
@@ -27,7 +26,6 @@ def init(
         "-k",
         help="Path to kubeconfig file (default: ~/.kube/config)",
     ),
-    force: bool = typer.Option(False, "--force", "-f", help="Force reconfiguration without asking"),
 ) -> None:
     """Initialize configuration for an environment."""
     console.print(f"[bold cyan]Initializing kseed for environment: {environment}[/bold cyan]\n")
@@ -37,21 +35,6 @@ def init(
     if not pulumi_cmd:
         console.print("[yellow]Pulumi CLI is not installed![/yellow]")
         console.print("Would you like kseed to install Pulumi? (y/n)")
-
-    # Check if environment already exists
-    config = KSeedConfig(environment)
-    config.load()
-    
-    if config.kubeconfig_path and not force:
-        console.print(f"[yellow]Environment '{environment}' is already configured.[/yellow]")
-        response = Prompt.ask(
-            f"Do you want to reconfigure '{environment}'?",
-            choices=["y", "n"],
-            default="n"
-        )
-        if response.lower() != "y":
-            console.print("[yellow]Operation cancelled.[/yellow]")
-            raise typer.Exit(0)
 
     try:
         setup_environment(environment)
