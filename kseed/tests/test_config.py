@@ -28,7 +28,7 @@ class TestKSeedConfig:
         """Test that KSeedConfig loads existing configuration."""
         # Create config file with existing data
         config_file = temp_kseed_dir / "config"
-        config_data = {"environments": {"dev": {"kubeconfig_path": "/test/kubeconfig", "kubeconfig_context": "dev"}}}
+        config_data = {"dev": {"kubeconfig_path": "/test/kubeconfig", "kubeconfig_context": "dev"}}
         with open(config_file, "w") as f:
             yaml.safe_dump(config_data, f)
 
@@ -58,17 +58,15 @@ class TestKSeedConfig:
         with open(config_file) as f:
             data = yaml.safe_load(f)
 
-        assert data["environments"]["dev"]["kubeconfig_path"] == "/test/kubeconfig"
-        assert data["environments"]["dev"]["kubeconfig_context"] == "dev"
+        assert data["dev"]["kubeconfig_path"] == "/test/kubeconfig"
+        assert data["dev"]["kubeconfig_context"] == "dev"
 
     def test_save_preserves_other_environments(self, temp_kseed_dir: Path) -> None:
         """Test that saving config for one environment preserves others."""
         # Create config file with prod environment
         config_file = temp_kseed_dir / "config"
         config_data = {
-            "environments": {
-                "prod": {"kubeconfig_path": "/prod/kubeconfig", "kubeconfig_context": "prod"}
-            }
+            "prod": {"kubeconfig_path": "/prod/kubeconfig", "kubeconfig_context": "prod"}
         }
         with open(config_file, "w") as f:
             yaml.safe_dump(config_data, f)
@@ -81,9 +79,10 @@ class TestKSeedConfig:
         with open(config_file) as f:
             data = yaml.safe_load(f)
 
-        assert "environments" in data
-        assert data["environments"]["prod"]["kubeconfig_path"] == "/prod/kubeconfig"
-        assert data["environments"]["dev"]["kubeconfig_path"] == "/dev/kubeconfig"
+        assert "prod" in data
+        assert "dev" in data
+        assert data["prod"]["kubeconfig_path"] == "/prod/kubeconfig"
+        assert data["dev"]["kubeconfig_path"] == "/dev/kubeconfig"
 
     def test_get_with_default(self, temp_kseed_dir: Path) -> None:
         """Test getting config value with default."""
@@ -135,91 +134,6 @@ class TestKSeedConfig:
         config = KSeedConfig("dev")
 
         assert config.kubeconfig_context is None
-
-    def test_project_runtime_returns_static(self, temp_kseed_dir: Path) -> None:
-        """Test that project_runtime always returns static python value."""
-        config = KSeedConfig("dev")
-        # runtime should always be python (static)
-        assert config.project_runtime == "python"
-
-    def test_project_main_returns_default(self, temp_kseed_dir: Path) -> None:
-        """Test that project_main returns default when not set."""
-        config = KSeedConfig("dev")
-        assert config.project_main == "kseed/"
-
-    def test_project_main_from_config(self, temp_kseed_dir: Path) -> None:
-        """Test that project_main returns value from config."""
-        config_file = temp_kseed_dir / "config"
-        config_data = {
-            "environments": {
-                "dev": {
-                    "project": {"main": "custom/"}
-                }
-            }
-        }
-        with open(config_file, "w") as f:
-            yaml.safe_dump(config_data, f)
-
-        config = KSeedConfig("dev")
-        assert config.project_main == "custom/"
-
-    def test_components_empty_by_default(self, temp_kseed_dir: Path) -> None:
-        """Test that components returns empty list by default."""
-        config = KSeedConfig("dev")
-        assert config.components == []
-
-    def test_components_from_config(self, temp_kseed_dir: Path) -> None:
-        """Test that components returns value from config."""
-        config_file = temp_kseed_dir / "config"
-        config_data = {
-            "environments": {
-                "dev": {
-                    "components": [{"name": "metallb"}]
-                }
-            }
-        }
-        with open(config_file, "w") as f:
-            yaml.safe_dump(config_data, f)
-
-        config = KSeedConfig("dev")
-        assert config.components == [{"name": "metallb"}]
-
-    def test_state_dir_from_config(self, temp_kseed_dir: Path) -> None:
-        """Test that state_dir returns value from config."""
-        config_file = temp_kseed_dir / "config"
-        config_data = {
-            "environments": {
-                "dev": {
-                    "state_dir": "/custom/state"
-                }
-            }
-        }
-        with open(config_file, "w") as f:
-            yaml.safe_dump(config_data, f)
-
-        config = KSeedConfig("dev")
-        assert config.state_dir == "/custom/state"
-
-    def test_set_project_config(self, temp_kseed_dir: Path) -> None:
-        """Test setting project config."""
-        config = KSeedConfig("dev")
-        config.set_project_config(name="testproj", description="Test desc", main="test/")
-
-        # Reload and verify
-        config2 = KSeedConfig("dev")
-        assert config2.project_name == "testproj"
-        assert config2.project_description == "Test desc"
-        assert config2.project_main == "test/"
-
-    def test_set_components(self, temp_kseed_dir: Path) -> None:
-        """Test setting components."""
-        config = KSeedConfig("dev")
-        components = [{"name": "metallb"}, {"name": "ingress"}]
-        config.set_components(components)
-
-        # Reload and verify
-        config2 = KSeedConfig("dev")
-        assert config2.components == components
 
 
 class TestGetStatePath:

@@ -11,21 +11,27 @@ GitOps-driven environment.
 
 ## ✅ Completed
 - [x] Initial K3s cluster setup with Ansible
-
+- [x] Semantic Release Initial Configuration
+- [x] SSH hardening
+- [x] SOPS secrets management
 
 ---
 
 ## 🚧 In Progress
-- Projec
+- [ ] Generate kube config and copy it to the local machine pre configured. (also the  pluging diff and secrets)
+- [ ] Helmfile configuration
+- [ ] Centralize scripting to run everything with one command.
+- [ ] Monitoring stack (Prometheus + Grafana)
+
 ---
 
 ## 📋 Planned
-- [ ] Allow to pass .env file with all the configurations, so the user can run init <environment>
-- [ ] Pass config file with all the configurations to run pulumi, so user can automate this from CD.
-- [ ] Add selected environment, so everythin runs default to that environment
-- [ ] Add get all environments information and what is the selected one 
-- [ ] Runtime by default is python
-
+- [ ] Dependencies checker
+- [ ] ArgoCD GitOps setup
+- [ ] CI/CD pipeline
+- [ ] Backup solution
+- [ ] Disaster recovery plan
+- [ ] Documentation improvements
 
 ---
 
