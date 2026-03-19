@@ -15,18 +15,18 @@ from kseed.infra.components.base import BaseComponent
 
 class MetalLBComponent(BaseComponent):
     """MetalLB load balancer component.
-
+    
     MetalLB provides network load-balancing for bare metal Kubernetes clusters.
     It supports two modes:
     - Layer 2 (ARP/NDP): Uses ARP/NDP to announce the service IP
     - Layer 3 (BGP): Uses BGP peering for more advanced routing
-
+    
     Configuration:
         - address_pool: IP address range for services (e.g., "192.168.1.100-192.168.1.200")
         - version: Helm chart version (default: "4.0.0")
         - namespace: Kubernetes namespace to deploy to (default: "metallb-system")
         - mode: Load balancing mode - "layer2" or "bgp" (default: "layer2")
-
+    
     Example config:
         name: "metallb"
         config:
@@ -35,13 +35,13 @@ class MetalLBComponent(BaseComponent):
           namespace: "metallb-system"
           mode: "layer2"
     """
-
+    
     name = "metallb"
     """Unique component name."""
-
+    
     dependencies = []
     """MetalLB has no dependencies on other components."""
-
+    
     def __init__(self):
         self._chart: helm.Chart | None = None
         self._namespace: k8s.core.v1.Namespace | None = None
@@ -50,14 +50,14 @@ class MetalLBComponent(BaseComponent):
         self._namespace_name: str = "metallb-system"
         self._mode: str = "layer2"
         self._config: dict[str, Any] = {}
-
+    
     def deploy(self, provider: k8s.Provider, config: dict[str, Any]) -> helm.Chart:
         """Deploy MetalLB using Helm.
-
+        
         Args:
             provider: The Pulumi Kubernetes provider.
             config: MetalLB configuration dictionary.
-
+            
         Returns:
             The MetalLB Helm chart.
         """
@@ -67,11 +67,11 @@ class MetalLBComponent(BaseComponent):
         self._version = config.get("version", self._version)
         self._namespace_name = config.get("namespace", self._namespace_name)
         self._mode = config.get("mode", self._mode)
-
+        
         # Validate mode
         if self._mode not in ("layer2", "bgp"):
             raise ValueError(f"Invalid mode '{self._mode}'. Must be 'layer2' or 'bgp'")
-
+        
         # Create namespace
         self._namespace = k8s.core.v1.Namespace(
             f"{self._namespace_name}-namespace",
@@ -84,13 +84,13 @@ class MetalLBComponent(BaseComponent):
             ),
             opts=pulumi.ResourceOptions(provider=provider),
         )
-
+        
         # Determine Helm values based on mode
         if self._mode == "layer2":
             values = self._get_layer2_config()
         else:
             values = self._get_bgp_config()
-
+        
         # Deploy MetalLB via Helm
         self._chart = helm.Chart(
             "metallb",
@@ -106,9 +106,9 @@ class MetalLBComponent(BaseComponent):
                 depends_on=[self._namespace],
             ),
         )
-
+        
         return self._chart
-
+    
     def _get_layer2_config(self) -> dict[str, Any]:
         """Get configuration for Layer 2 mode."""
         return {
@@ -123,12 +123,12 @@ class MetalLBComponent(BaseComponent):
                 ]
             }
         }
-
+    
     def _get_bgp_config(self) -> dict[str, Any]:
         """Get configuration for BGP mode."""
         # For BGP, we need routerPeerAddress and ASN configuration
         bgp_peers = self._config.get("bgp_peers", [])
-
+        
         return {
             "configInline": {
                 "peers": bgp_peers,
@@ -142,32 +142,32 @@ class MetalLBComponent(BaseComponent):
                 ],
             }
         }
-
+    
     def get_outputs(self) -> dict[str, Any]:
         """Get outputs from the deployed MetalLB component.
-
+        
         Returns:
             Dictionary of output values.
         """
         if not self._chart:
             return {}
-
+        
         return {
             "namespace": self._namespace_name,
             "address_pool": self._address_pool,
             "mode": self._mode,
             "version": self._version,
         }
-
+    
     def validate_config(self, config: dict[str, Any]) -> bool:
         """Validate MetalLB configuration.
-
+        
         Args:
             config: Configuration dictionary to validate.
-
+            
         Returns:
             True if configuration is valid.
-
+            
         Raises:
             ValueError: If configuration is invalid.
         """
@@ -180,15 +180,15 @@ class MetalLBComponent(BaseComponent):
                     f"Invalid address_pool '{address_pool}'. "
                     "Expected format: '192.168.1.100-192.168.1.200' or '192.168.1.0/24'"
                 )
-
+        
         # Validate mode
         mode = config.get("mode", "layer2")
         if mode not in ("layer2", "bgp"):
             raise ValueError(f"Invalid mode '{mode}'. Must be 'layer2' or 'bgp'")
-
+        
         # Validate version
         version = config.get("version", "4.0.0")
         if not version:
             raise ValueError("version cannot be empty")
-
+        
         return True
