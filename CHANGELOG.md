@@ -1,16 +1,3 @@
-# [3.0.0](https://github.com/albertoig/homelab/compare/v2.1.0...v3.0.0) (2026-03-14)
-
-
-### Features
-
-* deprecate helmfile infrastructure in favor of Pulumi with Python ([b7c8965](https://github.com/albertoig/homelab/commit/b7c896518e94d408b371dec2ef2fa927de874eac))
-
-
-### BREAKING CHANGES
-
-* helmfile directory is no longer supported.
-Please migrate to the new Pulumi-based infrastructure.
-
 # [2.1.0](https://github.com/albertoig/homelab/compare/v2.0.0...v2.1.0) (2026-03-13)
 
 
