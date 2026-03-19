@@ -1,0 +1,25 @@
+version: 1.4.1
+dependencies:
+  - name: authentik
+    repository: https://charts.goauthentik.io
+    version: 2026.2.1
+  - name: grafana
+    repository: https://grafana-community.github.io/helm-charts
+    version: 11.3.2
+  - name: kube-prometheus-stack
+    repository: https://prometheus-community.github.io/helm-charts
+    version: 82.10.3
+  - name: loki
+    repository: https://grafana.github.io/helm-charts
+    version: 6.54.0
+  - name: longhorn
+    repository: https://charts.longhorn.io
+    version: 1.7.1
+  - name: metallb
+    repository: https://metallb.github.io/metallb
+    version: 0.15.3
+  - name: tempo
+    repository: https://grafana-community.github.io/helm-charts
+    version: 2.0.0
+digest: sha256:123582d044a36fb55f6ffb2f7d1a818e9ecb42c1d7c73cb928ec2c4fc1b5a51a
+generated: "2026-03-13T13:14:19.46039168-04:00"

@@ -1,0 +1,33 @@
+# CRDs are managed separately via the prometheus-operator-crds chart release.
+# This prevents conflicts on upgrades and ensures CRDs are always installed first.
+crds:
+  enabled: false
+
+prometheusOperator:
+  enabled: true
+
+prometheus:
+  enabled: true
+  prometheusSpec:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
+
+alertmanager:
+  enabled: true
+
+grafana:
+  enabled: false
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+defaultRules:
+  create: true
