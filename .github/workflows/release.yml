@@ -1,9 +1,10 @@
-name: CD Pipeline
+name: Release
 
 on:
-  pull_request:
-    branches: [main, master]
-    types: [closed]
+  push:
+    branches:
+      - main
+      - master
 
 permissions:
   contents: write
@@ -14,9 +15,7 @@ jobs:
   release:
     name: Semantic Release
     runs-on: ubuntu-latest
-    # Only run when PR is merged
-    if: github.event.pull_request.merged == true
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4

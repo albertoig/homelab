@@ -1,0 +1,5 @@
+creation_rules:
+  - path_regex: \.(yaml|yml|json)$
+    key_groups:
+    - pgp:
+      - 8152E60988488774
