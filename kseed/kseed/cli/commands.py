@@ -328,15 +328,11 @@ def _display_health_result(health: ClusterHealth) -> None:
     # Cluster reachable
     if health.cluster_reachable:
         status = "[green]✓ Reachable[/green]"
+        if health.cluster_info:
+            status += f"\n   {health.cluster_info}"
     else:
         status = "[red]✗ Unreachable[/red]"
     table.add_row("Cluster Reachable", status)
-
-    # K8s version
-    if health.k8s_version:
-        table.add_row("K8s Version", health.k8s_version)
-    else:
-        table.add_row("K8s Version", "[red]N/A[/red]")
 
     # Has permissions
     if health.has_permissions:
