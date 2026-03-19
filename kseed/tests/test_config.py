@@ -192,26 +192,20 @@ class TestGetAvailableContexts:
 class TestSetupKubeconfig:
     """Tests for setup_kubeconfig function."""
 
-    @patch("kseed.config.manager.select_kubeconfig_context")
     def test_setup_kubeconfig_already_configured(
         self,
-        mock_select_context: MagicMock,
         temp_kseed_dir: Path,
-        kubeconfig_file: Path,
         mock_console_print: MagicMock,
     ) -> None:
-        """Test setup_kubeconfig when already configured - uses existing config as defaults."""
+        """Test setup_kubeconfig when already configured."""
         # Pre-configure
         config = KSeedConfig("dev")
-        config.save({"kubeconfig_path": str(kubeconfig_file), "kubeconfig_context": "dev"})
-        
-        # Reload the config
-        mock_select_context.return_value = "new-context"
+        config.save({"kubeconfig_path": "/test/kubeconfig", "kubeconfig_context": "dev"})
 
-        # Call with path - should prompt for context using existing path as default
-        result = setup_kubeconfig("dev", kubeconfig_file)
+        result = setup_kubeconfig("dev")
 
-        assert result.kubeconfig_path == kubeconfig_file
+        assert result.kubeconfig_path == Path("/test/kubeconfig")
+        assert result.kubeconfig_context == "dev"
 
     def test_setup_kubeconfig_file_not_found(
         self, temp_kseed_dir: Path, mock_console_print: MagicMock

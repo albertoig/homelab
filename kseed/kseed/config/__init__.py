@@ -6,7 +6,6 @@ from kseed.config.manager import (
     get_state_path,
     read_kubeconfig,
     select_kubeconfig_context,
-    setup_environment,
     setup_kubeconfig,
 )
 
@@ -16,6 +15,5 @@ __all__ = [
     "get_state_path",
     "read_kubeconfig",
     "select_kubeconfig_context",
-    "setup_environment",
     "setup_kubeconfig",
 ]

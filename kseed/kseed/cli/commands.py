@@ -1,6 +1,7 @@
 """CLI commands for kseed Pulumi management."""
 
 import os
+import subprocess
 from pathlib import Path
 
 import typer
@@ -9,10 +10,8 @@ from rich.console import Console
 from rich.table import Table
 
 from kseed import config as kseed_config
-from kseed.config import KSeedConfig, setup_environment
+from kseed.config import KSeedConfig
 from kseed.diagnose import ClusterHealth, check_cluster_health, get_all_configured_environments
-from kseed.infra.automation import run_up, run_preview, run_destroy
-from kseed.infra.resources import create_infrastructure
 
 app = typer.Typer(help="Kseed CLI")
 console = Console()
@@ -33,7 +32,7 @@ def init(
 
     try:
         kubeconfig = Path(kubeconfig_path) if kubeconfig_path else None
-        setup_environment(environment)
+        kseed_config.setup_kubeconfig(environment, kubeconfig)
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         raise typer.Exit(1)
@@ -46,11 +45,14 @@ def configure(
     """Reconfigure kubeconfig for an existing environment."""
     console.print(f"[bold cyan]Reconfiguring kseed for environment: {environment}[/bold cyan]\n")
 
-    try:
-        setup_environment(environment)
-    except Exception as e:
-        console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+    # Delete existing config and re-run setup
+    config = KSeedConfig(environment)
+    config.load()
+
+    if config.kubeconfig_path or config.kubeconfig_context:
+        console.print("[yellow]Configuration exists. Removing...[/yellow]")
+
+    kseed_config.setup_kubeconfig(environment)
 
 
 @app.command()
@@ -65,13 +67,6 @@ def status(
     table.add_column("Setting", style="cyan")
     table.add_column("Value", style="green")
 
-    # Project settings
-    table.add_row("[bold]Project Settings[/bold]", "")
-    table.add_row("  project_name", config.project_name)
-    table.add_row("  project_runtime", config.project_runtime)
-    table.add_row("  project_main", config.project_main)
-
-    # Kubeconfig
     if config.kubeconfig_path:
         table.add_row("kubeconfig_path", str(config.kubeconfig_path))
     else:
@@ -82,36 +77,9 @@ def status(
     else:
         table.add_row("kubeconfig_context", "[red]Not configured[/red]")
 
-    # Components
-    components = config.components
-    if components:
-        table.add_row("[bold]Components[/bold]", "")
-        for comp in components:
-            table.add_row(f"  - {comp.get('name', 'unknown')}", str(comp.get('config', {})))
-    else:
-        table.add_row("components", "[yellow]No components configured[/yellow]")
+    table.add_row("state_path", str(kseed_config.get_state_path(environment)))
 
     console.print(table)
-
-
-@app.command()
-def diagnose(
-    environment: str | None = typer.Argument(
-        None,
-        help="Environment name (if not provided, tests all configured environments)",
-    ),
-) -> None:
-    """Diagnose the connection to K3s cluster.
-
-    Checks:
-    - If the K3s cluster is reachable
-    - If the user has permissions to access
-    - If the user can install Helm charts
-    """
-    if environment:
-        _test_single_environment(environment)
-    else:
-        _test_all_environments()
 
 
 @app.command()
@@ -140,8 +108,28 @@ def destroy(
     _run_pulumi(environment, "destroy", plan)
 
 
+@app.command()
+def diagnose(
+    environment: str | None = typer.Argument(
+        None,
+        help="Environment name (if not provided, tests all configured environments)",
+    ),
+) -> None:
+    """Diagnose the connection to K3s cluster.
+
+    Checks:
+    - If the K3s cluster is reachable
+    - If the user has permissions to access
+    - If the user can install Helm charts
+    """
+    if environment:
+        _test_single_environment(environment)
+    else:
+        _test_all_environments()
+
+
 def _run_pulumi(environment: str, command: str, plan_only: bool) -> None:
-    """Run a pulumi command with the correct configuration using Automation API."""
+    """Run a pulumi command with the correct configuration."""
     config = KSeedConfig(environment)
     config.load()
 
@@ -151,19 +139,44 @@ def _run_pulumi(environment: str, command: str, plan_only: bool) -> None:
         console.print(f"Run 'kseed init {environment}' first.")
         raise typer.Exit(1)
 
-    console.print(f"[bold cyan]Running pulumi {command} for environment: {environment}[/bold cyan]\n")
+    # Get kubeconfig path and context
+    kubeconfig_path = config.kubeconfig_path
+    kubeconfig_context = config.kubeconfig_context
+
+    # Read the kubeconfig and extract the selected context
+    kubeconfig_content = _get_kubeconfig_for_context(kubeconfig_path, kubeconfig_context)
+
+    # Get state path
+    state_path = kseed_config.get_state_path(environment)
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Export kubeconfig to environment for pulumi
+    env = os.environ.copy()
+    env["KUBECONFIG"] = kubeconfig_content
+
+    # Set pulumi to use file state
+    env["PULUMI_BACKEND_URL"] = f"file://{state_path}"
+
+    # Find project path (parent of kseed package)
+    project_path = Path(__file__).parent.parent
+
+    # Build pulumi command
+    pulumi_cmd = ["pulumi", command, "--stack", environment]
+    if plan_only:
+        pulumi_cmd.append("--plan")
+
+    console.print(f"[bold cyan]Running: {' '.join(pulumi_cmd)}[/bold cyan]")
+    console.print(f"[dim]State: {state_path}[/dim]\n")
 
     try:
-        if command == "up":
-            run_up(environment, create_infrastructure, preview_only=plan_only)
-        elif command == "preview":
-            run_preview(environment, create_infrastructure)
-        elif command == "destroy":
-            run_destroy(environment, create_infrastructure)
-        else:
-            console.print(f"[red]Unknown command: {command}[/red]")
-            raise typer.Exit(1)
-    except Exception as e:
+        result = subprocess.run(
+            pulumi_cmd,
+            cwd=project_path,
+            env=env,
+            text=True,
+        )
+        raise typer.Exit(result.returncode)
+    except subprocess.CalledProcessError as e:
         console.print(f"[red]Error running pulumi: {e}[/red]")
         raise typer.Exit(1)
 

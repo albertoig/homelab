@@ -27,10 +27,6 @@ class TestStatusCommand:
         mock_config = MagicMock()
         mock_config.kubeconfig_path = Path("/test/kubeconfig")
         mock_config.kubeconfig_context = "dev-cluster"
-        mock_config.project_name = "homelab"
-        mock_config.project_runtime = "python"
-        mock_config.project_main = "kseed/"
-        mock_config.components = []
         mock_config.load.return_value = {
             "kubeconfig_path": "/test/kubeconfig",
             "kubeconfig_context": "dev-cluster",
@@ -54,10 +50,6 @@ class TestStatusCommand:
         mock_config = MagicMock()
         mock_config.kubeconfig_path = None
         mock_config.kubeconfig_context = None
-        mock_config.project_name = "homelab"
-        mock_config.project_runtime = "python"
-        mock_config.project_main = "kseed/"
-        mock_config.components = []
         mock_config.load.return_value = {}
         mock_config_class.return_value = mock_config
         mock_get_state.return_value = Path("/test/state/dev.state")
@@ -71,12 +63,14 @@ class TestStatusCommand:
 class TestUpCommand:
     """Tests for the up command."""
 
-    @patch("kseed.cli.commands.run_up")
+    @patch("kseed.cli.commands._get_kubeconfig_for_context")
+    @patch("kseed.cli.commands.kseed_config.get_state_path")
     @patch("kseed.cli.commands.KSeedConfig")
     def test_up_requires_configured_environment(
         self,
         mock_config_class: MagicMock,
-        mock_run_up: MagicMock,
+        mock_get_state: MagicMock,
+        mock_get_kubeconfig: MagicMock,
         runner: CliRunner,
     ) -> None:
         """Test that up fails if environment is not configured."""
@@ -85,6 +79,7 @@ class TestUpCommand:
         mock_config.kubeconfig_context = None
         mock_config.load.return_value = {}
         mock_config_class.return_value = mock_config
+        mock_get_state.return_value = Path("/test/state/dev.state")
 
         result = runner.invoke(app, ["up", "dev"])
 
@@ -95,12 +90,14 @@ class TestUpCommand:
 class TestDestroyCommand:
     """Tests for the destroy command."""
 
-    @patch("kseed.cli.commands.run_destroy")
+    @patch("kseed.cli.commands._get_kubeconfig_for_context")
+    @patch("kseed.cli.commands.kseed_config.get_state_path")
     @patch("kseed.cli.commands.KSeedConfig")
     def test_destroy_requires_configured_environment(
         self,
         mock_config_class: MagicMock,
-        mock_run_destroy: MagicMock,
+        mock_get_state: MagicMock,
+        mock_get_kubeconfig: MagicMock,
         runner: CliRunner,
     ) -> None:
         """Test that destroy fails if environment is not configured."""
@@ -109,6 +106,7 @@ class TestDestroyCommand:
         mock_config.kubeconfig_context = None
         mock_config.load.return_value = {}
         mock_config_class.return_value = mock_config
+        mock_get_state.return_value = Path("/test/state/dev.state")
 
         result = runner.invoke(app, ["destroy", "dev"])
 
