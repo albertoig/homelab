@@ -1,17 +1,10 @@
-"""Main entry point for kseed CLI and Pulumi program."""
+"""Main entry point for kseed Pulumi program."""
 
-import sys
+from kseed.infra import create_infrastructure
 
-# CLI entry point
-if len(sys.argv) > 1 and sys.argv[1] == "infra":
-    # Run Pulumi infrastructure
-    from kseed.infra import create_infrastructure
+if __name__ == "__main__":
+    # Get stack name to determine environment
     import pulumi
 
     stack_name = pulumi.get_stack()
     create_infrastructure(stack_name)
-else:
-    # Run CLI
-    from kseed import app
-
-    app()

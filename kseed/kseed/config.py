@@ -1,4 +1,4 @@
-"""Configuration management for kseed Pulumi."""
+"""Configuration management for homelab Pulumi."""
 
 import os
 from pathlib import Path
@@ -11,14 +11,14 @@ from rich.prompt import Prompt
 console = Console()
 
 # Default paths
-KSEED_DIR = Path.home() / ".kseed"
-CONFIG_FILE = KSEED_DIR / "config"
-STATE_DIR = KSEED_DIR / "statefiles"
+HOMELAB_DIR = Path.home() / ".homelab"
+CONFIG_FILE = HOMELAB_DIR / "config"
+STATE_DIR = HOMELAB_DIR / "statefiles"
 DEFAULT_KUBECONFIG_PATH = Path.home() / ".kube" / "config"
 
 
-class KSeedConfig:
-    """Manages kseed configuration stored in ~/.kseed/config."""
+class HomelabConfig:
+    """Manages homelab configuration stored in ~/.homelab/config."""
 
     def __init__(self, environment: str = "dev"):
         self.environment = environment
@@ -28,7 +28,7 @@ class KSeedConfig:
 
     def _ensure_config_dir(self) -> None:
         """Ensure the config directory exists."""
-        KSEED_DIR.mkdir(parents=True, exist_ok=True)
+        HOMELAB_DIR.mkdir(parents=True, exist_ok=True)
 
     def _load_config_file(self) -> None:
         """Load configuration from the single config file."""
@@ -126,9 +126,9 @@ def select_kubeconfig_context(kubeconfig_path: Path) -> str:
     return contexts[int(choice) - 1]
 
 
-def setup_kubeconfig(environment: str, kubeconfig_path: Path | None = None) -> KSeedConfig:
+def setup_kubeconfig(environment: str, kubeconfig_path: Path | None = None) -> HomelabConfig:
     """Interactive kubeconfig setup for an environment."""
-    config = KSeedConfig(environment)
+    config = HomelabConfig(environment)
     config.load()
 
     # Check if already configured

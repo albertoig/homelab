@@ -1,4 +1,4 @@
-# Kseed
+# Megahomelab
 
 Pulumi infrastructure as code for homelab k3s cluster using Python 3.14.
 
@@ -11,7 +11,7 @@ poetry install
 
 ## Development Installation
 
-To install as a development tool (available as `kseed` command):
+To install as a development tool (available as `megahomelab` command):
 
 ```bash
 poetry install
@@ -22,7 +22,7 @@ Or install system-wide:
 
 ```bash
 poetry build
-pip install dist/kseed-*.whl
+pip install dist/megahomelab-*.whl
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ pip install dist/kseed-*.whl
 ### Initialize an environment
 
 ```bash
-kseed init dev
+megahomelab init dev
 ```
 
 This will:
@@ -42,15 +42,15 @@ This will:
 ### Deploy infrastructure
 
 ```bash
-kseed up dev
+megahomelab up dev
 ```
 
 ### Other commands
 
-- `kseed configure <env>` - Reconfigure kubeconfig
-- `kseed status <env>` - Show configuration status
-- `kseed preview <env>` - Preview changes
-- `kseed destroy <env>` - Destroy resources
+- `megahomelab configure <env>` - Reconfigure kubeconfig
+- `megahomelab status <env>` - Show configuration status
+- `megahomelab preview <env>` - Preview changes
+- `megahomelab destroy <env>` - Destroy resources
 
 ## Configuration
 
