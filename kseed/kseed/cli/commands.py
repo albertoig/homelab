@@ -116,7 +116,7 @@ def diagnose(
     ),
 ) -> None:
     """Diagnose the connection to K3s cluster.
-
+    
     Checks:
     - If the K3s cluster is reachable
     - If the user has permissions to access
@@ -299,7 +299,7 @@ def _display_health_result(health: ClusterHealth) -> None:
 
     # Cluster reachable
     if health.cluster_reachable:
-        status = "[green]✓ Reachable[/green]"
+        status = f"[green]✓ Reachable[/green]"
         if health.cluster_info:
             status += f"\n   {health.cluster_info}"
     else:

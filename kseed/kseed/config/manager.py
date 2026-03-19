@@ -1,5 +1,6 @@
 """Configuration management for kseed Pulumi."""
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -155,12 +156,10 @@ def setup_kubeconfig(environment: str, kubeconfig_path: Path | None = None) -> K
     context = select_kubeconfig_context(kubeconfig_path)
 
     # Save configuration (stores path and context only)
-    config.save(
-        {
-            "kubeconfig_path": str(kubeconfig_path),
-            "kubeconfig_context": context,
-        }
-    )
+    config.save({
+        "kubeconfig_path": str(kubeconfig_path),
+        "kubeconfig_context": context,
+    })
 
     console.print(f"\n[green]Configuration saved for environment: {environment}[/green]")
     console.print(f"  kubeconfig: {kubeconfig_path}")

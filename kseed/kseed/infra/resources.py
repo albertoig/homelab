@@ -80,6 +80,9 @@ def install_nginx_ingress(
 
 def create_infrastructure(environment: str = "dev") -> None:
     """Create the full infrastructure for the given environment."""
+    # Get stack reference
+    stack_name = pulumi.get_stack()
+
     # Get configuration
     kubeconfig_content = get_config_value("kubeconfig")
 
@@ -99,7 +102,9 @@ def create_infrastructure(environment: str = "dev") -> None:
         "nginx_ingress_external_ip",
         nginx_ingress.status.apply(
             lambda status: (
-                status.load_balancer.ingress[0].ip if status and status.load_balancer else "pending"
+                status.load_balancer.ingress[0].ip
+                if status and status.load_balancer
+                else "pending"
             )
         ),
     )
