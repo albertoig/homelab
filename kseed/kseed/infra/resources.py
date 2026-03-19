@@ -113,7 +113,7 @@ def create_infrastructure(environment: str = "dev") -> None:
     kubeconfig_content = get_config_value("kubeconfig")
     
     # Get KSeed config for component definitions
-    get_kseed_config(environment)
+    kseed_config = get_kseed_config(environment)
     
     # Create provider
     provider = create_kubernetes_provider(kubeconfig_content)

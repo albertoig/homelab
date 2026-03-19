@@ -4,7 +4,7 @@ This module provides a registry for discovering and managing infrastructure
 components. Components can be registered manually or auto-discovered.
 """
 
-from typing import Type
+from typing import Any, Type
 
 from kseed.infra.components.base import BaseComponent
 
@@ -152,6 +152,7 @@ def register_components() -> None:
     registration. It should be called during module initialization.
     """
     # Import loadbalancer components
+    from kseed.infra.components.loadbalancer import metallb
     
     # Import other component categories as they're added
     # from kseed.infra.components.networking import ...

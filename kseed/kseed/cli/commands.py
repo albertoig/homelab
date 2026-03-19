@@ -1,5 +1,6 @@
 """CLI commands for kseed Pulumi management."""
 
+import os
 from pathlib import Path
 
 import typer
@@ -7,7 +8,7 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
-from kseed import config as kseed_config  # noqa: F401  # Used by tests for mocking
+from kseed import config as kseed_config
 from kseed.config import KSeedConfig, setup_environment
 from kseed.diagnose import ClusterHealth, check_cluster_health, get_all_configured_environments
 from kseed.infra.automation import run_up, run_preview, run_destroy
@@ -31,6 +32,7 @@ def init(
     console.print(f"[bold cyan]Initializing kseed for environment: {environment}[/bold cyan]\n")
 
     try:
+        kubeconfig = Path(kubeconfig_path) if kubeconfig_path else None
         setup_environment(environment)
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
