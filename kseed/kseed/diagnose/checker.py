@@ -166,8 +166,4 @@ def get_all_configured_environments() -> list[str]:
     with open(CONFIG_FILE) as f:
         config = yaml.safe_load(f) or {}
 
-    # Filter out non-environment keys (e.g., 'project' contains Pulumi settings)
-    reserved_keys = {"project"}
-    environments = [key for key in config.keys() if key not in reserved_keys]
-    
-    return environments
+    return list(config.keys())
