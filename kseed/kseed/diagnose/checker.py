@@ -82,10 +82,10 @@ def _load_kubeconfig(kubeconfig_path: Path, context_name: str) -> ApiClient:
         tmp_path = tmp.name
 
     try:
-        # Load from the temp file into the default config
+        # Load from the temp file
+        configuration = client.Configuration()
         config.load_kube_config(config_file=tmp_path)
-        # Get the configuration from the default
-        return client.ApiClient()
+        return ApiClient(configuration)
     finally:
         Path(tmp_path).unlink(missing_ok=True)
 
@@ -120,8 +120,7 @@ def check_cluster_health(
 
         # Test 1: Check if cluster is reachable
         try:
-            version_api = client.VersionApi(api_client)
-            version = version_api.get_code()
+            version = core_v1.get_code()
             result.cluster_reachable = True
             result.cluster_info = f"k3s version: {version.git_version}"
         except ApiException as e:
@@ -141,7 +140,7 @@ def check_cluster_health(
             # Check if we can at least see the API - this is a proxy for helm permissions
             # A full helm check would require actually trying to install a helm chart
             # which we don't want to do in a health check
-            apps_v1.list_namespaced_deployment(namespace="kube-system", limit=1)
+            apps_v1.list_deployment_namespaced_ns(namespace="kube-system", limit=1)
             result.can_install_helm = True
         except ApiException as e:
             if e.reason == "Forbidden":
