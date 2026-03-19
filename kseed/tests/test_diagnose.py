@@ -1,7 +1,8 @@
 """Unit tests for kseed diagnose functionality."""
 
+import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 
 import pytest
 import yaml
@@ -64,12 +65,11 @@ class TestGetAllConfiguredEnvironments:
         config_module.manager.CONFIG_FILE = Path("/non/existent/path/config")
 
         try:
-            from kseed.diagnose.checker import get_all_configured_environments  # noqa: F811
+            from kseed.diagnose.checker import get_all_configured_environments
             import importlib
             import kseed.diagnose.checker as checker_module
-
             importlib.reload(checker_module)
-            from kseed.diagnose.checker import get_all_configured_environments  # noqa: F811
+            from kseed.diagnose.checker import get_all_configured_environments
 
             result = get_all_configured_environments()
             assert result == []
@@ -85,17 +85,15 @@ class TestGetAllConfiguredEnvironments:
 
         # Patch the CONFIG_FILE to point to our temp file
         from kseed import config as config_module
-
         original_config_file = config_module.manager.CONFIG_FILE
 
         try:
             config_module.manager.CONFIG_FILE = config_file
-            from kseed.diagnose.checker import get_all_configured_environments  # noqa: F811
+            from kseed.diagnose.checker import get_all_configured_environments
             import importlib
             import kseed.diagnose.checker as checker_module
-
             importlib.reload(checker_module)
-            from kseed.diagnose.checker import get_all_configured_environments  # noqa: F811
+            from kseed.diagnose.checker import get_all_configured_environments
 
             result = get_all_configured_environments()
             assert set(result) == {"dev", "prod"}
@@ -113,10 +111,7 @@ class TestCheckClusterHealth:
             "apiVersion": "v1",
             "kind": "Config",
             "contexts": [
-                {
-                    "name": "test-context",
-                    "context": {"cluster": "test-cluster", "user": "test-user"},
-                }
+                {"name": "test-context", "context": {"cluster": "test-cluster", "user": "test-user"}}
             ],
             "current-context": "test-context",
             "clusters": [{"name": "test-cluster", "cluster": {"server": "https://localhost:6443"}}],
@@ -296,10 +291,7 @@ class TestLoadKubeconfig:
             "apiVersion": "v1",
             "kind": "Config",
             "contexts": [
-                {
-                    "name": "test-context",
-                    "context": {"cluster": "test-cluster", "user": "test-user"},
-                }
+                {"name": "test-context", "context": {"cluster": "test-cluster", "user": "test-user"}}
             ],
             "current-context": "test-context",
             "clusters": [{"name": "test-cluster", "cluster": {"server": "https://localhost:6443"}}],
