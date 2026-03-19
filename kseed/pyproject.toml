@@ -8,7 +8,6 @@ packages = [{include = "kseed"}]
 
 [tool.poetry.dependencies]
 python = "^3.14"
-python-semantic-release = "^9.8.0"
 pulumi = "^3.140.0"
 pulumi-kubernetes = "^4.18.0"
 python-dotenv = "^1.0.0"
@@ -32,15 +31,3 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 line-length = 100
 target-version = "py314"
-
-[tool.semantic_release]
-version_variable = [
-    "kseed/__init__.py:__version__",
-    "pyproject.toml:tool.poetry.version"
-]
-branch = "main"
-build_command = "poetry build"
-upload = false
-changelog_file = "CHANGELOG.md"
-hvcs = "github"
-tag_commit = true
