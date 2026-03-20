@@ -1,9 +1,11 @@
 # Cloudflare API Token Secret configuration
 secret:
   # The name of the Kubernetes secret to create
-  name: cloudflare-api-token
-  # The Cloudflare API token (can be provided via --set or from a sealed secret)
-  token: ""
+  name: cloudflare-api-key
+  # The Cloudflare API key
+  apiKey: ""
+  # The Cloudflare API email
+  email: ""
 
 # ClusterIssuer configuration
 clusterIssuer:
@@ -15,10 +17,10 @@ clusterIssuer:
   cloudflare:
     # Email associated with Cloudflare account (optional, using token auth)
     email: ""
-    # Reference to the secret containing the API token
+    # Reference to the secret containing the API key
     secretRef:
-      name: cloudflare-api-token
-      key: token
+      name: cloudflare-api-key
+      key: apiKey
 
 # Certificate request configuration
 certificate:

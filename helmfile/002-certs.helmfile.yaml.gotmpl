@@ -41,3 +41,21 @@ releases:
     - "../helmfile/common/values/{{`{{ .Release.Name }}`}}.yaml.gotmpl"
     secrets:
     - "../helmfile/environments/{{`{{ .Environment.Name }}`}}/secrets/{{`{{ .Release.Name }}`}}.enc.yaml"
+
+  # External DNS - uses Cloudflare credentials from cert-manager-config secret
+  - name: external-dns
+    namespace: cert-manager-system
+    chart: kubernetes-sigs/external-dns
+    version: "1.20.0"
+    wait: true
+    disableValidation: true
+    labels:
+      app: external-dns
+      type: certifications
+    needs:
+      - cert-manager-system/cert-manager
+      - cert-manager-system/cert-manager-config
+    missingFileHandler: Warn
+    values:
+    - "../helmfile/common/values/{{`{{ .Release.Name }}`}}.yaml.gotmpl"
+    # Secrets are sourced from cert-manager-config's cloudflare-api-key secret
