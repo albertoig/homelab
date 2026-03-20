@@ -1,3 +1,10 @@
+# [3.6.0](https://github.com/albertoig/homelab/compare/v3.5.0...v3.6.0) (2026-03-20)
+
+
+### Features
+
+* **cert-manager:** update secret structure and add external-dns ([dacf54a](https://github.com/albertoig/homelab/commit/dacf54aac01354760bd190ccbcf28c5c1a6cc521))
+
 # [3.5.0](https://github.com/albertoig/homelab/compare/v3.4.1...v3.5.0) (2026-03-20)
 
 
