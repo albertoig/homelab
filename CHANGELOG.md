@@ -1,3 +1,31 @@
+## [3.4.1](https://github.com/albertoig/homelab/compare/v3.4.0...v3.4.1) (2026-03-20)
+
+
+### Reverts
+
+* Revert "3.1.0" ([958766d](https://github.com/albertoig/homelab/commit/958766d81792bdf30697b34da780aa976c196b27))
+* Revert "chore: add CI/CD pipelines and contributor documentation" ([ab7bd0e](https://github.com/albertoig/homelab/commit/ab7bd0ed33f23ddbdea662e56eb88f14747f3ff6))
+* Revert "chore: Add kseed tool" ([0c88d9f](https://github.com/albertoig/homelab/commit/0c88d9ff2f0ec1cd83c26f398f27e60b30d98d3b))
+* Revert "chore: Add pull request template" ([1e76c93](https://github.com/albertoig/homelab/commit/1e76c9367c0d3f08601b7439157d66b9bed81035))
+* Revert "chore(deps): bump actions/checkout from 4 to 6" ([452ba80](https://github.com/albertoig/homelab/commit/452ba80a2beedaebe4a4cee09041691dfb9ad8f2))
+* Revert "chore(deps): bump actions/setup-python from 5 to 6" ([7622e66](https://github.com/albertoig/homelab/commit/7622e66be4a94506b65dd96dff012380b778c3a6))
+* Revert "chore(deps): bump codecov/codecov-action from 4 to 5" ([03ab263](https://github.com/albertoig/homelab/commit/03ab2633606451209fbb65ac22e6907daa1469cb))
+* Revert "chore(release): 2.1.0 [skip ci]" ([44d57be](https://github.com/albertoig/homelab/commit/44d57befc2318b5038e7d45a9f5162088b2064a9))
+* Revert "chore(release): 3.0.0 [skip ci]" ([78f09ef](https://github.com/albertoig/homelab/commit/78f09efe89145dbb1da1afd319c93ff694480c67))
+* Revert "feat: add CI pipeline" ([f004148](https://github.com/albertoig/homelab/commit/f004148aba2dd88158e898579d5d69f6ac932dd0))
+* Revert "feat: add SR step in the CD" ([8bc9b6b](https://github.com/albertoig/homelab/commit/8bc9b6bf20df556d9a989c79696fb056c86332b7))
+* Revert "feat: add unit testing to kseed" ([d3bafee](https://github.com/albertoig/homelab/commit/d3bafee2d0d6f4565772e2b23bc3da9ed07d927c))
+* Revert "feat: deprecate helmfile infrastructure in favor of Pulumi with Python" ([c21ae78](https://github.com/albertoig/homelab/commit/c21ae785ed014ab8648dcbf82d907241ea3b7eab))
+* Revert "feat: improving documentation" ([928de38](https://github.com/albertoig/homelab/commit/928de38dc64158981bad54c33c0c1657c3e1c2a3))
+* Revert "feat: rename test to diagnose" ([a8cf0c0](https://github.com/albertoig/homelab/commit/a8cf0c072b6d618478c159d80bd74ca44dfc3438))
+* Revert "feat: testing" ([6bfc484](https://github.com/albertoig/homelab/commit/6bfc484d5e4ac08e58a269701e33d509cb481e33))
+* Revert "feat: testing" ([2320ac5](https://github.com/albertoig/homelab/commit/2320ac522c07307b535c7d964f93302d06e57484))
+* Revert "fix: fix lint" ([34a5152](https://github.com/albertoig/homelab/commit/34a5152bfa3c04f2a8f4a29cf5a3ef682578970a))
+* Revert "fix: now the diagnose function works correctly in the CLI" ([213ef4f](https://github.com/albertoig/homelab/commit/213ef4f84a0cb4c0fc3510a441a49954e12069f2))
+* Revert "fix: python format" ([e3e70a3](https://github.com/albertoig/homelab/commit/e3e70a36cbce15ba8f062f547c7a08498c3e127b))
+* Revert "fix: semantic release" ([949accd](https://github.com/albertoig/homelab/commit/949accdb10742624cab00c797290d59348a99aed))
+* Revert "fix(ci): remove invalid allow-dependencies-licenses parameter" ([efb3305](https://github.com/albertoig/homelab/commit/efb3305a679805c5bd8d6f038aaf35a06725ee5e))
+
 # [2.0.0](https://github.com/albertoig/homelab/compare/v1.6.0...v2.0.0) (2026-03-13)
 
 
