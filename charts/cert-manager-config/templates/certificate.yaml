@@ -1,0 +1,37 @@
+{{- if .Values.certificate.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.certificate.name | default "selfsigned-cert" }}
+  namespace: {{ .Values.certificate.namespace | default "default" }}
+spec:
+  secretName: {{ .Values.certificate.secretName | default "selfsigned-tls" }}
+  issuerRef:
+    name: {{ .Values.clusterIssuer.name | default "letsencrypt-prod" }}
+    kind: ClusterIssuer
+    group: cert-manager.io
+  {{- if .Values.certificate.dnsNames }}
+  dnsNames:
+    {{- range .Values.certificate.dnsNames }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.certificate.ipAddresses }}
+  ipAddresses:
+    {{- range .Values.certificate.ipAddresses }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.certificate.duration }}
+  duration: {{ .Values.certificate.duration }}
+  {{- end }}
+  {{- if .Values.certificate.renewBefore }}
+  renewBefore: {{ .Values.certificate.renewBefore }}
+  {{- end }}
+  {{- if .Values.certificate.usages }}
+  usages:
+    {{- range .Values.certificate.usages }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+{{- end }}

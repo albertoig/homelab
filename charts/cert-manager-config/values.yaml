@@ -1,0 +1,44 @@
+# Cloudflare API Token Secret configuration
+secret:
+  # The name of the Kubernetes secret to create
+  name: cloudflare-api-token
+  # The Cloudflare API token (can be provided via --set or from a sealed secret)
+  token: ""
+
+# ClusterIssuer configuration
+clusterIssuer:
+  # The name of the ClusterIssuer
+  name: letsencrypt-prod
+  # Email address for Let's Encrypt certificates
+  email: admin@example.com
+  # Cloudflare solver configuration
+  cloudflare:
+    # Email associated with Cloudflare account (optional, using token auth)
+    email: ""
+    # Reference to the secret containing the API token
+    secretRef:
+      name: cloudflare-api-token
+      key: token
+
+# Certificate request configuration
+certificate:
+  # Enable Certificate resource creation
+  enabled: false
+  # Name of the Certificate
+  name: selfsigned-cert
+  # Namespace where the Certificate will be created
+  namespace: default
+  # Name of the secret that will store the issued certificate
+  secretName: selfsigned-tls
+  # DNS names for the certificate
+  dnsNames: []
+  # IP addresses for the certificate
+  ipAddresses: []
+  # Certificate validity duration (e.g., "2160h")
+  duration: "2160h"
+  # Certificate renewal period before expiration (e.g., "360h")
+  renewBefore: "360h"
+  # Key usages (e.g., "server auth", "client auth")
+  usages:
+    - "server auth"
+    - "client auth"
