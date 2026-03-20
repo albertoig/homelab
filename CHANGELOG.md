@@ -1,3 +1,10 @@
+# [3.5.0](https://github.com/albertoig/homelab/compare/v3.4.1...v3.5.0) (2026-03-20)
+
+
+### Features
+
+* **cert-manager:** add cert-manager and cert-manager-config helm chart ([a1476f2](https://github.com/albertoig/homelab/commit/a1476f21b3b47fd02f2765a26e643052d36d9752))
+
 ## [3.4.1](https://github.com/albertoig/homelab/compare/v3.4.0...v3.4.1) (2026-03-20)
 
 
