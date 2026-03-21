@@ -1,3 +1,10 @@
+# [3.7.0](https://github.com/albertoig/homelab/compare/v3.6.0...v3.7.0) (2026-03-21)
+
+
+### Features
+
+* **helmfile:** add Traefik reverse proxy and update external-dns configuration ([d92a82e](https://github.com/albertoig/homelab/commit/d92a82e5ad469d74428a34f220b2f2c96b443fa8))
+
 # [3.6.0](https://github.com/albertoig/homelab/compare/v3.5.0...v3.6.0) (2026-03-20)
 
 
