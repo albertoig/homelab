@@ -17,3 +17,5 @@ repositories:
     url: https://charts.jetstack.io
   - name: kubernetes-sigs
     url: https://kubernetes-sigs.github.io/external-dns/
+  - name: traefik
+    url: https://traefik.github.io/charts

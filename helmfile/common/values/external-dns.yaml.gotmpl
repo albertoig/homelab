@@ -6,3 +6,10 @@ env:
       secretKeyRef:
         name: cloudflare-api-key
         key: apiKey
+source:
+  service:
+    enabled: true
+
+policy: sync
+
+txtOwnerId: k8s

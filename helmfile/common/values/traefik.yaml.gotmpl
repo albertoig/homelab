@@ -1,0 +1,62 @@
+# Traefik Configuration
+# https://artifacthub.io/packages/helm/traefik/traefik?modal=values
+
+# traefik-values.yaml
+
+deployment:
+  replicas: 1
+  # Ensure pods are spread across nodes for HA
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+service:
+  enabled: true
+  type: LoadBalancer
+
+
+# 5. Providers
+providers:
+  kubernetesCRD:
+    enabled: true
+    allowCrossNamespace: true
+  kubernetesIngress:
+    enabled: true
+    allowExternalNameServices: true
+
+# 6. Ports (CORRECTED STRUCTURE)
+# Note: In 39.x, 'expose' is not a boolean, and 'tls' is not allowed under websecure
+ports:
+  web:
+    port: 80
+  websecure:
+    port: 443
+  traefik:
+    port: 9000
+
+persistence:
+  enabled: false        # ← not needed
+
+# 7. Logs
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+    format: common
+
+# 8. Metrics
+metrics:
+  prometheus:
+    enabled: true
+    addEntryPointsLabels: true
+    addServicesLabels: true
+
+# 10. Resources
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"

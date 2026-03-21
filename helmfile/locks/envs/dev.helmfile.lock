@@ -21,5 +21,8 @@ dependencies:
   - name: tempo
     repository: https://grafana-community.github.io/helm-charts
     version: 2.0.0
-digest: sha256:c55fabdb44c0557e4472562eccd8bbae4ee33d6b002823c91e613f73364fe8bd
-generated: "2026-03-20T09:35:36.952712547-04:00"
+  - name: traefik
+    repository: https://traefik.github.io/charts
+    version: 39.0.6
+digest: sha256:5d8db95c668577eab3f4e1b79e03ab2b3cafbfbea8a8f35d217e13134d2ebd20
+generated: "2026-03-20T23:25:30.230295691-04:00"

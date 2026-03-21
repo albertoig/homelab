@@ -147,6 +147,18 @@ releases:
             done
             sleep 5
 
+  # Traefik - Reverse Proxy and Load Balancer
+  # https://github.com/traefik/helm-chart/blob/main/traefik/values.yaml
+  - name: traefik
+    namespace: traefik
+    chart: traefik/traefik
+    version: "39.0.6"
+    wait: true
+    labels:
+      app: networking
+    inherit:
+    - template: values_gotmpl_and_secrets
+
   # Authentik - Open Source Identity Provider
   # https://github.com/goauthentik/helm/blob/authentik-2026.2.1/charts/authentik/values.yaml
   - name: authentik
