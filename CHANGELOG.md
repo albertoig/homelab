@@ -1,3 +1,10 @@
+# [3.8.0](https://github.com/albertoig/homelab/compare/v3.7.0...v3.8.0) (2026-03-24)
+
+
+### Features
+
+* **infrastructure:** enable Traefik ingress for Grafana and add MetalLB support ([5caeea7](https://github.com/albertoig/homelab/commit/5caeea7639278c24aeeddbaa7c1d5f61ddef0ca7))
+
 # [3.7.0](https://github.com/albertoig/homelab/compare/v3.6.0...v3.7.0) (2026-03-21)
 
 
