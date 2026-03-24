@@ -10,10 +10,20 @@ deployment:
     enabled: true
     minAvailable: 1
 
-service:
+ingressClass:
   enabled: true
-  type: LoadBalancer
+  isDefaultClass: true
+  name: traefik
 
+service:
+    enabled: true
+    type: LoadBalancer
+    spec:
+        externalTrafficPolicy: Local
+    annotations:
+        # MetalLB configuration
+        metallb.universe.tf/address-pool: default
+        metallb.universe.tf/allow-zero-ips: "true"
 
 # 5. Providers
 providers:
@@ -29,6 +39,13 @@ providers:
 ports:
   web:
     port: 80
+    http:
+        redirections:
+            entryPoint:
+            to: websecure
+            scheme: https
+            permanent: true
+
   websecure:
     port: 443
   traefik:

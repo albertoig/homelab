@@ -9,16 +9,23 @@ service:
   targetPort: 3000
 
 ingress:
-  enabled: false
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    # 1. Cert-manager: Issue certificate via DNS-01
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # 2. External DNS: Create record in internal DNS
+    external-dns.alpha.kubernetes.io/hostname: "" # On secrets
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    external-dns.alpha.kubernetes.io/action: sync
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"  
 
-#ingress:
-#  enabled: true
-#  ingressClassName: nginx
-#  annotations:
-#    nginx.ingress.kubernetes.io/rewrite-target: /
-#  hosts:
-#    - grafana.yourdomain.com
-#  tls:
-#    - secretName: grafana-tls
-#      hosts:
-#        - grafana.yourdomain.com
+    # 3. Traefik: Force HTTPS
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+  hosts:
+    - grafana.internal.iglesias.cloud
+  tls:
+    - secretName: grafana-tls
+      hosts:
+        - grafana.internal.iglesias.cloud
