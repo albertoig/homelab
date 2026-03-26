@@ -1,0 +1,10 @@
+# Authentik-specific ingress configuration
+
+service:
+  name: authentik-server
+  namespace: authentik
+  port: 80
+
+ingress:
+  hostnames:
+    - auth.iglesias.cloud

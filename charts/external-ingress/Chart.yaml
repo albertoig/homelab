@@ -1,0 +1,12 @@
+apiVersion: v2
+name: external-ingress
+description: Generic Ingress chart for services without built-in ingress support
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - ingress
+  - traefik
+  - external-dns
+  - cert-manager
+  - metallb

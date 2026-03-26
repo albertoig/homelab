@@ -1,0 +1,21 @@
+# Common values for external-ingress chart
+# These can be overridden per-service
+
+service:
+  port: 80
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    # Cert-manager
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # External DNS
+    # Note: hostname is set dynamically in the template based on ingress.hostnames
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    external-dns.alpha.kubernetes.io/action: sync
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+    
+    # Traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure

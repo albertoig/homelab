@@ -1,0 +1,32 @@
+bases:
+- templates.yaml.gotmpl
+- environments.yaml.gotmpl
+- repositories.yaml
+
+---
+
+lockFilePath: ../helmfile/locks/003-ingresses.helmfile.lock
+
+---
+
+# This file contains ingress definitions for services without built-in ingress
+# Each release creates an Ingress for a specific service
+# Certificates are managed by cert-manager-config chart via Ingress annotations in
+# 002-certs.helmfile.yaml.gotmpl
+
+releases:
+  # Authentik Ingress
+  - name: authentik-ingress
+    namespace: authentik
+    chart: ../charts/external-ingress
+    version: "0.1.0"
+    labels:
+      app: external-ingress
+      service: authentik
+      type: ingress
+    wait: true
+    disableValidation: true
+    missingFileHandler: Warn
+    values:
+    - ../helmfile/common/values/external-ingress.yaml.gotmpl
+    - "../helmfile/environments/{{ .Environment.Name }}/values/authentik-ingress.yaml.gotmpl"

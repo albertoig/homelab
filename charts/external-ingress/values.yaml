@@ -1,0 +1,25 @@
+# Service information
+service:
+  name: ""          # Target service name (required)
+  namespace: ""     # Target service namespace (required)
+  port: 80          # Target service port
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: traefik
+  hostnames: []     # List of hostnames (required)
+  
+  # Annotations (cert-manager will auto-create certificates based on these)
+  annotations:
+    # Cert-manager: Issue certificate via DNS-01
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # External DNS
+    # Note: hostname is dynamically set in the template based on ingress.hostnames
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    external-dns.alpha.kubernetes.io/action: sync
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+    
+    # Traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure

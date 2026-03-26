@@ -16,7 +16,7 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     
     # 2. External DNS: Create record in internal DNS
-    external-dns.alpha.kubernetes.io/hostname: "" # On secrets
+    external-dns.alpha.kubernetes.io/hostname: "grafana.internal.iglesias.cloud" # On secrets
     external-dns.alpha.kubernetes.io/ttl: "300"
     external-dns.alpha.kubernetes.io/action: sync
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"  
