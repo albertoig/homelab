@@ -9,7 +9,7 @@ ingress:
   className: traefik
   annotations:
     # Cert-manager
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-{{ .Environment.Name }}"
     
     # External DNS
     # Note: hostname is set dynamically in the template based on ingress.hostnames

@@ -1,13 +1,3 @@
-replicas: 1
-
-persistence:
-  size: 10Gi
-
-# Use port 30080 to avoid conflict with Traefik on port 80
-service:
-  port: 30080
-  targetPort: 3000
-
 ingress:
   enabled: true
   ingressClassName: traefik
@@ -16,16 +6,17 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-{{ .Environment.Name }}"
     
     # 2. External DNS: Create record in internal DNS
-    external-dns.alpha.kubernetes.io/hostname: "grafana.internal.iglesias.cloud" # On secrets
+    external-dns.alpha.kubernetes.io/hostname: "longhorn.internal.iglesias.cloud" # On secrets
     external-dns.alpha.kubernetes.io/ttl: "300"
     external-dns.alpha.kubernetes.io/action: sync
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"  
 
     # 3. Traefik: Force HTTPS
     traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+  host: longhorn.internal.iglesias.cloud
   hosts:
-    - grafana.internal.iglesias.cloud
+    - longhorn.internal.iglesias.cloud
   tls:
-    - secretName: grafana-tls
+    - secretName: longhorn-tls
       hosts:
-        - grafana.internal.iglesias.cloud
+        - longhorn.internal.iglesias.cloud

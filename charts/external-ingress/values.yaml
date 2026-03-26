@@ -13,7 +13,7 @@ ingress:
   # Annotations (cert-manager will auto-create certificates based on these)
   annotations:
     # Cert-manager: Issue certificate via DNS-01
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-{{ .Environment.Name }}"
     
     # External DNS
     # Note: hostname is dynamically set in the template based on ingress.hostnames
