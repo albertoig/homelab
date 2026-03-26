@@ -1,3 +1,10 @@
+# [3.10.0](https://github.com/albertoig/homelab/compare/v3.9.0...v3.10.0) (2026-03-26)
+
+
+### Features
+
+* **helmfile:** make cert-manager cluster-issuer dynamic and enable Longhorn ingress in prod ([0dd7345](https://github.com/albertoig/homelab/commit/0dd7345bb99a8847f3beb03789da3ad2d9b10642))
+
 # [3.9.0](https://github.com/albertoig/homelab/compare/v3.8.0...v3.9.0) (2026-03-26)
 
 
