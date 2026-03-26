@@ -1,3 +1,10 @@
+# [3.9.0](https://github.com/albertoig/homelab/compare/v3.8.0...v3.9.0) (2026-03-26)
+
+
+### Features
+
+* **helm:** add external-ingress chart for ingress management ([15ada8d](https://github.com/albertoig/homelab/commit/15ada8d190c921b1f2b644704bf0441c1e3a27d3))
+
 # [3.8.0](https://github.com/albertoig/homelab/compare/v3.7.0...v3.8.0) (2026-03-24)
 
 
