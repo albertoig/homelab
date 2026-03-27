@@ -1,3 +1,10 @@
+# [3.11.0](https://github.com/albertoig/homelab/compare/v3.10.0...v3.11.0) (2026-03-27)
+
+
+### Features
+
+* **helmfile:** upgrade Longhorn to v1.11.1 and disable telemetry ([64ec59c](https://github.com/albertoig/homelab/commit/64ec59c360f1a8859c6323cd9de94190e2c62eba))
+
 # [3.10.0](https://github.com/albertoig/homelab/compare/v3.9.0...v3.10.0) (2026-03-26)
 
 
