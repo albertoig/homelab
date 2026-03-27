@@ -14,7 +14,7 @@ dependencies:
     version: 6.54.0
   - name: longhorn
     repository: https://charts.longhorn.io
-    version: 1.7.1
+    version: 1.11.1
   - name: metallb
     repository: https://metallb.github.io/metallb
     version: 0.15.3
@@ -24,5 +24,5 @@ dependencies:
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 39.0.6
-digest: sha256:887c458bf2b6da214694934f1617c1ce3c1318d10f4ac6551025366f2e2ef713
-generated: "2026-03-26T16:09:51.041485791-04:00"
+digest: sha256:0dfa4a9d45319b9c2a3960f25c8d7022b8f1832d812fb8199645e8724a63575b
+generated: "2026-03-27T02:36:07.714955875-04:00"
