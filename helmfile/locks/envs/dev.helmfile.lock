@@ -1,5 +1,8 @@
 version: 1.4.1
 dependencies:
+  - name: argo-cd
+    repository: https://argoproj.github.io/argo-helm
+    version: 9.4.16
   - name: authentik
     repository: https://charts.goauthentik.io
     version: 2026.2.1
@@ -24,5 +27,5 @@ dependencies:
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 39.0.6
-digest: sha256:417cb4e0d5a0db4ce59cebf04d516a959b5b2159e2443a00a453609370e1ed32
-generated: "2026-03-27T10:51:34.620821081-04:00"
+digest: sha256:30c6081b8b1b57068da6061063b656bacc00fff346e9131c1ebf3214f37cba82
+generated: "2026-03-27T11:34:06.713408775-04:00"

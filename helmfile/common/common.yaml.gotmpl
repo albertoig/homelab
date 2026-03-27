@@ -173,3 +173,15 @@ releases:
       - prometheus/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
+
+  # ArgoCD - GitOps Continuous Delivery
+  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
+  - name: argocd
+    namespace: argocd
+    chart: argocd/argo-cd
+    version: "9.4.16"
+    wait: true
+    labels:
+      app: gitops
+    inherit:
+    - template: values_gotmpl_and_secrets

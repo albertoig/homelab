@@ -19,3 +19,5 @@ repositories:
     url: https://kubernetes-sigs.github.io/external-dns/
   - name: traefik
     url: https://traefik.github.io/charts
+  - name: argocd
+    url: https://argoproj.github.io/argo-helm

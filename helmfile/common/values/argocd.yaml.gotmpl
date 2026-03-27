@@ -1,0 +1,92 @@
+# ArgoCD Configuration
+# https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
+
+configs:
+  params:
+    server.insecure: "true"
+
+# Application Controller
+controller:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+# UI Server
+server:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  service:
+    enabled: true
+    type: LoadBalancer
+    port: 80
+    targetPort: 8080
+    annotations:
+      # MetalLB configuration
+      metallb.universe.tf/address-pool: default
+      metallb.universe.tf/allow-zero-ips: "true"
+
+
+# Repo Server
+repoServer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+
+# Application Set Controller
+applicationSet:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+
+# Notification Controller
+notifications:
+  enabled: false  # Enable if needed
+
+# Dex (OIDC provider)
+dex:
+  enabled: false  # Use external auth provider if needed
+
+# Redis
+redis:
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "200m"
+      memory: "128Mi"
+
+# Metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true  # Enable for prometheus-stack integration
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: prometheus-stack  # Matches the prometheus-stack release name
+
+# Logs
+logs:
+  level: info

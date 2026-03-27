@@ -1,0 +1,31 @@
+# ArgoCD prod environment configuration
+global:
+  domain: argocd.internal.iglesias.cloud
+
+# Enable ingress with Traefik
+server:
+  certificate:
+    enabled: false
+
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      # CRITICAL: This links the Ingress to the Certificate
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+      # 2. External DNS: Create record in internal DNS
+      external-dns.alpha.kubernetes.io/hostname: "argocd.internal.iglesias.cloud"
+      external-dns.alpha.kubernetes.io/ttl: "300"
+      external-dns.alpha.kubernetes.io/action: sync
+      external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+
+      # Tell Traefik to use the websecure entrypoint
+      traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    hostname: "argocd.internal.iglesias.cloud"
+    hosts:
+      - argocd.internal.iglesias.cloud
+    tls:
+      - secretName: argocd-server-tls
+        hosts:
+          - argocd.internal.iglesias.cloud
