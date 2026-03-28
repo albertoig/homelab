@@ -112,6 +112,8 @@ Make sure you have the following tools installed:
 
 ### Required Helm Plugins
 
+**⚠️ Important**: The following Helm plugins are **required** for this homelab to function properly. Without these plugins, Helmfile will not be able to manage secrets or show diffs during deployments.
+
 After installing Helm, make sure to install the following plugins:
 
 ```bash
@@ -129,21 +131,36 @@ chmod 600 ~/.config/helm/keys/jkroepke.gpg
 # Verify the key is valid
 gpg --no-default-keyring --keyring ~/.config/helm/keys/jkroepke.gpg --list-keys
 
-# Install helm-secrets plugin
+# Install helm-secrets plugin (REQUIRED)
 helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
 
-# Install helm-secrets getter plugin
+# Install helm-secrets getter plugin (REQUIRED)
 helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-getter-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
 
-# Install helm-secrets post-renderer plugin
+# Install helm-secrets post-renderer plugin (REQUIRED)
 helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-post-renderer-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
 
-# Install helm-diff plugin
+# Install helm-diff plugin (REQUIRED)
 helm plugin install https://github.com/databus23/helm-diff --verify false
 
 # Cleanup raw key file after use
 rm ~/.config/helm/keys/jkroepke.gpg.raw
 
+```
+
+### Verify Plugin Installation
+
+After installing the plugins, verify they are correctly installed:
+
+```bash
+# List installed Helm plugins
+helm plugin list
+
+# You should see:
+# - secrets
+# - secrets-getter
+# - secrets-post-renderer
+# - diff
 ```
 
 ### Cluster Setup
