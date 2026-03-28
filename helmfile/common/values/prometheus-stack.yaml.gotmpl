@@ -9,6 +9,8 @@ prometheusOperator:
 prometheus:
   enabled: true
   prometheusSpec:
+    serviceMonitorNamespaceSelector: {}
+    serviceMonitorSelector: {}
     resources:
       requests:
         memory: "512Mi"
@@ -16,6 +18,24 @@ prometheus:
       limits:
         memory: "2Gi"
         cpu: "1000m"
+
+    #additionalScrapeConfigs:
+    #  kubernetes-api-servers:
+    #    kubernetes_sd_configs:
+    #      - role: endpointslice
+    #    relabel_configs:
+    #      - source_labels:
+    #          - __meta_kubernetes_namespace
+    #          - __meta_kubernetes_service_name
+    #          - __meta_kubernetes_endpointslice_port_name
+    #        action: keep
+    #        regex: default;kubernetes;https
+    #  kubernetes-service-endpoints:
+    #    kubernetes_sd_configs:
+    #      - role: endpointslice
+    #  kubernetes-service-endpoints-slow:
+    #    kubernetes_sd_configs:
+    #      - role: endpointslice
 
 alertmanager:
   enabled: true

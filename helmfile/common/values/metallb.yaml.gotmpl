@@ -10,8 +10,16 @@ frr:
 
 # Enable Prometheus metrics
 prometheus:
-  enabled: true
-  namespace: ""
+  serviceAccount: metallb-prometheus
+  namespace: "prometheus"
+  serviceMonitor:
+    enabled: true
+    speaker:
+      additionalLabels:
+        release: prometheus-stack
+    controller:
+      additionalLabels:
+        release: prometheus-stack
 
 # Speaker configuration
 speaker:
@@ -23,43 +31,3 @@ speaker:
 controller:
   nodeSelector:
     kubernetes.io/os: linux
-
----
-# Service for MetalLB controller metrics (used by Prometheus ServiceMonitor)
-apiVersion: v1
-kind: Service
-metadata:
-  name: metallb-controller-metrics
-  namespace: metallb-system
-  labels:
-    app.kubernetes.io/name: metallb
-    release: prometheus-stack
-spec:
-  selector:
-    app.kubernetes.io/name: metallb
-    app.kubernetes.io/component: controller
-  ports:
-    - name: monitoring
-      port: 7472
-      targetPort: monitoring
-
----
-# ServiceMonitor for MetalLB metrics
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: metallb
-  namespace: metallb-system
-  labels:
-    release: prometheus-stack
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: metallb
-      release: prometheus-stack
-  namespaceSelector:
-    matchNames:
-      - metallb-system
-  endpoints:
-    - port: monitoring
-      interval: 15s
