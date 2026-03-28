@@ -22,6 +22,7 @@ GitOps-driven environment.
 - [ ] Helmfile configuration
 - [ ] Centralize scripting to run everything with one command.
 - [ ] Monitoring stack (Prometheus + Grafana)
+- [ ] Create Grafana dashboards for Authentik and ArgoCD
 
 ---
 

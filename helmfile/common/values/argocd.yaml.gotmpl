@@ -35,7 +35,14 @@ server:
       # MetalLB configuration
       metallb.universe.tf/address-pool: default
       metallb.universe.tf/allow-zero-ips: "true"
-
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true  # Enable for prometheus-stack integration
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels:
+        release: prometheus-stack  # Matches the prometheus-stack release name
 
 # Repo Server
 repoServer:
@@ -47,6 +54,14 @@ repoServer:
     limits:
       cpu: "200m"
       memory: "256Mi"
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true  # Enable for prometheus-stack integration
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels:
+        release: prometheus-stack  # Matches the prometheus-stack release name
 
 # Application Set Controller
 applicationSet:
@@ -58,14 +73,38 @@ applicationSet:
     limits:
       cpu: "200m"
       memory: "256Mi"
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true  # Enable for prometheus-stack integration
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels:
+        release: prometheus-stack  # Matches the prometheus-stack release name
 
 # Notification Controller
 notifications:
   enabled: false  # Enable if needed
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true  # Enable for prometheus-stack integration
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels:
+        release: prometheus-stack  # Matches the prometheus-stack release name
 
 # Dex (OIDC provider)
 dex:
   enabled: false  # Use external auth provider if needed
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true  # Enable for prometheus-stack integration
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels:
+        release: prometheus-stack  # Matches the prometheus-stack release name
 
 # Redis
 redis:
@@ -76,16 +115,25 @@ redis:
     limits:
       cpu: "200m"
       memory: "128Mi"
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true  # Enable for prometheus-stack integration
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels:
+        release: prometheus-stack  # Matches the prometheus-stack release name
 
 # Metrics
-metrics:
-  enabled: true
-  serviceMonitor:
-    enabled: true  # Enable for prometheus-stack integration
-    interval: 30s
-    scrapeTimeout: 10s
-    labels:
-      release: prometheus-stack  # Matches the prometheus-stack release name
+controller:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true  # Enable for prometheus-stack integration
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels:
+        release: prometheus-stack  # Matches the prometheus-stack release name
 
 # Logs
 logs:

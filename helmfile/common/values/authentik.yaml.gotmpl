@@ -28,6 +28,24 @@ server:
       # MetalLB configuration
       metallb.universe.tf/address-pool: default
       metallb.universe.tf/allow-zero-ips: "true"
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 3s
+      labels: 
+        release: prometheus-stack
+
+worker:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 3s
+      labels: 
+        release: prometheus-stack
 
 postgresql:
   enabled: true
