@@ -10,6 +10,13 @@ source:
   service:
     enabled: true
 
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  scrapeTimeout: 10s
+  additionalLabels:
+    release: prometheus-stack
+  
 policy: sync
 
 txtOwnerId: k8s
