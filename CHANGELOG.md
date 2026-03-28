@@ -1,3 +1,10 @@
+# [3.12.0](https://github.com/albertoig/homelab/compare/v3.11.0...v3.12.0) (2026-03-28)
+
+
+### Features
+
+* add ArgoCD GitOps continuous delivery platform ([cffeffd](https://github.com/albertoig/homelab/commit/cffeffd7dcbba4ab167443d6e0f0badf415edbe7))
+
 # [3.11.0](https://github.com/albertoig/homelab/compare/v3.10.0...v3.11.0) (2026-03-27)
 
 
