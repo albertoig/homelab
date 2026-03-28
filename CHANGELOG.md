@@ -1,3 +1,10 @@
+# [3.13.0](https://github.com/albertoig/homelab/compare/v3.12.0...v3.13.0) (2026-03-28)
+
+
+### Features
+
+* add external-dns monitoring and Grafana dashboard ([95f3e57](https://github.com/albertoig/homelab/commit/95f3e57563e23bc7ad40e8a7306656e236b183e1))
+
 # [3.12.0](https://github.com/albertoig/homelab/compare/v3.11.0...v3.12.0) (2026-03-28)
 
 
