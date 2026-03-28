@@ -1,3 +1,10 @@
+# [3.14.0](https://github.com/albertoig/homelab/compare/v3.13.0...v3.14.0) (2026-03-28)
+
+
+### Features
+
+* enable Prometheus monitoring for ArgoCD and Authentik with Grafana dashboards ([63a80e2](https://github.com/albertoig/homelab/commit/63a80e222977b334b7a60880eff9c2b281e5fa6e))
+
 # [3.13.0](https://github.com/albertoig/homelab/compare/v3.12.0...v3.13.0) (2026-03-28)
 
 
