@@ -14,43 +14,36 @@ GitOps-driven environment.
 - [x] Semantic Release Initial Configuration
 - [x] SSH hardening
 - [x] SOPS secrets management
+- [x] Monitoring stack (Prometheus + Grafana)
+- [x] Prometheus (Service Monitor)
+    - [x] Longhorn
+    - [x] Metallb
+    - [x] Traefik
+    - [x] Authentik
+    - [x] Argocd
+    - [x] Loki
+    - [x] Tempo
+    - [x] External-dns
 
 ---
 
 ## 🚧 In Progress
 - [ ] Generate kube config and copy it to the local machine pre configured. (also the  pluging diff and secrets)
-- [ ] Helmfile configuration
-- [ ] Centralize scripting to run everything with one command.
-- [ ] Monitoring stack (Prometheus + Grafana)
-- [ ] Create Grafana dashboards for Authentik and ArgoCD
+- [ ] Prometheus (Service Monitor)
+    - [ ] Grafana
+    - [ ] Cert-Manager
+
 
 ---
 
 ## 📋 Planned
-- [ ] Dependencies checker
-- [ ] ArgoCD GitOps setup
-- [ ] CI/CD pipeline
 - [ ] Backup solution
 - [ ] Disaster recovery plan
 - [ ] Documentation improvements
-
----
-
-## 💡 Ideas / Backlog
-- [ ] Multi-cluster setup
-- [ ] Service mesh (Istio/Linkerd)
-- [ ] Cost optimization
-
----
-
-## 📅 Timeline
-
-| Quarter | Goal |
-|---------|------|
-| Q1 2026 | K3s cluster + Terraform |
-| Q2 2026 | GitOps with ArgoCD |
-| Q3 2026 | Monitoring + Alerting |
-| Q4 2026 | Full HA setup |
+- [ ]Centralize secrets and configs in the root directory
+- [ ] Helmfile configuration
+- [ ] Centralize scripting to run everything with one command.
+- [ ] Create Grafana dashboards for Authentik and ArgoCD
 
 ---
 
