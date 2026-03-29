@@ -238,6 +238,10 @@ Grafana is exposed via MetalLB LoadBalancer. Access it using the external IP ass
 
 See our [ROADMAP.md](./ROADMAP.md) for upcoming features and progress.
 
+## 📐 Architecture Decisions
+
+See [docs/decisions/INDEX.md](./docs/decisions/INDEX.md) for architecture decision records (ADRs) documenting the reasoning behind significant infrastructure and configuration changes.
+
 ---
 
 ## 🤝 Contributing

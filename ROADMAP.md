@@ -15,6 +15,7 @@ GitOps-driven environment.
 - [x] SSH hardening
 - [x] SOPS secrets management
 - [x] Monitoring stack (Prometheus + Grafana)
+- [x] ADR docs structure
 - [x] Prometheus (Service Monitor)
     - [x] Longhorn
     - [x] Metallb
@@ -41,6 +42,7 @@ GitOps-driven environment.
 
 ## 🚧 In Progress
 - [ ] Generate kube config and copy it to the local machine pre configured. (also the  pluging diff and secrets)
+- [x] ADR docs structure for MR request
 - [ ] Grafana Dashboards
     - [ ] Metallb
     - [ ] Traefik
