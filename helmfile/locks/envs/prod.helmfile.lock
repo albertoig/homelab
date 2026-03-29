@@ -1,5 +1,8 @@
 version: 1.4.1
 dependencies:
+  - name: alloy
+    repository: https://grafana.github.io/helm-charts
+    version: 0.12.4
   - name: argo-cd
     repository: https://argoproj.github.io/argo-helm
     version: 9.4.16
@@ -13,8 +16,8 @@ dependencies:
     repository: https://prometheus-community.github.io/helm-charts
     version: 82.10.3
   - name: loki
-    repository: https://grafana.github.io/helm-charts
-    version: 6.54.0
+    repository: https://grafana-community.github.io/helm-charts
+    version: 9.2.2
   - name: longhorn
     repository: https://charts.longhorn.io
     version: 1.11.1
@@ -27,5 +30,5 @@ dependencies:
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 39.0.6
-digest: sha256:5d7c0a4dc3c2a6f558bf900382e736ca532f45eaa91ebba6fed6bf2a55ecbea1
-generated: "2026-03-27T11:35:52.697073418-04:00"
+digest: sha256:2b070dd326b6a4aa2d7650babaded6611e4f5c02ce92e0e63dae074f803aaad8
+generated: "2026-03-29T12:16:25.381944333-04:00"

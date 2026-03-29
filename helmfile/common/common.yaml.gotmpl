@@ -83,8 +83,8 @@ releases:
   # https://artifacthub.io/packages/helm/grafana/loki?modal=values
   - name: loki
     namespace: prometheus
-    chart: grafana/loki
-    version: "6.54.0"
+    chart: grafana-community/loki
+    version: "9.2.2"
     wait: true
     labels:
       app: logging
@@ -112,6 +112,21 @@ releases:
               esac
             done
             sleep 5
+
+  # Alloy - OpenTelemetry collector (replaces promtail)
+  # https://artifacthub.io/packages/helm/grafana/alloy?modal=values
+  - name: alloy
+    namespace: prometheus
+    chart: grafana/alloy
+    version: "0.12.4"
+    wait: true
+    labels:
+      app: logging
+    needs:
+      - prometheus/loki
+      - prometheus/grafana
+    inherit:
+    - template: values_gotmpl_and_secrets
 
   # Tempo - Distributed tracing system
   # https://artifacthub.io/packages/helm/grafana-community/tempo?modal=values&path=serviceMonitor

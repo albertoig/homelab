@@ -1,5 +1,6 @@
 ---
 collections:
+  - name: ansible.posix
   - name: kubernetes.core
   - name: ansible.utils
   - name: https://github.com/k3s-io/k3s-ansible.git

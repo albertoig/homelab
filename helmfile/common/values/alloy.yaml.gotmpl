@@ -1,0 +1,33 @@
+# Alloy Configuration
+# https://artifacthub.io/packages/helm/grafana/alloy?modal=values
+
+alloy:
+  mounts:
+    varlog: true
+    dockercontainers: true
+  configMap:
+    content: |
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      loki.source.kubernetes "pods" {
+        targets = discovery.kubernetes.pods.targets
+        forward_to = [loki.write.default.receiver]
+      }
+
+      loki.write "default" {
+        endpoint {
+          url = "http://loki-gateway.prometheus.svc.cluster.local/loki/api/v1/push"
+          headers = { "X-Scope-OrgID" = "homelab" }
+        }
+      }
+
+controller:
+  type: daemonset
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  additionalLabels:
+    release: prometheus-stack

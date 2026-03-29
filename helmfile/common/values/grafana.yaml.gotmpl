@@ -70,6 +70,9 @@ datasources:
         jsonData:
           httpMethod: GET
           timeout: 60
+          httpHeaderName1: X-Scope-OrgID
+        secureJsonData:
+          httpHeaderValue1: homelab
 sidecar:
   dashboards:
     enabled: true

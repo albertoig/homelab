@@ -68,6 +68,11 @@ ansible all -i "$INVENTORY" -m ping || {
   exit 1
 }
 
+# ─── Apply Sysctl Tuning ───────────────────────────────────────────────────────
+
+echo "Applying sysctl tuning for inotify..."
+ansible-playbook playbooks/sysctl-tuning.yml -i "$INVENTORY" -v
+
 # ─── Run Playbook ─────────────────────────────────────────────────────────────
 
 echo "Running playbook: $PLAYBOOK"
