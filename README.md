@@ -244,9 +244,36 @@ See our [ROADMAP.md](./ROADMAP.md) for upcoming features and progress.
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+### Commit Message Format
+
+This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification (Angular convention) for commit messages. This enables automatic versioning and changelog generation via semantic-release.
+
+**Format**: `type(scope): description`
+
+**Types**:
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, missing semi-colons, etc.)
+- `refactor`: Code refactoring without feature changes or bug fixes
+- `perf`: Performance improvements
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks, dependency updates, etc.
+- `ci`: CI/CD configuration changes
+- `build`: Build system or external dependency changes
+- `revert`: Reverting a previous commit
+
+**Examples**:
+- `feat(helmfile): add prometheus monitoring stack`
+- `fix(cert-manager): resolve certificate renewal issue`
+- `docs(readme): update installation instructions`
+- `chore(deps): update helm chart versions`
+
+### Contribution Steps
+
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+3. Commit your changes using the conventional commit format (`git commit -m 'feat: add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
