@@ -24,12 +24,30 @@ GitOps-driven environment.
     - [x] Loki
     - [x] Tempo
     - [x] External-dns
-
+    - [x] Grafana
+    - [x] Cert-Manager
+- [ ] Grafana Dashboards
+    - [x] Longhorn
+    - [ ] Metallb
+    - [ ] Traefik
+    - [ ] Authentik
+    - [ ] Argocd
+    - [x] Loki
+    - [ ] Tempo
+    - [ ] External-dns
+    - [ ] Grafana
+    - [ ] Cert-Manager
 ---
 
 ## 🚧 In Progress
 - [ ] Generate kube config and copy it to the local machine pre configured. (also the  pluging diff and secrets)
-- [ ] Prometheus (Service Monitor)
+- [ ] Grafana Dashboards
+    - [ ] Metallb
+    - [ ] Traefik
+    - [ ] Authentik
+    - [ ] Argocd
+    - [ ] Tempo
+    - [ ] External-dns
     - [ ] Grafana
     - [ ] Cert-Manager
 
@@ -40,10 +58,12 @@ GitOps-driven environment.
 - [ ] Backup solution
 - [ ] Disaster recovery plan
 - [ ] Documentation improvements
-- [ ]Centralize secrets and configs in the root directory
+- [ ] Centralize secrets and configs in the root directory
 - [ ] Helmfile configuration
 - [ ] Centralize scripting to run everything with one command.
 - [ ] Create Grafana dashboards for Authentik and ArgoCD
+- [ ] Authentik Auth
+    - [ ] Grafana
 
 ---
 

@@ -1,2 +1,12 @@
 certificate:
     enabled: true
+
+prometheus:
+  enabled: true
+
+  servicemonitor:
+    enabled: true  # Enable for prometheus-stack integration
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+        release: prometheus-stack  # Matches the prometheus-stack release name

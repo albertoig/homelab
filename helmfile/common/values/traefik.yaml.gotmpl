@@ -66,8 +66,12 @@ logs:
 metrics:
   prometheus:
     enabled: true
-    addEntryPointsLabels: true
-    addServicesLabels: true
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+      additionalLabels:
+        release: prometheus-stack
 
 # 10. Resources
 resources:
