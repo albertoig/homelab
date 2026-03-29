@@ -39,9 +39,13 @@ write:
   replicas: 0
 backend:
   replicas: 0
-
-# Enable service monitor for Prometheus scraping
-serviceMonitor:
-  enabled: true
-  annotations:
-    prometheus.io/scrape: "true"
+monitoring:
+  # Enable service monitor
+  serviceMonitor:
+    enabled: true  # Enable for prometheus-stack integration
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: prometheus-stack  # Matches the prometheus-stack release name
+  dashboards:
+    enabled: true

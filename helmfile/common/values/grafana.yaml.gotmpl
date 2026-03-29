@@ -60,6 +60,13 @@ datasources:
         jsonData:
           httpMethod: GET
           timeout: 60
+sidecar:
+  dashboards:
+    enabled: true
+    searchNamespace: ALL
+  alerts:
+    enabled: true
+    searchNamespace: ALL
 
 dashboardProviders:
   dashboardproviders.yaml:
