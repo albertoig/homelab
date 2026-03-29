@@ -1,3 +1,10 @@
+# [3.15.0](https://github.com/albertoig/homelab/compare/v3.14.0...v3.15.0) (2026-03-29)
+
+
+### Features
+
+* enhance monitoring configuration for Grafana and Loki ([d2fb0e5](https://github.com/albertoig/homelab/commit/d2fb0e5e2498edeab63477fc34673d1c34aa5f4b))
+
 # [3.14.0](https://github.com/albertoig/homelab/compare/v3.13.0...v3.14.0) (2026-03-28)
 
 
