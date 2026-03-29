@@ -1,3 +1,10 @@
+# [3.16.0](https://github.com/albertoig/homelab/compare/v3.15.0...v3.16.0) (2026-03-29)
+
+
+### Features
+
+* **monitoring:** add prometheus service monitors and update documentation ([6234de8](https://github.com/albertoig/homelab/commit/6234de8319adbaeab6f2de8b0e2d6ae63fca65c8))
+
 # [3.15.0](https://github.com/albertoig/homelab/compare/v3.14.0...v3.15.0) (2026-03-29)
 
 
