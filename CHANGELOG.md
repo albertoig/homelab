@@ -1,3 +1,18 @@
+# [4.0.0](https://github.com/albertoig/homelab/compare/v3.16.0...v4.0.0) (2026-03-29)
+
+
+* feat(monitoring)!: migrate Loki to v9, add Alloy collector, and tune sysctl ([ba83486](https://github.com/albertoig/homelab/commit/ba834866bcd533d92dd26139ba2d98f663783e59))
+
+
+### BREAKING CHANGES
+
+* Loki chart migrated from grafana/loki to grafana-community/loki (v6.54.0 → v9.2.2)
+
+- Add Alloy as OpenTelemetry collector replacing promtail
+- Configure Loki datasource with X-Scope-OrgID header
+- Add ansible playbook for sysctl inotify tuning on K3s nodes
+- Update helmfile lock files for dev and prod environments
+
 # [3.16.0](https://github.com/albertoig/homelab/compare/v3.15.0...v3.16.0) (2026-03-29)
 
 
