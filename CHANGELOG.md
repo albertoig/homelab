@@ -1,3 +1,10 @@
+# [4.5.0](https://github.com/albertoig/homelab/compare/v4.4.0...v4.5.0) (2026-03-30)
+
+
+### Features
+
+* **scripts:** add install/destroy orchestrators and requirement checks ([da0c030](https://github.com/albertoig/homelab/commit/da0c0307fa5142569a77ca7c958ad6ed9bf0838a))
+
 # [4.4.0](https://github.com/albertoig/homelab/compare/v4.3.0...v4.4.0) (2026-03-30)
 
 
