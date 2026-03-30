@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/albertoig/homelab/compare/v4.1.0...v4.2.0) (2026-03-30)
+
+
+### Features
+
+* **monitoring:** add Pyroscope profiling, Tempo metrics-generator, and Alloy eBPF ([23ebaac](https://github.com/albertoig/homelab/commit/23ebaac403959b1d94ded68f0970f38cd570c7ce))
+
 # [4.1.0](https://github.com/albertoig/homelab/compare/v4.0.0...v4.1.0) (2026-03-30)
 
 
