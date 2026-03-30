@@ -193,14 +193,16 @@ The homelab supports multiple environments (dev, prod). Environment-specific con
 
 ### Secrets Management
 
-Secrets are encrypted using SOPS with Age encryption. To decrypt secrets:
+Secrets are encrypted using SOPS with Age encryption. Only `dev` and `prod` environments are supported.
 
 ```bash
-# Decrypt dev secrets
-./scripts/decrypt-dev-secrets.sh
+# Decrypt secrets
+./scripts/sops-decrypt-secrets.sh dev
+./scripts/sops-decrypt-secrets.sh prod
 
-# Decrypt prod secrets
-./scripts/decrypt-prod-secrets.sh
+# Encrypt secrets
+./scripts/sops-encrypt-secrets.sh dev
+./scripts/sops-encrypt-secrets.sh prod
 ```
 
 ---
