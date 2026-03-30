@@ -5,12 +5,25 @@ alloy:
   mounts:
     varlog: true
     dockercontainers: true
+    extra:
+      # Mount tracefs for eBPF profiling (pyroscope.ebpf)
+      - name: tracefs
+        mountPath: /sys/kernel/tracing
+        readOnly: false
+      # Mount BPF filesystem for eBPF program/map management
+      - name: bpffs
+        mountPath: /sys/fs/bpf
+        readOnly: false
   securityContext:
     privileged: false
     capabilities:
       add:
         - SYS_ADMIN
         - SYS_PTRACE
+        - SYS_RESOURCE
+        - BPF
+        - PERFMON
+        - SYSLOG
     runAsGroup: 0
     runAsUser: 0
   configMap:
@@ -88,6 +101,16 @@ alloy:
 controller:
   type: daemonset
   hostPID: true
+  volumes:
+    extra:
+      - name: tracefs
+        hostPath:
+          path: /sys/kernel/tracing
+          type: Directory
+      - name: bpffs
+        hostPath:
+          path: /sys/fs/bpf
+          type: Directory
 
 resources:
   requests:

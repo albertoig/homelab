@@ -14,6 +14,10 @@ grafana.ini:
     enabled: true
   analytics:
     check_for_updates: false
+  tracing:
+    open_telemetry:
+      address: "alloy.prometheus.svc.cluster.local:4318/v1/traces"
+      propagation: "w3c"
   security:
     disable_initial_admin_creation: false
 

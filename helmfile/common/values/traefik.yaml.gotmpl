@@ -64,7 +64,7 @@ metrics:
       additionalLabels:
         release: prometheus-stack
 
-# OpenTelemetry tracing — sends traces to Tempo
+# OpenTelemetry tracing — sends traces to Alloy, which forwards to Tempo
 # https://doc.traefik.io/traefik/observability/tracing/opentelemetry/
 tracing:
   serviceName: traefik
@@ -72,7 +72,7 @@ tracing:
     enabled: true
     http:
       enabled: true
-      endpoint: "http://tempo.prometheus.svc.cluster.local:4318/v1/traces"
+      endpoint: "http://alloy.prometheus.svc.cluster.local:4318/v1/traces"
 
 resources:
   requests:

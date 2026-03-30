@@ -18,3 +18,11 @@
         sysctl_set: true
         state: present
         reload: true
+
+    - name: Set kernel.kptr_restrict for eBPF symbol resolution
+      ansible.posix.sysctl:
+        name: kernel.kptr_restrict
+        value: "0"
+        sysctl_set: true
+        state: present
+        reload: true

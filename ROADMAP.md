@@ -13,6 +13,7 @@ GitOps-driven environment.
 - [x] Initial K3s cluster setup with Ansible
 - [x] Semantic Release Initial Configuration
 - [x] Cross-signal correlation (Loki ↔ Tempo ↔ Pyroscope)
+- [x] OTel Tracing for Traefik, ArgoCD, Grafana
 - [x] SSH hardening
 - [x] SOPS secrets management
 - [x] Monitoring stack (Prometheus + Grafana)
@@ -59,6 +60,7 @@ GitOps-driven environment.
 ---
 
 ## 📋 Planned
+- [ ] Investigate Grafana Beyla eBPF auto-instrumentation for services without native tracing (Authentik, Longhorn, MetalLB, Cert-Manager, External-DNS)
 - [ ] Backup solution
 - [ ] Disaster recovery plan
 - [ ] Documentation improvements

@@ -2,7 +2,7 @@ version: 1.4.1
 dependencies:
   - name: alloy
     repository: https://grafana.github.io/helm-charts
-    version: 0.12.4
+    version: 1.6.2
   - name: argo-cd
     repository: https://argoproj.github.io/argo-helm
     version: 9.4.16
@@ -33,5 +33,5 @@ dependencies:
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 39.0.6
-digest: sha256:92f950646345bcd7d0303e0ec6fa16858a8fe95df21e154554bac4ae9433adef
-generated: "2026-03-30T00:12:53.701915772-04:00"
+digest: sha256:133ca05329de5fd947ac47dc359e8b7f8a32eb94656cde17995e9959884f2f9f
+generated: "2026-03-30T09:32:28.955655904-04:00"

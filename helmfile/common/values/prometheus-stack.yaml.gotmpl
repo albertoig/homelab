@@ -10,6 +10,9 @@ prometheus:
   enabled: true
   prometheusSpec:
     replicas: 1
+    # Enable remote write receiver for Tempo metrics-generator
+    # Tempo pushes span-metrics and service-graph metrics to Prometheus via remote write
+    enableRemoteWriteReceiver: true
     serviceMonitorNamespaceSelector: {}
     serviceMonitorSelector: {}
     resources:
