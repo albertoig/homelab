@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/albertoig/homelab/compare/v4.3.0...v4.4.0) (2026-03-30)
+
+
+### Features
+
+* **monitoring:** add eBPF profiling and OTel tracing for ArgoCD and Grafana ([57f38c4](https://github.com/albertoig/homelab/commit/57f38c4d54525c79af5d407885dea91d84bc8b24))
+
 # [4.3.0](https://github.com/albertoig/homelab/compare/v4.2.0...v4.3.0) (2026-03-30)
 
 
