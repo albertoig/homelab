@@ -1,11 +1,8 @@
 # Traefik Configuration
 # https://artifacthub.io/packages/helm/traefik/traefik?modal=values
 
-# traefik-values.yaml
-
 deployment:
   replicas: 1
-  # Ensure pods are spread across nodes for HA
   podDisruptionBudget:
     enabled: true
     minAvailable: 1
@@ -16,16 +13,15 @@ ingressClass:
   name: traefik
 
 service:
-    enabled: true
-    type: LoadBalancer
-    spec:
-        externalTrafficPolicy: Local
-    annotations:
-        # MetalLB configuration
-        metallb.universe.tf/address-pool: default
-        metallb.universe.tf/allow-zero-ips: "true"
+  enabled: true
+  type: LoadBalancer
+  spec:
+    externalTrafficPolicy: Local
+  annotations:
+    # MetalLB configuration
+    metallb.universe.tf/address-pool: default
+    metallb.universe.tf/allow-zero-ips: "true"
 
-# 5. Providers
 providers:
   kubernetesCRD:
     enabled: true
@@ -34,27 +30,23 @@ providers:
     enabled: true
     allowExternalNameServices: true
 
-# 6. Ports (CORRECTED STRUCTURE)
-# Note: In 39.x, 'expose' is not a boolean, and 'tls' is not allowed under websecure
 ports:
   web:
     port: 80
     http:
-        redirections:
-            entryPoint:
-            to: websecure
-            scheme: https
-            permanent: true
-
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
   websecure:
     port: 443
   traefik:
     port: 9000
 
 persistence:
-  enabled: false        # ← not needed
+  enabled: false
 
-# 7. Logs
 logs:
   general:
     level: INFO
@@ -62,7 +54,6 @@ logs:
     enabled: true
     format: common
 
-# 8. Metrics
 metrics:
   prometheus:
     enabled: true
@@ -73,7 +64,6 @@ metrics:
       additionalLabels:
         release: prometheus-stack
 
-# 10. Resources
 resources:
   requests:
     cpu: "100m"

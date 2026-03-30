@@ -1,3 +1,6 @@
+# External DNS configuration
+# https://artifacthub.io/packages/helm/external-dns/external-dns?modal=values
+
 provider:
   name: cloudflare
 env:
@@ -6,9 +9,6 @@ env:
       secretKeyRef:
         name: cloudflare-api-key
         key: apiKey
-source:
-  service:
-    enabled: true
 
 serviceMonitor:
   enabled: true

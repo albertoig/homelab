@@ -14,6 +14,7 @@ lockFilePath: ../helmfile/locks/001-crds.helmfile.lock
 releases:
   - name: prometheus-operator-crds
     namespace: prometheus
+    createNamespace: true
     chart: prometheus-community/prometheus-operator-crds
     version: "27.0.0"
     wait: true

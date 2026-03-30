@@ -1,6 +1,6 @@
 releases:
-   # Longhorn - Cloud-native distributed block storage for Kubernetes
-   # https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
+  # Longhorn - Cloud-native distributed block storage for Kubernetes
+  # https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
   - name: longhorn
     namespace: longhorn-system
     createNamespace: true
@@ -53,6 +53,8 @@ releases:
       app: monitoring
     needs:
       - longhorn-system/longhorn
+      - metallb-system/metallb
+      - metallb-system/metallb-config
     inherit:
     - template: values_gotmpl_and_secrets
 
@@ -184,6 +186,8 @@ releases:
     needs:
       - longhorn-system/longhorn
       - prometheus/prometheus-stack
+      - metallb-system/metallb
+      - metallb-system/metallb-config
     inherit:
     - template: values_gotmpl_and_secrets
 
@@ -197,6 +201,9 @@ releases:
     wait: true
     labels:
       app: networking
+    needs:
+      - metallb-system/metallb
+      - metallb-system/metallb-config
     inherit:
     - template: values_gotmpl_and_secrets
 
@@ -226,5 +233,7 @@ releases:
     wait: true
     labels:
       app: gitops
+    needs:
+      - traefik/traefik
     inherit:
     - template: values_gotmpl_and_secrets

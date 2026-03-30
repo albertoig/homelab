@@ -22,6 +22,14 @@ persistence:
   enabled: true
   size: 10Gi
 
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
 # ServiceMonitor for Prometheus scraping
 serviceMonitor:
   enabled: true

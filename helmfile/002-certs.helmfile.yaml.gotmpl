@@ -13,6 +13,7 @@ lockFilePath: ../helmfile/locks/002-certs.helmfile.lock
 releases:
   - name: cert-manager
     namespace: cert-manager-system
+    createNamespace: true
     chart: jetstack/cert-manager
     version: "1.20.0"
     labels:
@@ -27,6 +28,7 @@ releases:
   # Cert-manager Configuration - SSL certifications for domain
   - name: cert-manager-config
     namespace: cert-manager-system
+    createNamespace: true
     chart: ../charts/cert-manager-config
     version: "0.1.0"
     wait: true
@@ -45,6 +47,7 @@ releases:
   # External DNS - uses Cloudflare credentials from cert-manager-config secret
   - name: external-dns
     namespace: cert-manager-system
+    createNamespace: true
     chart: kubernetes-sigs/external-dns
     version: "1.20.0"
     wait: true
