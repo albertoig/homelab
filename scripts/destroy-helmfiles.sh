@@ -13,13 +13,17 @@ if [ -z "$ENVIRONMENT" ]; then
     exit 1
 fi
 
+if [ "$ENVIRONMENT" != "dev" ] && [ "$ENVIRONMENT" != "prod" ]; then
+    echo "Error: Invalid environment '$ENVIRONMENT'."
+    echo "Available environments: dev, prod"
+    exit 1
+fi
+
 HELMFILE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-# Validate environment
+# Validate environment directory exists
 if [ ! -d "$HELMFILE_DIR/helmfile/environments/$ENVIRONMENT" ]; then
-    echo "Error: Environment '$ENVIRONMENT' not found."
-    echo "Available environments:"
-    ls "$HELMFILE_DIR/helmfile/environments/"
+    echo "Error: Environment directory '$ENVIRONMENT' not found."
     exit 1
 fi
 

@@ -107,7 +107,6 @@ Make sure you have the following tools installed:
 - [helm](https://helm.sh/docs/intro/install/)
 - [helmfile](https://helmfile.readthedocs.io/en/latest/#installation)
 - [sops](https://github.com/mozilla/sops#installation)
-- [age](https://github.com/FiloSottile/age#installation)
 - [ansible](https://docs.ansible.com/ansible/latest/installation_guide/index.html)
 
 ### Required Helm Plugins
@@ -173,8 +172,15 @@ helm plugin list
 
 2. **Deploy infrastructure**:
    ```bash
-   helmfile sync --environment dev
+   ./scripts/install-helmfiles.sh dev
    ```
+
+   This runs the full deployment in order:
+   1. Check CLI requirements and Kubernetes access
+   2. Apply CRDs
+   3. Apply certifications
+   4. Apply common releases (monitoring, auth, etc.)
+   5. Apply ingresses
 
 3. **Verify deployment**:
    ```bash
