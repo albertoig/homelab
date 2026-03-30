@@ -38,8 +38,10 @@ persistence:
   storageClass: longhorn
   size: 10Gi
 
-# Service monitor for Prometheus scraping
 serviceMonitor:
   enabled: true
-  annotations:
-    prometheus.io/scrape: "true"
+  namespace: prometheus
+  interval: 15s
+  scrapeTimeout: 10s
+  additionalLabels:
+    release: prometheus-stack

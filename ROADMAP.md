@@ -52,7 +52,8 @@ GitOps-driven environment.
     - [ ] External-dns
     - [ ] Grafana
     - [ ] Cert-Manager
-
+- [ ] Review meta monitoring https://grafana.com/docs/loki/latest/operations/meta-monitoring/
+- [ ] Migrate Loki(longhorn) to distributed from single binary.
 
 ---
 

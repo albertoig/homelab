@@ -58,21 +58,31 @@ datasources:
     datasources:
       - name: Prometheus
         type: prometheus
+        uid: prometheus
         url: http://prometheus-stack-kube-prom-prometheus.prometheus.svc.cluster.local:9090
         access: proxy
         isDefault: true
         jsonData:
           timeInterval: "30s"
+          
       - name: Loki
         type: loki
+        uid: loki
         url: http://loki-gateway.prometheus.svc.cluster.local
         access: proxy
         jsonData:
-          httpMethod: GET
-          timeout: 60
-          httpHeaderName1: X-Scope-OrgID
+          httpHeaderName1: 'X-Scope-OrgID'
         secureJsonData:
-          httpHeaderValue1: homelab
+          httpHeaderValue1: 'homelab'
+
+      - name: Tempo
+        type: tempo
+        uid: tempo
+        url: http://tempo.prometheus.svc.cluster.local:3200
+        access: proxy
+        jsonData:
+          nodeGraph:
+            enabled: true
 sidecar:
   dashboards:
     enabled: true

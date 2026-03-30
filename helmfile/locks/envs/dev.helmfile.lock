@@ -1,5 +1,8 @@
 version: 1.4.1
 dependencies:
+  - name: alloy
+    repository: https://grafana.github.io/helm-charts
+    version: 0.12.4
   - name: argo-cd
     repository: https://argoproj.github.io/argo-helm
     version: 9.4.16
@@ -13,22 +16,19 @@ dependencies:
     repository: https://prometheus-community.github.io/helm-charts
     version: 82.10.3
   - name: loki
-    repository: https://grafana.github.io/helm-charts
-    version: 6.54.0
+    repository: https://grafana-community.github.io/helm-charts
+    version: 9.2.2
   - name: longhorn
     repository: https://charts.longhorn.io
     version: 1.11.1
   - name: metallb
     repository: https://metallb.github.io/metallb
     version: 0.15.3
-  - name: promtail
-    repository: https://grafana.github.io/helm-charts
-    version: 6.17.1
   - name: tempo
     repository: https://grafana-community.github.io/helm-charts
     version: 2.0.0
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 39.0.6
-digest: sha256:86f5ff9c9c5d49cf7cb4803cefa5a65415ab3bc42420aa4669565cd8f56d4653
-generated: "2026-03-29T11:05:00.725898177-04:00"
+digest: sha256:a4f05b2dc3fe782676918ebb8b1fb748f4eb9b7231d065e75463e57e882fd27c
+generated: "2026-03-29T19:04:16.480766495-04:00"

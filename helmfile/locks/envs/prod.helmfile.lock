@@ -11,7 +11,7 @@ dependencies:
     version: 2026.2.1
   - name: grafana
     repository: https://grafana-community.github.io/helm-charts
-    version: 11.3.2
+    version: 11.3.6
   - name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
     version: 82.10.3
@@ -30,5 +30,5 @@ dependencies:
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 39.0.6
-digest: sha256:2b070dd326b6a4aa2d7650babaded6611e4f5c02ce92e0e63dae074f803aaad8
-generated: "2026-03-29T12:16:25.381944333-04:00"
+digest: sha256:a06ccc9d037452270323a7c9d587ab0bb34c786c6cef94a77be02589d1adb70f
+generated: "2026-03-29T20:40:19.247036885-04:00"
