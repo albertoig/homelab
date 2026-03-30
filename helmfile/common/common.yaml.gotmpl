@@ -113,7 +113,7 @@ releases:
             done
             sleep 5
 
-  # Alloy - OpenTelemetry collector (replaces promtail)
+  # Alloy - OpenTelemetry collector (log and profile collection)
   # https://artifacthub.io/packages/helm/grafana/alloy?modal=values
   - name: alloy
     namespace: prometheus
@@ -125,6 +125,7 @@ releases:
     needs:
       - prometheus/loki
       - prometheus/grafana
+      - prometheus/pyroscope
     inherit:
     - template: values_gotmpl_and_secrets
 
@@ -161,6 +162,21 @@ releases:
               esac
             done
             sleep 5
+
+  # Pyroscope - Continuous profiling system
+  # https://artifacthub.io/packages/helm/grafana/pyroscope?modal=values
+  - name: pyroscope
+    namespace: prometheus
+    chart: grafana/pyroscope
+    version: "1.19.1"
+    wait: true
+    labels:
+      app: profiling
+    needs:
+      - longhorn-system/longhorn
+      - prometheus/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets
 
   # Traefik - Reverse Proxy and Load Balancer
   # https://github.com/traefik/helm-chart/blob/main/traefik/values.yaml

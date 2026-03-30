@@ -5,8 +5,13 @@ alloy:
   mounts:
     varlog: true
     dockercontainers: true
+  securityContext:
+    privileged: true
+    runAsGroup: 0
+    runAsUser: 0
   configMap:
     content: |
+      // --- Log collection (Loki) ---
       discovery.kubernetes "pods" {
         role = "pod"
       }
@@ -23,8 +28,29 @@ alloy:
         }
       }
 
+      // --- eBPF Profile collection (Pyroscope) ---
+      discovery.kubernetes "local_pods" {
+        selectors {
+          field = "spec.nodeName=" + env("HOSTNAME")
+          role = "pod"
+        }
+        role = "pod"
+      }
+
+      pyroscope.ebpf "cpu" {
+        forward_to = [pyroscope.write.pyroscope.receiver]
+        targets    = discovery.kubernetes.local_pods.targets
+      }
+
+      pyroscope.write "pyroscope" {
+        endpoint {
+          url = "http://pyroscope.prometheus.svc.cluster.local:4040"
+        }
+      }
+
 controller:
   type: daemonset
+  hostPID: true
 
 serviceMonitor:
   enabled: true

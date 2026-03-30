@@ -1,0 +1,31 @@
+# Pyroscope Configuration
+# https://artifacthub.io/packages/helm/grafana/pyroscope?modal=values
+
+pyroscope:
+  # Disable self-profile push
+  disableSelfProfile: true
+
+# Disable built-in Alloy — reuse existing Alloy instance for profile scraping
+alloy:
+  enabled: false
+
+# Disable built-in Grafana Agent (deprecated)
+agent:
+  enabled: false
+
+# Disable MinIO (using filesystem storage on PVC)
+minio:
+  enabled: false
+
+# Enable persistence with Longhorn
+persistence:
+  enabled: true
+  size: 10Gi
+
+# ServiceMonitor for Prometheus scraping
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  scrapeTimeout: 10s
+  labels:
+    release: prometheus-stack

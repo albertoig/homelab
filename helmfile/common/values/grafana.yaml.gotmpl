@@ -83,6 +83,12 @@ datasources:
         jsonData:
           nodeGraph:
             enabled: true
+
+      - name: Pyroscope
+        type: grafana-pyroscope-datasource
+        uid: pyroscope
+        url: http://pyroscope.prometheus.svc.cluster.local:4040
+        access: proxy
 sidecar:
   dashboards:
     enabled: true

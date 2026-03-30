@@ -11,7 +11,7 @@ dependencies:
     version: 2026.2.1
   - name: grafana
     repository: https://grafana-community.github.io/helm-charts
-    version: 11.3.2
+    version: 11.3.6
   - name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
     version: 82.10.3
@@ -24,11 +24,14 @@ dependencies:
   - name: metallb
     repository: https://metallb.github.io/metallb
     version: 0.15.3
+  - name: pyroscope
+    repository: https://grafana.github.io/helm-charts
+    version: 1.19.1
   - name: tempo
     repository: https://grafana-community.github.io/helm-charts
     version: 2.0.0
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 39.0.6
-digest: sha256:a4f05b2dc3fe782676918ebb8b1fb748f4eb9b7231d065e75463e57e882fd27c
-generated: "2026-03-29T19:04:16.480766495-04:00"
+digest: sha256:661ff36014222fec3418ccb8cd591db59c0d17ec853c9683dfff227aa9e04691
+generated: "2026-03-30T00:08:48.102898352-04:00"

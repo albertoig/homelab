@@ -3,6 +3,19 @@
 
 # Tempo v2.x configuration structure
 tempo:
+  # Enable metrics-generator for TraceQL metrics queries (rate, histogram_over_time, etc.)
+  # https://grafana.com/docs/tempo/latest/metrics-generator/
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: http://prometheus-stack-kube-prom-prometheus.prometheus.svc.cluster.local:9090/api/v1/write
+    processor:
+      local_blocks:
+        flush_to_storage: true
+    storage:
+      path: /var/tempo/generator/wal
+    traces_storage:
+      path: /var/tempo/generator/traces
+
   receivers:
     jaeger:
       protocols:

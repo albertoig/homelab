@@ -67,7 +67,7 @@ GitOps-driven environment.
 - [ ] Create Grafana dashboards for Authentik and ArgoCD
 - [ ] Authentik Auth
     - [ ] Grafana
-
+- [ ] Badges on Readme
 ---
 
 ## 📝 Notes
