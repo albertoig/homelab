@@ -45,7 +45,7 @@ releases:
     namespace: prometheus
     createNamespace: true
     chart: prometheus-community/kube-prometheus-stack
-    version: "82.10.3"
+    version: "82.15.1"
     wait: true
     waitForJobs: true
     disableValidationOnInstall: true
@@ -92,7 +92,7 @@ releases:
     namespace: prometheus
     createNamespace: true
     chart: grafana-community/loki
-    version: "9.2.2"
+    version: "9.3.6"
     wait: true
     labels:
       app: logging
@@ -180,7 +180,7 @@ releases:
     namespace: prometheus
     createNamespace: true
     chart: grafana/pyroscope
-    version: "1.19.1"
+    version: "1.19.2"
     wait: true
     labels:
       app: profiling
@@ -198,7 +198,7 @@ releases:
     namespace: traefik
     createNamespace: true
     chart: traefik/traefik
-    version: "39.0.6"
+    version: "39.0.7"
     wait: true
     labels:
       app: networking
@@ -231,7 +231,7 @@ releases:
     namespace: argocd
     createNamespace: true
     chart: argocd/argo-cd
-    version: "9.4.16"
+    version: "9.4.17"
     wait: true
     labels:
       app: gitops

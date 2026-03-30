@@ -2,10 +2,10 @@ version: 1.4.1
 dependencies:
   - name: alloy
     repository: https://grafana.github.io/helm-charts
-    version: 0.12.4
+    version: 1.6.2
   - name: argo-cd
     repository: https://argoproj.github.io/argo-helm
-    version: 9.4.16
+    version: 9.4.17
   - name: authentik
     repository: https://charts.goauthentik.io
     version: 2026.2.1
@@ -14,10 +14,10 @@ dependencies:
     version: 11.3.6
   - name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
-    version: 82.10.3
+    version: 82.15.1
   - name: loki
     repository: https://grafana-community.github.io/helm-charts
-    version: 9.2.2
+    version: 9.3.6
   - name: longhorn
     repository: https://charts.longhorn.io
     version: 1.11.1
@@ -26,12 +26,12 @@ dependencies:
     version: 0.15.3
   - name: pyroscope
     repository: https://grafana.github.io/helm-charts
-    version: 1.19.1
+    version: 1.19.2
   - name: tempo
     repository: https://grafana-community.github.io/helm-charts
     version: 2.0.0
   - name: traefik
     repository: https://traefik.github.io/charts
-    version: 39.0.6
-digest: sha256:661ff36014222fec3418ccb8cd591db59c0d17ec853c9683dfff227aa9e04691
-generated: "2026-03-30T00:08:48.102898352-04:00"
+    version: 39.0.7
+digest: sha256:a1f36a699020ba06034b4633b6f8f7d6f0c2e5d9c8a28833b03e267fa35f16ca
+generated: "2026-03-30T13:18:38.500156851-04:00"

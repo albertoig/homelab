@@ -28,6 +28,10 @@ alloy:
     runAsUser: 0
   configMap:
     content: |
+      logging {
+        level = "info"
+      }
+
       // --- Log collection (Loki) ---
       discovery.kubernetes "pods" {
         role = "pod"

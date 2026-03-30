@@ -5,10 +5,12 @@ crds:
 
 prometheusOperator:
   enabled: true
+  logLevel: info
 
 prometheus:
   enabled: true
   prometheusSpec:
+    logLevel: info
     replicas: 1
     # Enable remote write receiver for Tempo metrics-generator
     # Tempo pushes span-metrics and service-graph metrics to Prometheus via remote write
@@ -47,6 +49,7 @@ prometheus:
 alertmanager:
   enabled: true
   alertmanagerSpec:
+    logLevel: info
     replicas: 1
   podDisruptionBudget:
     enabled: true

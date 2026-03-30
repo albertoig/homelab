@@ -18,6 +18,8 @@ grafana.ini:
     open_telemetry:
       address: "alloy.prometheus.svc.cluster.local:4318/v1/traces"
       propagation: "w3c"
+  log:
+    level: info
   security:
     disable_initial_admin_creation: false
 
