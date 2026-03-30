@@ -9,6 +9,7 @@ prometheusOperator:
 prometheus:
   enabled: true
   prometheusSpec:
+    replicas: 1
     serviceMonitorNamespaceSelector: {}
     serviceMonitorSelector: {}
     resources:
@@ -36,9 +37,17 @@ prometheus:
     #  kubernetes-service-endpoints-slow:
     #    kubernetes_sd_configs:
     #      - role: endpointslice
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
 
 alertmanager:
   enabled: true
+  alertmanagerSpec:
+    replicas: 1
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
 
 grafana:
   enabled: false

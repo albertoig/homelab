@@ -3,6 +3,7 @@ releases:
    # https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
   - name: longhorn
     namespace: longhorn-system
+    createNamespace: true
     chart: longhorn/longhorn
     version: "v1.11.1"
     wait: true
@@ -12,9 +13,10 @@ releases:
     - template: values_gotmpl_and_secrets
 
   # MetalLB - Load balancer for Kubernetes
-  # https://github.com/metallb/helm-charts/blob/main/charts/metallb/values.yaml
+  # https://github.com/metallb/metallb/blob/main/charts/metallb/values.yaml
   - name: metallb
     namespace: metallb-system
+    createNamespace: true
     chart: metallb/metallb
     version: "0.15.3"
     wait: true
@@ -26,6 +28,7 @@ releases:
   # MetalLB Configuration - IP Address Pool and L2 Advertisement
   - name: metallb-config
     namespace: metallb-system
+    createNamespace: true
     chart: charts/metallb-config
     version: "0.15.3"
     wait: true
@@ -40,6 +43,7 @@ releases:
   # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
   - name: prometheus-stack
     namespace: prometheus
+    createNamespace: true
     chart: prometheus-community/kube-prometheus-stack
     version: "82.10.3"
     wait: true
@@ -55,6 +59,7 @@ releases:
   # https://github.com/grafana-community/helm-charts/blob/main/charts/grafana/values.yaml
   - name: grafana
     namespace: prometheus
+    createNamespace: true
     chart: grafana-community/grafana
     version: "11.3.6"
     wait: true
@@ -83,6 +88,7 @@ releases:
   # https://artifacthub.io/packages/helm/grafana/loki?modal=values
   - name: loki
     namespace: prometheus
+    createNamespace: true
     chart: grafana-community/loki
     version: "9.2.2"
     wait: true
@@ -117,6 +123,7 @@ releases:
   # https://artifacthub.io/packages/helm/grafana/alloy?modal=values
   - name: alloy
     namespace: prometheus
+    createNamespace: true
     chart: grafana/alloy
     version: "0.12.4"
     wait: true
@@ -133,6 +140,7 @@ releases:
   # https://artifacthub.io/packages/helm/grafana-community/tempo?modal=values&path=serviceMonitor
   - name: tempo
     namespace: prometheus
+    createNamespace: true
     chart: grafana-community/tempo
     version: "2.0.0"
     wait: true
@@ -167,6 +175,7 @@ releases:
   # https://artifacthub.io/packages/helm/grafana/pyroscope?modal=values
   - name: pyroscope
     namespace: prometheus
+    createNamespace: true
     chart: grafana/pyroscope
     version: "1.19.1"
     wait: true
@@ -182,6 +191,7 @@ releases:
   # https://github.com/traefik/helm-chart/blob/main/traefik/values.yaml
   - name: traefik
     namespace: traefik
+    createNamespace: true
     chart: traefik/traefik
     version: "39.0.6"
     wait: true
@@ -194,6 +204,7 @@ releases:
   # https://github.com/goauthentik/helm/blob/authentik-2026.2.1/charts/authentik/values.yaml
   - name: authentik
     namespace: authentik
+    createNamespace: true
     chart: authentik/authentik
     version: "2026.2.1"
     wait: true
@@ -209,6 +220,7 @@ releases:
   # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
   - name: argocd
     namespace: argocd
+    createNamespace: true
     chart: argocd/argo-cd
     version: "9.4.16"
     wait: true

@@ -3,7 +3,7 @@ prometheusOperator:
 
 prometheus:
   prometheusSpec:
-    replicas: 1
+    replicas: 2
     retention: 30d
     storageSpec:
       volumeClaimTemplate:
@@ -16,7 +16,7 @@ prometheus:
 
 alertmanager:
   alertmanagerSpec:
-    replicas: 1
+    replicas: 2
     storage:
       volumeClaimTemplate:
         spec:

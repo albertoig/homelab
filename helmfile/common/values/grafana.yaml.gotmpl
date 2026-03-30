@@ -10,8 +10,8 @@ grafana.ini:
     disable_login_form: false
   auth.anonymous:
     enabled: false
-  auth.token_rotation: 
-    enabled: false
+  auth.token_rotation:
+    enabled: true
   analytics:
     check_for_updates: false
   security:
@@ -39,6 +39,10 @@ resources:
   limits:
     memory: "512Mi"
     cpu: "500m"
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
 
 # Expose Grafana via MetalLB LoadBalancer
 service:

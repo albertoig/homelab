@@ -6,7 +6,7 @@ loki:
   commonConfig:
     replication_factor: 1
 
-  # Neccesary for Grafana drilldown
+  # Necessary for Grafana drilldown
   # https://github.com/grafana/logs-drilldown?tab=readme-ov-file#installation-in-your-own-grafana-instance
   limits_config:
     allow_structured_metadata: true
@@ -44,6 +44,9 @@ singleBinary:   # this should be at root level, not under loki:
     enabled: true
     storageClass: longhorn
     size: 10Gi
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
 
 monitoring:
   # Enable service monitor

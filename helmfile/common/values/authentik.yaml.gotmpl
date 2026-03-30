@@ -16,7 +16,7 @@ authentik:
     from: "authentik@example.com" # Set via secrets: authentik.email.from
 
 server:
-  # Expose Grafana via MetalLB LoadBalancer 
+  # Expose Authentik via MetalLB LoadBalancer
   service:
     enabled: true
     type: LoadBalancer

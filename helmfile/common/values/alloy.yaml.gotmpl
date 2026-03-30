@@ -6,7 +6,11 @@ alloy:
     varlog: true
     dockercontainers: true
   securityContext:
-    privileged: true
+    privileged: false
+    capabilities:
+      add:
+        - SYS_ADMIN
+        - SYS_PTRACE
     runAsGroup: 0
     runAsUser: 0
   configMap:
