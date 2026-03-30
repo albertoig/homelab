@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/albertoig/homelab/compare/v4.0.0...v4.1.0) (2026-03-30)
+
+
+### Features
+
+* **monitoring:** upgrade Grafana LGTM stack and add Tempo datasource ([bf8bd3f](https://github.com/albertoig/homelab/commit/bf8bd3f8efc4afad170e3ce21a56474e4c35cb70))
+
 # [4.0.0](https://github.com/albertoig/homelab/compare/v3.16.0...v4.0.0) (2026-03-29)
 
 
