@@ -75,6 +75,22 @@ datasources:
         access: proxy
         jsonData:
           httpHeaderName1: 'X-Scope-OrgID'
+          derivedFields:
+            - name: TraceID
+              matcherRegex: 'traceID=([a-f0-9]+)'
+              url: '$${__value.raw}'
+              urlDisplayLabel: 'Tempo Trace'
+              datasourceUid: tempo
+            - name: TraceID
+              matcherRegex: 'trace_id=([a-f0-9]+)'
+              url: '$${__value.raw}'
+              urlDisplayLabel: 'Tempo Trace'
+              datasourceUid: tempo
+            - name: TraceID
+              matcherRegex: '"trace_id":"([a-f0-9]+)"'
+              url: '$${__value.raw}'
+              urlDisplayLabel: 'Tempo Trace'
+              datasourceUid: tempo
         secureJsonData:
           httpHeaderValue1: 'homelab'
 
@@ -86,12 +102,30 @@ datasources:
         jsonData:
           nodeGraph:
             enabled: true
+          tracesToLogs:
+            datasourceUid: loki
+            filterByTraceID: true
+            filterBySpanID: false
+            tags: ['job', 'service.name', 'service.namespace']
+          tracesToProfiles:
+            datasourceUid: pyroscope
+            profileTypeId: 'process_cpu:cpu:nanoseconds:cpu:nanoseconds'
+            tags:
+              - key: 'service.name'
+                value: 'service_name'
 
       - name: Pyroscope
         type: grafana-pyroscope-datasource
         uid: pyroscope
         url: http://pyroscope.prometheus.svc.cluster.local:4040
         access: proxy
+        jsonData:
+          profilesToLogs:
+            datasourceUid: loki
+            tags: ['job', 'service.name', 'service.namespace']
+          profilesToTraces:
+            datasourceUid: tempo
+            tags: ['service.name', 'service.namespace']
 sidecar:
   dashboards:
     enabled: true

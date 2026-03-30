@@ -12,6 +12,7 @@ GitOps-driven environment.
 ## ✅ Completed
 - [x] Initial K3s cluster setup with Ansible
 - [x] Semantic Release Initial Configuration
+- [x] Cross-signal correlation (Loki ↔ Tempo ↔ Pyroscope)
 - [x] SSH hardening
 - [x] SOPS secrets management
 - [x] Monitoring stack (Prometheus + Grafana)

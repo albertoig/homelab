@@ -4,6 +4,7 @@
 # Tempo v2.x configuration structure
 tempo:
   # Enable metrics-generator for TraceQL metrics queries (rate, histogram_over_time, etc.)
+  # Service graph and span-metrics processors generate RED metrics from traces
   # https://grafana.com/docs/tempo/latest/metrics-generator/
   metricsGenerator:
     enabled: true
@@ -35,6 +36,12 @@ tempo:
           endpoint: "0.0.0.0:4318"
         grpc:
           endpoint: "0.0.0.0:4317"
+
+  # Enable service-graph and span-metrics processors by default
+  overrides:
+    defaults:
+      metrics_generator:
+        processors: [service-graphs, span-metrics, local-blocks]
 
 # Storage configuration - use PVC for persistence
 storage:

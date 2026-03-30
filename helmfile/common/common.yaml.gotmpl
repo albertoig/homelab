@@ -135,6 +135,7 @@ releases:
       - prometheus/loki
       - prometheus/grafana
       - prometheus/pyroscope
+      - prometheus/tempo
     inherit:
     - template: values_gotmpl_and_secrets
 
@@ -204,6 +205,7 @@ releases:
     needs:
       - metallb-system/metallb
       - metallb-system/metallb-config
+      - prometheus/tempo
     inherit:
     - template: values_gotmpl_and_secrets
 
