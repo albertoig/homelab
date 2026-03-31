@@ -15,13 +15,17 @@ GitOps-driven environment.
 - [x] OTel Tracing for Traefik, ArgoCD, Grafana
 - [x] SSH hardening
 - [x] SOPS secrets management structure
+    - [x] Secrets template
+    - [x] Script to initialize secrets
+    - [x] Per-chart secrets architecture
+    - [x] Secrets reference doc (docs/SECRETS.md)
 - [x] Monitoring stack (Prometheus + Grafana + Tempo + Pyroscope)
     - [x] Cross-signal correlation (Loki ↔ Tempo ↔ Pyroscope)
 - [x] ADR docs structure
 - [x] Automation scripts
-    - [x] Encrypt secrets(SOPS)
-    - [x] Decrypt secrets(SOPS)
-    - [x] Install Helmmfiles script
+    - [x] Encrypt secrets (SOPS)
+    - [x] Decrypt secrets (SOPS)
+    - [x] Install Helmfiles script
     - [x] Destroy Helmfile script
     - [x] Add beautiful colors to scripts
 - [x] Prometheus (Service Monitor)
@@ -35,23 +39,14 @@ GitOps-driven environment.
     - [x] External-dns
     - [x] Grafana
     - [x] Cert-Manager
-- [ ] Grafana Dashboards
-    - [x] Longhorn
-    - [ ] Metallb
-    - [ ] Traefik
-    - [ ] Authentik
-    - [ ] Argocd
-    - [x] Loki
-    - [ ] Tempo
-    - [ ] External-dns
-    - [ ] Grafana
-    - [ ] Cert-Manager
 ---
 
 ## 🚧 In Progress
-- [ ] Generate kube config and copy it to the local machine pre configured. (also the  pluging diff and secrets)
-- [ ] ADR docs structure for MR request
+- [ ] Automate kubeconfig setup with helm-diff and helm-secrets plugins for new developer onboarding
+- [ ] ADR integration into merge request workflow
 - [ ] Grafana Dashboards
+    - [x] Longhorn
+    - [x] Loki
     - [ ] Metallb
     - [ ] Traefik
     - [ ] Authentik
@@ -61,7 +56,7 @@ GitOps-driven environment.
     - [ ] Grafana
     - [ ] Cert-Manager
 - [ ] Review meta monitoring https://grafana.com/docs/loki/latest/operations/meta-monitoring/
-- [ ] Migrate Loki(longhorn) to distributed from single binary.
+- [ ] Migrate Loki (longhorn) to distributed from single binary
 
 
 ---
@@ -71,9 +66,8 @@ GitOps-driven environment.
 - [ ] Backup solution
 - [ ] Disaster recovery plan
 - [ ] Documentation improvements
-- [ ] Centralize secrets and configs in the root directory
 - [ ] Helmfile configuration
-- [ ] Centralize scripting to run everything with one command.
+- [ ] Centralize scripting to run everything with one command
 - [ ] Create Grafana dashboards for Authentik and ArgoCD
 - [ ] Authentik Auth
     - [ ] Grafana
@@ -81,4 +75,4 @@ GitOps-driven environment.
 ---
 
 ## 📝 Notes
-No aditional notes.
+No additional notes.

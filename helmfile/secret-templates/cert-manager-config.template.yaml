@@ -1,0 +1,16 @@
+# --- cert-manager-config ---
+secret:
+  # Cloudflare API token with DNS edit permissions
+  apiKey: ""
+  # Account email for Cloudflare API
+  email: ""
+clusterIssuer:
+  # Email address for Let's Encrypt certificate notifications
+  email: ""
+  cloudflare:
+    # Cloudflare account email
+    email: ""
+certificate:
+  # Domain names for the TLS certificate (e.g., example.com)
+  dnsNames:
+    - ""

@@ -1,0 +1,21 @@
+# --- authentik ---
+authentik:
+  # Secret key for cryptographic operations (generate with: openssl rand -hex 32)
+  secret_key: ""
+  email:
+    # Sender address (e.g., "Homelab <homelab@example.com>")
+    from: ""
+    # SMTP account password
+    password: ""
+    # SMTP server hostname (e.g., smtp.protonmail.ch)
+    host: ""
+    # SMTP account username
+    username: ""
+  # PostgreSQL credentials for Authentik's internal database
+  postgresql:
+    # Database user password
+    password: ""
+postgresql:
+  auth:
+    # PostgreSQL superuser password
+    password: ""

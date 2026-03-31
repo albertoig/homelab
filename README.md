@@ -84,7 +84,12 @@ homelab/
 │   │   └── common.yaml.gotmpl # Main releases definition
 │   ├── environments/          # Environment-specific configs
 │   │   ├── dev/               # Development environment
+│   │   │   ├── secrets/       # Per-chart encrypted secrets
+│   │   │   └── values/        # Per-chart value overrides
 │   │   └── prod/              # Production environment
+│   │       ├── secrets/       # Per-chart encrypted secrets
+│   │       └── values/        # Per-chart value overrides
+│   ├── secret-templates/      # Secret templates with descriptions
 │   └── locks/                 # Helmfile lock files
 ├── metal/                     # Bare metal provisioning
 │   └── k3s/                   # K3s cluster setup with Ansible
@@ -199,17 +204,31 @@ The homelab supports multiple environments (dev, prod). Environment-specific con
 
 ### Secrets Management
 
-Secrets are encrypted using SOPS with Age encryption. Only `dev` and `prod` environments are supported.
+Secrets are managed per-chart with SOPS encryption. Each chart has its own encrypted secrets file at `helmfile/environments/<env>/secrets/<chart>.enc.yaml`, matching the per-chart values pattern.
 
 ```bash
-# Decrypt secrets
+# Initialize secrets for a new environment (interactive prompts)
+./scripts/init-secrets.sh dev
+./scripts/init-secrets.sh prod
+
+# Encrypt all per-chart secrets
+./scripts/sops-encrypt-secrets.sh dev
+./scripts/sops-encrypt-secrets.sh prod
+
+# Encrypt a single chart
+./scripts/sops-encrypt-secrets.sh prod grafana
+
+# Decrypt all per-chart secrets
 ./scripts/sops-decrypt-secrets.sh dev
 ./scripts/sops-decrypt-secrets.sh prod
 
-# Encrypt secrets
-./scripts/sops-encrypt-secrets.sh dev
-./scripts/sops-encrypt-secrets.sh prod
+# Decrypt a single chart
+./scripts/sops-decrypt-secrets.sh prod grafana
 ```
+
+Secret templates with descriptions are in `helmfile/secret-templates/*.template.yaml`.
+
+For a full reference of all secrets, their criticality, and how to obtain them, see [docs/SECRETS.md](./docs/SECRETS.md).
 
 ---
 
@@ -242,13 +261,12 @@ Grafana is exposed via MetalLB LoadBalancer. Access it using the external IP ass
 
 ---
 
-## 📌 Roadmap
+## 📚 Documentation
 
-See our [ROADMAP.md](./ROADMAP.md) for upcoming features and progress.
-
-## 📐 Architecture Decisions
-
-See [docs/decisions/INDEX.md](./docs/decisions/INDEX.md) for architecture decision records (ADRs) documenting the reasoning behind significant infrastructure and configuration changes.
+- [Roadmap](./ROADMAP.md) — upcoming features and progress
+- [Architecture Decisions](./docs/decisions/INDEX.md) — ADRs documenting significant infrastructure changes
+- [Scripts](./docs/SCRIPTS.md) — automation script documentation and usage
+- [Secrets](./docs/SECRETS.md) — full secrets reference with criticality levels
 
 ---
 

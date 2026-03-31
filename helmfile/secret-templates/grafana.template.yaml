@@ -1,0 +1,4 @@
+# --- grafana ---
+grafana:
+  # The admin password for the Grafana dashboard
+  adminPassword: ""

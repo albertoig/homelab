@@ -38,3 +38,5 @@ keys.txt
 ## SECRETS
 *.secrets.yaml
 !*.secrets.enc.yaml
+# Centralized per-environment secrets (plaintext working copies)
+helmfile/environments/*/secrets.yaml

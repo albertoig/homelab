@@ -4,11 +4,11 @@ This document describes all automation scripts in the homelab repository, their 
 
 ## Overview
 
-The repository contains 7 shell scripts organized into three functional groups:
+The repository contains 8 shell scripts organized into three functional groups:
 
 - **Validation scripts** - Verify prerequisites and cluster health
 - **Helmfile lifecycle scripts** - Deploy and destroy Helmfile-managed services
-- **Secrets management scripts** - Encrypt and decrypt environment secrets
+- **Secrets management scripts** - Initialize, encrypt, and decrypt per-chart environment secrets
 - **Infrastructure provisioning** - Bootstrap K3s on bare metal via Ansible
 
 ## Hierarchy Diagram
@@ -41,8 +41,8 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
         │                                  │  ┌──────────▼────────────┐ │
         │                                  │  │ scripts/              │ │
         │                                  │  │  sops-decrypt-secrets │ │
-        │                                  │  │  .enc.yaml ->         │ │
-        │                                  │  │  .secrets.yaml        │ │
+        │                                  │  │  *.enc.yaml ->        │ │
+        │                                  │  │  *.secrets.yaml       │ │
         │                                  │  └──────────┬────────────┘ │
         │                                  │             │              │
         │                                  │  Steps:     │              │
@@ -74,10 +74,18 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
         │  scripts/sops-encrypt-secrets.sh
         │  ┌──────────────────────────────┐
         │  │  Secrets Encryption           │
-        │  │  .secrets.yaml -> .enc.yaml  │
+        │  │  *.secrets.yaml -> *.enc.yaml │
         └──┤  (standalone, not called by  │
            │   other scripts)             │
            └──────────────────────────────┘
+
+
+        scripts/init-secrets.sh
+        ┌──────────────────────────────┐
+        │  Interactive Secret Init      │
+        │  Templates -> .secrets.yaml   │
+        │  -> .enc.yaml (auto-encrypt)  │
+        └──────────────────────────────┘
 ```
 
 ## Scripts
@@ -179,39 +187,89 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
 
 ### `scripts/sops-decrypt-secrets.sh`
 
-**Purpose:** Decrypts all `.enc.yaml` files in an environment's secrets directory, producing `.secrets.yaml` files.
+**Purpose:** Decrypts per-chart `.enc.yaml` files in an environment's secrets directory, producing `.secrets.yaml` files.
 
 **Usage:**
 ```bash
+# Decrypt all charts
 ./scripts/sops-decrypt-secrets.sh <environment>
-# Example:
-./scripts/sops-decrypt-secrets.sh dev
+
+# Decrypt a single chart
+./scripts/sops-decrypt-secrets.sh <environment> <chart-name>
+
+# Examples:
 ./scripts/sops-decrypt-secrets.sh prod
+./scripts/sops-decrypt-secrets.sh prod grafana
 ```
 
 **Source directory:** `helmfile/environments/<env>/secrets/*.enc.yaml`
 **Output:** `helmfile/environments/<env>/secrets/*.secrets.yaml`
 
-**Standalone:** Not called by other scripts. Run manually before deploying if encrypted secrets need to be decrypted.
+**Standalone:** Not called by other scripts. Run manually before deploying if encrypted secrets need to be reviewed.
 
 ---
 
 ### `scripts/sops-encrypt-secrets.sh`
 
-**Purpose:** Encrypts all `.secrets.yaml` files in an environment's secrets directory, producing `.enc.yaml` files for version control.
+**Purpose:** Encrypts per-chart `.secrets.yaml` files in an environment's secrets directory, producing `.enc.yaml` files for version control.
 
 **Usage:**
 ```bash
+# Encrypt all charts
 ./scripts/sops-encrypt-secrets.sh <environment>
-# Example:
-./scripts/sops-encrypt-secrets.sh dev
+
+# Encrypt a single chart
+./scripts/sops-encrypt-secrets.sh <environment> <chart-name>
+
+# Examples:
 ./scripts/sops-encrypt-secrets.sh prod
+./scripts/sops-encrypt-secrets.sh prod grafana
 ```
 
 **Source directory:** `helmfile/environments/<env>/secrets/*.secrets.yaml`
 **Output:** `helmfile/environments/<env>/secrets/*.enc.yaml`
 
-**Standalone:** Not called by other scripts. Run manually after editing secrets.
+**Called by:** `init-secrets.sh` (after generating per-chart files). Can also be run standalone after manually editing secrets.
+
+---
+
+### `scripts/init-secrets.sh`
+
+**Purpose:** Interactively initializes secrets for an environment from per-chart template files. Reads templates from `helmfile/secret-templates/`, prompts for each value with descriptions, generates per-chart `.secrets.yaml` files, and encrypts them with sops.
+
+**Usage:**
+```bash
+./scripts/init-secrets.sh <environment>
+# Example:
+./scripts/init-secrets.sh dev
+./scripts/init-secrets.sh prod
+```
+
+**Execution flow (5 phases):**
+1. Validate environment and check for existing secrets (warns before overwriting)
+2. Extract key paths, descriptions, and line types from all template files
+3. Prompt interactively for each secret value (pre-fills from existing `.secrets.yaml` or decrypted `.enc.yaml`)
+4. Generate per-chart `<chart>.secrets.yaml` files in `helmfile/environments/<env>/secrets/`
+5. Encrypt each chart to `<chart>.enc.yaml` via sops
+
+**Templates:** Secret templates with comment-based descriptions are in `helmfile/secret-templates/*.template.yaml`. Each template corresponds to one chart and uses `# --- name ---` as a section header.
+
+**Pre-filling:** If a chart already has a `.secrets.yaml` or `.enc.yaml` file, existing values are shown as defaults in square brackets. Press Enter to keep the existing value.
+
+**Output structure:**
+```
+helmfile/environments/<env>/secrets/
+  grafana.secrets.yaml          # plaintext (gitignored)
+  grafana.enc.yaml              # encrypted (committed)
+  prometheus-stack.secrets.yaml
+  prometheus-stack.enc.yaml
+  authentik.secrets.yaml
+  authentik.enc.yaml
+  cert-manager-config.secrets.yaml
+  cert-manager-config.enc.yaml
+```
+
+**Standalone:** Not called by other scripts. Run once to initialize or update secrets for an environment.
 
 ---
 
@@ -280,5 +338,9 @@ destroy-helmfiles.sh <env>
 ### Edit Secrets
 
 ```
-sops-decrypt-secrets.sh <env>   ──>  Edit .secrets.yaml  ──>  sops-encrypt-secrets.sh <env>
+init-secrets.sh <env>          (interactive prompts, auto-encrypts)
+  └── sops-encrypt-secrets.sh  (called automatically per chart)
+
+Manual edit workflow:
+sops-decrypt-secrets.sh <env> [chart]  ──>  Edit .secrets.yaml  ──>  sops-encrypt-secrets.sh <env> [chart]
 ```
