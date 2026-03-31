@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/albertoig/homelab/compare/v4.6.0...v5.0.0) (2026-03-31)
+
+
+* refactor(namespaces)!: rename service namespaces to follow system naming convention ([025b41e](https://github.com/albertoig/homelab/commit/025b41ef5851bcde2813b1b1cf07f8db48cc94a6))
+
+
+### BREAKING CHANGES
+
+* Existing namespaces and their Helm release ownership
+metadata must be migrated before deploying. ArgoCD CRD annotations
+require manual patching of meta.helm.sh/release-namespace.
+
 # [4.6.0](https://github.com/albertoig/homelab/compare/v4.5.0...v4.6.0) (2026-03-31)
 
 
