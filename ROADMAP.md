@@ -12,12 +12,18 @@ GitOps-driven environment.
 ## ✅ Completed
 - [x] Initial K3s cluster setup with Ansible
 - [x] Semantic Release Initial Configuration
-- [x] Cross-signal correlation (Loki ↔ Tempo ↔ Pyroscope)
 - [x] OTel Tracing for Traefik, ArgoCD, Grafana
 - [x] SSH hardening
-- [x] SOPS secrets management
-- [x] Monitoring stack (Prometheus + Grafana)
+- [x] SOPS secrets management structure
+- [x] Monitoring stack (Prometheus + Grafana + Tempo + Pyroscope)
+    - [x] Cross-signal correlation (Loki ↔ Tempo ↔ Pyroscope)
 - [x] ADR docs structure
+- [x] Automation scripts
+    - [x] Encrypt secrets(SOPS)
+    - [x] Decrypt secrets(SOPS)
+    - [x] Install Helmmfiles script
+    - [x] Destroy Helmfile script
+    - [x] Add beautiful colors to scripts
 - [x] Prometheus (Service Monitor)
     - [x] Longhorn
     - [x] Metallb
@@ -44,7 +50,7 @@ GitOps-driven environment.
 
 ## 🚧 In Progress
 - [ ] Generate kube config and copy it to the local machine pre configured. (also the  pluging diff and secrets)
-- [x] ADR docs structure for MR request
+- [ ] ADR docs structure for MR request
 - [ ] Grafana Dashboards
     - [ ] Metallb
     - [ ] Traefik
@@ -56,6 +62,7 @@ GitOps-driven environment.
     - [ ] Cert-Manager
 - [ ] Review meta monitoring https://grafana.com/docs/loki/latest/operations/meta-monitoring/
 - [ ] Migrate Loki(longhorn) to distributed from single binary.
+
 
 ---
 

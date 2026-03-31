@@ -1,44 +1,38 @@
 #!/bin/bash
-# Encrypt all .secrets.yaml files in the specified environment and update .enc.yaml files
+# Encrypt the centralized secrets file for the specified environment
 # Usage: ./scripts/sops-encrypt-secrets.sh <environment>
 # Example: ./scripts/sops-encrypt-secrets.sh dev
 
 set -e
 
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
+
 ENVIRONMENT="${1:-}"
 
 if [ -z "$ENVIRONMENT" ]; then
-    echo "Usage: $0 <environment>"
-    echo "Available environments: dev, prod"
+    error "Usage: $0 <environment>"
+    info "Available environments: dev, prod"
     exit 1
 fi
 
 if [ "$ENVIRONMENT" != "dev" ] && [ "$ENVIRONMENT" != "prod" ]; then
-    echo "Error: Invalid environment '$ENVIRONMENT'."
-    echo "Available environments: dev, prod"
+    error "Invalid environment '$ENVIRONMENT'."
+    info "Available environments: dev, prod"
     exit 1
 fi
 
-ENVS_DIR="helmfile/environments/$ENVIRONMENT/secrets"
+SECRETS_FILE="helmfile/environments/$ENVIRONMENT/secrets.yaml"
+ENCRYPTED_FILE="helmfile/environments/$ENVIRONMENT/secrets.enc.yaml"
 
-echo "Encrypting $ENVIRONMENT environment secrets..."
+if [ ! -f "$SECRETS_FILE" ]; then
+    error "Secrets file not found: $SECRETS_FILE"
+    exit 1
+fi
 
-# Find all .secrets.yaml files in the secrets directory
-for secrets_file in "$ENVS_DIR"/*.secrets.yaml; do
-    if [ -f "$secrets_file" ]; then
-        # Get the filename without the .secrets.yaml extension
-        basename=$(basename "$secrets_file" .secrets.yaml)
+info "Encrypting $ENVIRONMENT environment secrets..."
+info "Encrypting: $SECRETS_FILE -> $ENCRYPTED_FILE"
 
-        # Create the output filename with .enc.yaml
-        output_file="$ENVS_DIR/${basename}.enc.yaml"
+sops --encrypt "$SECRETS_FILE" > "$ENCRYPTED_FILE"
 
-        echo "Encrypting: $secrets_file -> $output_file"
-
-        # Encrypt the file using sops
-        sops --encrypt "$secrets_file" > "$output_file"
-
-        echo "Created: $output_file"
-    fi
-done
-
-echo "$ENVIRONMENT environment secrets encrypted successfully!"
+success "Created: $ENCRYPTED_FILE"
+success "$ENVIRONMENT environment secrets encrypted successfully!"
