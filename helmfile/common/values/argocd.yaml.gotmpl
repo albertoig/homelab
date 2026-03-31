@@ -1,5 +1,10 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+{{- $argocdHost := printf "argocd.internal.%s" $cfg.general.root_dns -}}
 # ArgoCD Configuration
 # https://artifacthub.io/packages/helm/argo/argo-cd?modal=values
+
+global:
+  domain: {{ $argocdHost }}
 
 configs:
   params:
@@ -37,6 +42,8 @@ controller:
 # UI Server
 server:
   replicas: 1
+  certificate:
+    enabled: false
   env:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: "http://alloy.monitoring-system.svc.cluster.local:4317"
@@ -68,6 +75,23 @@ server:
       scrapeTimeout: 10s
       additionalLabels:
         release: prometheus-stack  # Matches the prometheus-stack release name
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-{{ .Environment.Name }}"
+      external-dns.alpha.kubernetes.io/hostname: "{{ $argocdHost }}"
+      external-dns.alpha.kubernetes.io/ttl: "300"
+      external-dns.alpha.kubernetes.io/action: sync
+      external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+      traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    hostname: "{{ $argocdHost }}"
+    hosts:
+      - {{ $argocdHost }}
+    tls:
+      - secretName: argocd-server-tls
+        hosts:
+          - {{ $argocdHost }}
 
 # Repo Server
 repoServer:

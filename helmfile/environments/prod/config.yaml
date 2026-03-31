@@ -1,0 +1,20 @@
+general:
+  root_dns: iglesias.cloud
+  dns:
+    provider: cloudflare
+
+metallb:
+  ipPool: 10.0.0.161-10.0.0.170
+
+grafana:
+  storage: 10Gi
+  port: 30080
+
+prometheus:
+  replicas: 2
+  retention: 30d
+  storage: 20Gi
+
+alertmanager:
+  replicas: 2
+  storage: 2Gi

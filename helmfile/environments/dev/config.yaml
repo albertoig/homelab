@@ -1,0 +1,20 @@
+general:
+  root_dns: dev.iglesias.cloud
+  dns:
+    provider: cloudflare
+
+metallb:
+  ipPool: 10.0.0.150-10.0.0.160
+
+grafana:
+  storage: 2Gi
+  port: 80
+
+prometheus:
+  replicas: 1
+  retention: 7d
+  storage: 10Gi
+
+alertmanager:
+  replicas: 1
+  storage: 1Gi

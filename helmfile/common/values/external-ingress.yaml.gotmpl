@@ -1,7 +1,10 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
 # Common values for external-ingress chart
 # These can be overridden per-service
 
 service:
+  name: authentik-server
+  namespace: auth-system
   port: 80
 
 ingress:
@@ -19,3 +22,6 @@ ingress:
     
     # Traefik
     traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+
+  hostnames:
+    - auth.{{ $cfg.general.root_dns }}

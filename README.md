@@ -280,6 +280,8 @@ Grafana is exposed via MetalLB LoadBalancer. Access it using the external IP ass
 ## 📚 Documentation
 
 - [Roadmap](./ROADMAP.md) — upcoming features and progress
+- [Configuration](./docs/CONFIG.md) — config system reference and all available settings
+- [Installation](./docs/INSTALL.md) — step-by-step setup guide
 - [Architecture Decisions](./docs/decisions/INDEX.md) — ADRs documenting significant infrastructure changes
 - [Scripts](./docs/SCRIPTS.md) — automation script documentation and usage
 - [Secrets](./docs/SECRETS.md) — full secrets reference with criticality levels

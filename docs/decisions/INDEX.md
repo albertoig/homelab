@@ -12,6 +12,7 @@ Decisions related to Helm charts, helmfile configuration, and Kubernetes service
 | [ADR-002](helmfile/ADR-002-alloy-replacing-promtail.md) | Replace Promtail with Alloy for log collection | 2026-03-29 | Accepted |
 | [ADR-004](helmfile/ADR-004-tracing-via-alloy.md) | Route application traces through Alloy instead of Tempo | 2026-03-30 | Accepted |
 | [ADR-005](helmfile/ADR-005-ebpf-kernel-symbol-access.md) | Enable eBPF kernel symbol access for Pyroscope profiling | 2026-03-30 | Accepted |
+| [ADR-006](helmfile/ADR-006-config-system.md) | Per-environment config system for user-configurable settings | 2026-03-31 | Accepted |
 
 ## Ansible
 

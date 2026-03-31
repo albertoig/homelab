@@ -1,0 +1,39 @@
+# Homelab Configuration
+# Copy this file to helmfile/environments/<env>/config.yaml and customize.
+#
+# These values are non-secret user settings referenced by the chart value templates.
+# For secrets (passwords, API keys), see helmfile/secret-templates/.
+
+# Reusable values referenced across multiple charts
+general:
+  # Root DNS domain. Service hostnames are derived from this.
+  # Example: root_dns: iglesias.cloud
+  #   -> grafana.internal.iglesias.cloud
+  #   -> auth.iglesias.cloud
+  root_dns: ""
+  dns:
+    # DNS provider used by external-dns and cert-manager
+    # Currently supported: cloudflare
+    provider: cloudflare
+
+# MetalLB - Load balancer IP pools
+metallb:
+  # IP address range for MetalLB LoadBalancer services
+  # Format: start-end (e.g., 10.0.0.161-10.0.0.170)
+  ipPool: ""
+
+# Grafana - Monitoring dashboards
+grafana:
+  storage: 10Gi
+  port: 30080
+
+# Prometheus - Metrics collection
+prometheus:
+  replicas: 1
+  retention: 15d
+  storage: 10Gi
+
+# Alertmanager - Alert routing
+alertmanager:
+  replicas: 1
+  storage: 1Gi

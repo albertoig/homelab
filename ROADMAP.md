@@ -21,6 +21,9 @@ GitOps-driven environment.
     - [x] Secrets reference doc (docs/SECRETS.md)
 - [x] Monitoring stack (Prometheus + Grafana + Tempo + Pyroscope)
     - [x] Cross-signal correlation (Loki ↔ Tempo ↔ Pyroscope)
+- [x] Alloy replacing Promtail (ADR-002)
+    - [x] OpenTelemetry log collection via Alloy
+    - [x] eBPF profiling via Alloy → Pyroscope
 - [x] ADR docs structure
 - [x] Automation scripts
     - [x] Encrypt secrets (SOPS)
@@ -28,6 +31,8 @@ GitOps-driven environment.
     - [x] Install Helmfiles script
     - [x] Destroy Helmfile script
     - [x] Add beautiful colors to scripts
+    - [x] Check requirements script
+    - [x] Check Kubernetes script
 - [x] Prometheus (Service Monitor)
     - [x] Longhorn
     - [x] Metallb
@@ -39,25 +44,37 @@ GitOps-driven environment.
     - [x] External-dns
     - [x] Grafana
     - [x] Cert-Manager
+- [x] Grafana Dashboards
+    - [x] Longhorn
+    - [x] Loki
+    - [x] Metallb
+    - [x] Traefik
+    - [x] External-dns
+    - [x] Grafana (node-exporter, kubernetes-cluster, kubernetes-pods, coredns)
+- [x] Per-environment config system (ADR-006)
+    - [x] Config template with descriptions and defaults
+    - [x] Per-environment config.yaml (general, metallb, grafana, prometheus, alertmanager)
+    - [x] Common values read config via readFile/fromYaml
+    - [x] Config reference doc (docs/CONFIG.md)
+    - [x] Consolidated per-env values into common values
+- [x] Documentation
+    - [x] Scripts doc (docs/SCRIPTS.md)
+    - [x] Secrets reference doc (docs/SECRETS.md)
+    - [x] Config reference doc (docs/CONFIG.md)
+    - [x] Installation guide (docs/INSTALL.md)
+    - [x] ADR-006 config system decision record
 ---
 
 ## 🚧 In Progress
 - [ ] Automate kubeconfig setup with helm-diff and helm-secrets plugins for new developer onboarding
 - [ ] ADR integration into merge request workflow
 - [ ] Grafana Dashboards
-    - [x] Longhorn
-    - [x] Loki
-    - [ ] Metallb
-    - [ ] Traefik
     - [ ] Authentik
     - [ ] Argocd
     - [ ] Tempo
-    - [ ] External-dns
-    - [ ] Grafana
     - [ ] Cert-Manager
 - [ ] Review meta monitoring https://grafana.com/docs/loki/latest/operations/meta-monitoring/
 - [ ] Migrate Loki (longhorn) to distributed from single binary
-- [ ] Adjust values and secrets templates
 
 ---
 
@@ -65,15 +82,17 @@ GitOps-driven environment.
 - [ ] Investigate Grafana Beyla eBPF auto-instrumentation for services without native tracing (Authentik, Longhorn, MetalLB, Cert-Manager, External-DNS)
 - [ ] Backup solution
 - [ ] Disaster recovery plan
-- [ ] Documentation improvements
 - [ ] Helmfile configuration
 - [ ] Centralize scripting to run everything with one command
 - [ ] Create Grafana dashboards for Authentik and ArgoCD
 - [ ] Authentik Auth
     - [ ] Grafana
 - [ ] Badges on Readme
-- [ ] Testing scrips
-- [ ] String with URL of the services
+- [ ] Testing scripts
+- [ ] Study to migrate HTTP URL in helm repositories to the new format
+- [ ] Explain angular stone principle in the readme
+- [ ] Adjust scripts to number of environments in helmfile folder
+
 ---
 
 ## 📝 Notes

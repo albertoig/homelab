@@ -1,3 +1,5 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+{{- $longhornHost := printf "longhorn.internal.%s" $cfg.general.root_dns -}}
 # Longhorn configuration
 defaultSettings:
   telemetry: false
@@ -24,3 +26,26 @@ metrics:
     scrapeTimeout: 10s
     additionalLabels:
       release: prometheus-stack
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    # 1. Cert-manager: Issue certificate via DNS-01
+    cert-manager.io/cluster-issuer: "letsencrypt-{{ .Environment.Name }}"
+
+    # 2. External DNS: Create record in internal DNS
+    external-dns.alpha.kubernetes.io/hostname: "{{ $longhornHost }}"
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    external-dns.alpha.kubernetes.io/action: sync
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+
+    # 3. Traefik: Force HTTPS
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+  host: {{ $longhornHost }}
+  hosts:
+    - {{ $longhornHost }}
+  tls:
+    - secretName: longhorn-tls
+      hosts:
+        - {{ $longhornHost }}

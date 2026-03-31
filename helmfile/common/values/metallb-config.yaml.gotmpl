@@ -1,0 +1,3 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+
+ipPool: {{ $cfg.metallb.ipPool }}

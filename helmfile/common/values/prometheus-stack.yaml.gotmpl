@@ -1,3 +1,4 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
 # CRDs are managed separately via the prometheus-operator-crds chart release.
 # This prevents conflicts on upgrades and ensures CRDs are always installed first.
 crds:
@@ -11,7 +12,8 @@ prometheus:
   enabled: true
   prometheusSpec:
     logLevel: info
-    replicas: 1
+    replicas: {{ $cfg.prometheus.replicas }}
+    retention: {{ $cfg.prometheus.retention }}
     # Enable remote write receiver for Tempo metrics-generator
     # Tempo pushes span-metrics and service-graph metrics to Prometheus via remote write
     enableRemoteWriteReceiver: true
@@ -24,6 +26,14 @@ prometheus:
       limits:
         memory: "2Gi"
         cpu: "1000m"
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: {{ $cfg.prometheus.storage }}
 
     #additionalScrapeConfigs:
     #  kubernetes-api-servers:
@@ -50,7 +60,15 @@ alertmanager:
   enabled: true
   alertmanagerSpec:
     logLevel: info
-    replicas: 1
+    replicas: {{ $cfg.alertmanager.replicas }}
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: {{ $cfg.alertmanager.storage }}
   podDisruptionBudget:
     enabled: true
     minAvailable: 1

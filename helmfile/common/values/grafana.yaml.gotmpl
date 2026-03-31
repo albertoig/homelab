@@ -1,3 +1,5 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+{{- $grafanaHost := printf "grafana.internal.%s" $cfg.general.root_dns -}}
 # Grafana Configuration
 # https://artifacthub.io/packages/helm/grafana/grafana?modal=values
 
@@ -5,7 +7,7 @@ adminUser: admin
 
 grafana.ini:
   server:
-    root_url: "%(protocol)s://%(domain)s/"
+    root_url: "https://{{ $grafanaHost }}/"
   auth:
     disable_login_form: false
   auth.anonymous:
@@ -35,7 +37,7 @@ persistence:
   storageClassName: longhorn
   accessModes:
     - ReadWriteOnce
-  size: 10Gi
+  size: {{ $cfg.grafana.storage }}
 
 resources:
   requests:
@@ -53,12 +55,34 @@ podDisruptionBudget:
 service:
   enabled: true
   type: LoadBalancer
-  port: 80
+  port: {{ $cfg.grafana.port }}
   targetPort: 3000
   annotations:
     # MetalLB configuration
     metallb.universe.tf/address-pool: default
     metallb.universe.tf/allow-zero-ips: "true"
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    # 1. Cert-manager: Issue certificate via DNS-01
+    cert-manager.io/cluster-issuer: "letsencrypt-{{ .Environment.Name }}"
+
+    # 2. External DNS: Create record in internal DNS
+    external-dns.alpha.kubernetes.io/hostname: "{{ $grafanaHost }}"
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    external-dns.alpha.kubernetes.io/action: sync
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+
+    # 3. Traefik: Force HTTPS
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+  hosts:
+    - {{ $grafanaHost }}
+  tls:
+    - secretName: grafana-tls
+      hosts:
+        - {{ $grafanaHost }}
 
 # Connect to prometheus-stack's Prometheus instance as a datasource
 datasources:
