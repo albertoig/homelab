@@ -17,7 +17,7 @@ lockFilePath: ../helmfile/locks/003-ingresses.helmfile.lock
 releases:
   # Authentik Ingress
   - name: authentik-ingress
-    namespace: authentik
+    namespace: auth-system
     chart: ../charts/external-ingress
     version: "0.1.0"
     labels:

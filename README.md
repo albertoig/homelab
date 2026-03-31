@@ -29,8 +29,8 @@ The homelab follows a layered architecture:
 
 | Service | Purpose | Namespace |
 |---------|---------|-----------|
-| MetalLB | Load balancer for bare metal | metallb-system |
-| Traefik | Reverse proxy and ingress | traefik |
+| MetalLB | Load balancer for bare metal | lb-system |
+| Traefik | Reverse proxy and ingress | ingress-system |
 | cert-manager | SSL/TLS certificate management | cert-manager-system |
 | external-dns | DNS management with Cloudflare | cert-manager-system |
 | Longhorn | Distributed block storage | longhorn-system |
@@ -38,8 +38,8 @@ The homelab follows a layered architecture:
 | Grafana | Metrics visualization | monitoring-system |
 | Loki | Log aggregation | monitoring-system |
 | Tempo | Distributed tracing | monitoring-system |
-| Authentik | Identity provider | authentik |
-| ArgoCD | GitOps continuous delivery | argocd |
+| Authentik | Identity provider | auth-system |
+| ArgoCD | GitOps continuous delivery | gitops-system |
 
 ---
 
@@ -127,7 +127,6 @@ You will need the following external accounts and credentials before deploying:
 | **Slack webhook URL** | Alertmanager alert notifications | [Slack Incoming Webhooks](https://api.slack.com/messaging/webhooks) |
 | **SSH key** | Ansible provisioning of K3s nodes | `~/.ssh/homelab` (or update `metal/k3s/inventory.yml`) |
 | **PGP key** | SOPS encryption/decryption | Your existing PGP key (fingerprint in `.sops.yaml`) |
-| **Age key** | Alternative SOPS encryption backend | `~/.config/sops/age/keys.txt` (optional, if using Age) |
 
 ### Required Helm Plugins
 

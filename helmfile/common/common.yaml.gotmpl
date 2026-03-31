@@ -15,7 +15,7 @@ releases:
   # MetalLB - Load balancer for Kubernetes
   # https://github.com/metallb/metallb/blob/main/charts/metallb/values.yaml
   - name: metallb
-    namespace: metallb-system
+    namespace: lb-system
     createNamespace: true
     chart: metallb/metallb
     version: "0.15.3"
@@ -27,7 +27,7 @@ releases:
 
   # MetalLB Configuration - IP Address Pool and L2 Advertisement
   - name: metallb-config
-    namespace: metallb-system
+    namespace: lb-system
     createNamespace: true
     chart: charts/metallb-config
     version: "0.15.3"
@@ -36,7 +36,7 @@ releases:
     labels:
       app: networking
     needs:
-      - metallb-system/metallb
+      - lb-system/metallb
     inherit:
     - template: values_gotmpl_and_secrets
 
@@ -53,8 +53,8 @@ releases:
       app: monitoring
     needs:
       - longhorn-system/longhorn
-      - metallb-system/metallb
-      - metallb-system/metallb-config
+      - lb-system/metallb
+      - lb-system/metallb-config
     inherit:
     - template: values_gotmpl_and_secrets
 
@@ -71,8 +71,8 @@ releases:
     needs:
       - monitoring-system/prometheus-stack
       - longhorn-system/longhorn
-      - metallb-system/metallb
-      - metallb-system/metallb-config
+      - lb-system/metallb
+      - lb-system/metallb-config
     inherit:
     - template: values_gotmpl_and_secrets
     # Hook to clean up stuck MetalLB services before grafana installation
@@ -187,15 +187,15 @@ releases:
     needs:
       - longhorn-system/longhorn
       - monitoring-system/prometheus-stack
-      - metallb-system/metallb
-      - metallb-system/metallb-config
+      - lb-system/metallb
+      - lb-system/metallb-config
     inherit:
     - template: values_gotmpl_and_secrets
 
   # Traefik - Reverse Proxy and Load Balancer
   # https://github.com/traefik/helm-chart/blob/main/traefik/values.yaml
   - name: traefik
-    namespace: traefik
+    namespace: ingress-system
     createNamespace: true
     chart: traefik/traefik
     version: "39.0.7"
@@ -203,8 +203,8 @@ releases:
     labels:
       app: networking
     needs:
-      - metallb-system/metallb
-      - metallb-system/metallb-config
+      - lb-system/metallb
+      - lb-system/metallb-config
       - monitoring-system/tempo
     inherit:
     - template: values_gotmpl_and_secrets
@@ -212,7 +212,7 @@ releases:
   # Authentik - Open Source Identity Provider
   # https://github.com/goauthentik/helm/blob/authentik-2026.2.1/charts/authentik/values.yaml
   - name: authentik
-    namespace: authentik
+    namespace: auth-system
     createNamespace: true
     chart: authentik/authentik
     version: "2026.2.1"
@@ -228,7 +228,7 @@ releases:
   # ArgoCD - GitOps Continuous Delivery
   # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
   - name: argocd
-    namespace: argocd
+    namespace: gitops-system
     createNamespace: true
     chart: argocd/argo-cd
     version: "9.4.17"
@@ -236,6 +236,6 @@ releases:
     labels:
       app: gitops
     needs:
-      - traefik/traefik
+      - ingress-system/traefik
     inherit:
     - template: values_gotmpl_and_secrets

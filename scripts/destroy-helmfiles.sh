@@ -93,7 +93,7 @@ for pvc in $(kubectl get pvc -n longhorn-system -o name 2>/dev/null); do
 done
 
 # Remove stuck namespace finalizers
-for ns in longhorn-system metallb-system monitoring-system traefik authentik argocd cert-manager-system; do
+for ns in longhorn-system lb-system monitoring-system ingress-system auth-system gitops-system cert-manager-system; do
     if kubectl get namespace "$ns" &>/dev/null; then
         info "Cleaning namespace: $ns"
         kubectl patch namespace "$ns" \

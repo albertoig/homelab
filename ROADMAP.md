@@ -57,7 +57,7 @@ GitOps-driven environment.
     - [ ] Cert-Manager
 - [ ] Review meta monitoring https://grafana.com/docs/loki/latest/operations/meta-monitoring/
 - [ ] Migrate Loki (longhorn) to distributed from single binary
-
+- [ ] Adjust values and secrets templates
 
 ---
 
