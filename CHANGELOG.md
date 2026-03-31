@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/albertoig/homelab/compare/v5.0.0...v5.1.0) (2026-03-31)
+
+
+### Features
+
+* **helmfile:** add per-environment config system and consolidate values ([625c15c](https://github.com/albertoig/homelab/commit/625c15c84ef513fda175a1187c0559a3664fa30a))
+
 # [5.0.0](https://github.com/albertoig/homelab/compare/v4.6.0...v5.0.0) (2026-03-31)
 
 
