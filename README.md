@@ -10,8 +10,8 @@ This repository contains the infrastructure as code (IaC) and configurations for
 
 The homelab is designed to be:
 - **Automated**: Infrastructure is managed as code using Terraform and Helmfile
-- **Secure**: Secrets are encrypted using SOPS and Age
-- **Observable**: Comprehensive monitoring with Prometheus, Grafana, Loki, and Tempo
+- **Secure**: Secrets are encrypted using SOPS
+- **Observable**: Comprehensive monitoring with Prometheus, Grafana, Loki, Tempo, and Pyroscope
 - **GitOps-driven**: ArgoCD for continuous delivery and GitOps workflows
 
 ---
@@ -23,13 +23,12 @@ The homelab follows a layered architecture:
 1. **Infrastructure Layer**: K3s cluster provisioned with Ansible
 2. **Platform Layer**: Core services (MetalLB, Traefik, cert-manager) for networking and certificates
 3. **Application Layer**: Applications deployed via Helmfile (ArgoCD, Authentik, Grafana, etc.)
-4. **Observability Layer**: Monitoring (Prometheus), Logging (Loki), and Tracing (Tempo)
+4. **Observability Layer**: Monitoring (Prometheus), Logging (Loki), Tracing (Tempo), and Profiling (Pyroscope)
 
 ### Services Deployed
 
 | Service | Purpose | Namespace |
 |---------|---------|-----------|
-| K3s | Lightweight Kubernetes | - |
 | MetalLB | Load balancer for bare metal | metallb-system |
 | Traefik | Reverse proxy and ingress | traefik |
 | cert-manager | SSL/TLS certificate management | cert-manager-system |
@@ -54,11 +53,12 @@ The homelab follows a layered architecture:
 | [Helm](https://helm.sh/) | Kubernetes package manager |
 | [ArgoCD](https://argoproj.github.io/cd/) | GitOps continuous delivery |
 | [SOPS](https://github.com/mozilla/sops) | Secrets encryption |
-| [Age](https://age-encryption.org/) | Encryption tool for SOPS |
 | [Prometheus](https://prometheus.io/) | Monitoring and alerting |
 | [Grafana](https://grafana.com/) | Metrics visualization |
 | [Loki](https://grafana.com/oss/loki/) | Log aggregation |
 | [Tempo](https://grafana.com/oss/tempo/) | Distributed tracing |
+| [Pyroscope](https://grafana.com/oss/pyroscope/) | Continuous profiling |
+| [Grafana Alloy](https://grafana.com/docs/alloy/) | OpenTelemetry collector for logs, traces, and eBPF profiling |
 | [Longhorn](https://longhorn.io/) | Cloud-native distributed block storage |
 | [MetalLB](https://metallb.universe.tf/) | Load balancer for bare metal Kubernetes |
 | [Traefik](https://traefik.io/) | Cloud-native reverse proxy |
@@ -113,6 +113,21 @@ Make sure you have the following tools installed:
 - [helmfile](https://helmfile.readthedocs.io/en/latest/#installation)
 - [sops](https://github.com/mozilla/sops#installation)
 - [ansible](https://docs.ansible.com/ansible/latest/installation_guide/index.html)
+
+### Required Accounts & Credentials
+
+You will need the following external accounts and credentials before deploying:
+
+| Credential | Purpose | Where to obtain |
+|------------|---------|-----------------|
+| **SMTP credentials** | Authentik email delivery (password resets, notifications) | Any SMTP provider (Gmail, ProtonMail, etc.) |
+| **Cloudflare API token** | DNS management for cert-manager and external-dns | [Cloudflare Dashboard](https://dash.cloudflare.com/) → API Tokens (requires `Zone:DNS:Edit` and `Zone:Zone:Read` permissions) |
+| **Cloudflare account email** | Cloudflare API authentication | Your Cloudflare account |
+| **Let's Encrypt email** | ACME certificate expiration notifications | Any email address |
+| **Slack webhook URL** | Alertmanager alert notifications | [Slack Incoming Webhooks](https://api.slack.com/messaging/webhooks) |
+| **SSH key** | Ansible provisioning of K3s nodes | `~/.ssh/homelab` (or update `metal/k3s/inventory.yml`) |
+| **PGP key** | SOPS encryption/decryption | Your existing PGP key (fingerprint in `.sops.yaml`) |
+| **Age key** | Alternative SOPS encryption backend | `~/.config/sops/age/keys.txt` (optional, if using Age) |
 
 ### Required Helm Plugins
 
@@ -240,6 +255,8 @@ The homelab includes a comprehensive monitoring stack:
 - **Grafana**: Visualization and dashboards
 - **Loki**: Log aggregation
 - **Tempo**: Distributed tracing
+- **Pyroscope**: Continuous profiling
+- **Grafana Alloy**: OpenTelemetry collector for logs, traces, and eBPF profiling
 
 ### Accessing Grafana
 
@@ -322,6 +339,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ArgoCD](https://argoproj.github.io/cd/) for GitOps continuous delivery
 - [Prometheus](https://prometheus.io/) for monitoring
 - [Grafana](https://grafana.com/) for visualization
+- [Loki](https://grafana.com/oss/loki/) for log aggregation
+- [Tempo](https://grafana.com/oss/tempo/) for distributed tracing
+- [Pyroscope](https://grafana.com/oss/pyroscope/) for continuous profiling
+- [Grafana Alloy](https://grafana.com/docs/alloy/) for OpenTelemetry collection
+- [Longhorn](https://longhorn.io/) for cloud-native block storage
+- [MetalLB](https://metallb.universe.tf/) for bare metal load balancing
+- [Traefik](https://traefik.io/) for reverse proxy and ingress
+- [cert-manager](https://cert-manager.io/) for certificate management
+- [external-dns](https://github.com/kubernetes-sigs/external-dns/) for DNS automation
+- [Authentik](https://goauthentik.io/) for identity management
+- [SOPS](https://github.com/mozilla/sops) for secrets encryption
+- [Ansible](https://www.ansible.com/) for cluster provisioning
+- [Let's Encrypt](https://letsencrypt.org/) for free TLS certificates
+- [Cloudflare](https://www.cloudflare.com/) for DNS and CDN services
 
 ---
 
