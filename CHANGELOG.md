@@ -1,3 +1,10 @@
+# [4.6.0](https://github.com/albertoig/homelab/compare/v4.5.0...v4.6.0) (2026-03-31)
+
+
+### Features
+
+* **secrets:** migrate to per-chart secrets architecture with interactive init ([eab70e6](https://github.com/albertoig/homelab/commit/eab70e61930fe0fac0c07a81f4dd89c237dda55a))
+
 # [4.5.0](https://github.com/albertoig/homelab/compare/v4.4.0...v4.5.0) (2026-03-30)
 
 
