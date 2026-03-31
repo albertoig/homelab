@@ -191,4 +191,4 @@ alertmanager:
 
 - **Secrets:** [SECRETS.md](./SECRETS.md) — encrypted values (passwords, API keys)
 - **Scripts:** [SCRIPTS.md](./SCRIPTS.md) — automation scripts
-- **ADR:** [decisions/helmfile/ADR-006-config-system.md](./decisions/helmfile/ADR-006-config-system.md) — why the config system was created
+- **ADR:** [decisions/helmfile/ADR-005-config-system.md](./decisions/helmfile/ADR-005-config-system.md) — why the config system was created

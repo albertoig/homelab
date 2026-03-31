@@ -1,4 +1,4 @@
-# ADR-005: Enable eBPF Profiling for Pyroscope via Alloy
+# ADR-004: Enable eBPF Profiling for Pyroscope via Alloy
 
 - **Date**: 2026-03-30
 - **Status**: Accepted
@@ -69,7 +69,7 @@ Apply three changes to enable eBPF profiling:
   - Follows the principle of least privilege.
   - Host-level sysctl is the correct placement for a host-level kernel parameter.
   - `hostPID` provides process visibility; volume mounts provide filesystem access — both needed, neither alone sufficient.
-  - Consistent with existing sysctl-tuning pattern established in [ADR-003](../ansible/ADR-003-sysctl-tuning.md).
+  - Consistent with existing sysctl-tuning pattern established in [ADR-001](../ansible/ADR-001-sysctl-tuning.md).
 - **Cons**:
   - `kernel.kptr_restrict=0` exposes kernel symbol addresses globally. Minor information disclosure (kernel version and build details), acceptable for a homelab.
 
@@ -148,8 +148,8 @@ Added kernel parameter:
 
 ## References
 
-- [ADR-002: Replace Promtail with Alloy for Log Collection](ADR-002-alloy-replacing-promtail.md)
-- [ADR-003: Add sysctl tuning for K3s inotify limits](../ansible/ADR-003-sysctl-tuning.md)
+- [ADR-002](ADR-002-alloy-replacing-promtail.md)
+- [ansible/ADR-001](../ansible/ADR-001-sysctl-tuning.md)
 - [Grafana Alloy pyroscope.ebpf component](https://grafana.com/docs/alloy/latest/reference/components/pyroscope/pyroscope.ebpf/)
 - [Linux capabilities - BPF](https://man7.org/linux/man-pages/man7/capabilities.7.html)
 - [kernel.kptr_restrict documentation](https://www.kernel.org/doc/html/latest/admin-guide/sysctl/kernel.html#kptr-restrict)

@@ -1,4 +1,4 @@
-# ADR-003: Add Sysctl Tuning for K3s Inotify Limits
+# ADR-001: Add Sysctl Tuning for K3s Inotify Limits
 
 - **Date**: 2026-03-29
 - **Status**: Accepted

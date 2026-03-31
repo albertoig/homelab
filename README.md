@@ -103,146 +103,22 @@ homelab/
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-Make sure you have the following tools installed:
-
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- [terraform](https://developer.hashicorp.com/terraform/install)
-- [helm](https://helm.sh/docs/intro/install/)
-- [helmfile](https://helmfile.readthedocs.io/en/latest/#installation)
-- [sops](https://github.com/mozilla/sops#installation)
-- [ansible](https://docs.ansible.com/ansible/latest/installation_guide/index.html)
-
-### Required Accounts & Credentials
-
-You will need the following external accounts and credentials before deploying:
-
-| Credential | Purpose | Where to obtain |
-|------------|---------|-----------------|
-| **SMTP credentials** | Authentik email delivery (password resets, notifications) | Any SMTP provider (Gmail, ProtonMail, etc.) |
-| **Cloudflare API token** | DNS management for cert-manager and external-dns | [Cloudflare Dashboard](https://dash.cloudflare.com/) → API Tokens (requires `Zone:DNS:Edit` and `Zone:Zone:Read` permissions) |
-| **Cloudflare account email** | Cloudflare API authentication | Your Cloudflare account |
-| **Let's Encrypt email** | ACME certificate expiration notifications | Any email address |
-| **Slack webhook URL** | Alertmanager alert notifications | [Slack Incoming Webhooks](https://api.slack.com/messaging/webhooks) |
-| **SSH key** | Ansible provisioning of K3s nodes | `~/.ssh/homelab` (or update `metal/k3s/inventory.yml`) |
-| **PGP key** | SOPS encryption/decryption | Your existing PGP key (fingerprint in `.sops.yaml`) |
-
-### Required Helm Plugins
-
-**⚠️ Important**: The following Helm plugins are **required** for this homelab to function properly. Without these plugins, Helmfile will not be able to manage secrets or show diffs during deployments.
-
-After installing Helm, make sure to install the following plugins:
+See [docs/INSTALL.md](./docs/INSTALL.md) for the full setup guide, including prerequisites, helm plugins, credentials, and step-by-step deployment.
 
 ```bash
-# Create a secure directory for GPG keys
-mkdir -p ~/.config/helm/keys
-chmod 700 ~/.config/helm/keys
-
-# Import GPG key for helm-secrets plugin
-curl -fsSL https://github.com/jkroepke.gpg -o ~/.config/helm/keys/jkroepke.gpg.raw
-
-# Convert key to legacy GPG format
-gpg --dearmor < ~/.config/helm/keys/jkroepke.gpg.raw > ~/.config/helm/keys/jkroepke.gpg
-chmod 600 ~/.config/helm/keys/jkroepke.gpg
-
-# Verify the key is valid
-gpg --no-default-keyring --keyring ~/.config/helm/keys/jkroepke.gpg --list-keys
-
-# Install helm-secrets plugin (REQUIRED)
-helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
-
-# Install helm-secrets getter plugin (REQUIRED)
-helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-getter-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
-
-# Install helm-secrets post-renderer plugin (REQUIRED)
-helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-post-renderer-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
-
-# Install helm-diff plugin (REQUIRED)
-helm plugin install https://github.com/databus23/helm-diff --verify false
-
-# Cleanup raw key file after use
-rm ~/.config/helm/keys/jkroepke.gpg.raw
-
+# Quick start
+./scripts/check-requirements.sh      # verify tools
+cp helmfile/config.template.yaml helmfile/environments/<env>/config.yaml  # configure
+./scripts/init-secrets.sh <env>       # set up secrets
+cd metal/k3s && ./run.sh             # provision cluster
+./scripts/install-helmfiles.sh <env> # deploy services
 ```
-
-### Verify Plugin Installation
-
-After installing the plugins, verify they are correctly installed:
-
-```bash
-# List installed Helm plugins
-helm plugin list
-
-# You should see:
-# - secrets
-# - secrets-getter
-# - secrets-post-renderer
-# - diff
-```
-
-### Cluster Setup
-
-1. **Provision K3s cluster**:
-   ```bash
-   cd metal/k3s
-   ./run.sh
-   ```
-
-2. **Deploy infrastructure**:
-   ```bash
-   ./scripts/install-helmfiles.sh dev
-   ```
-
-   This runs the full deployment in order:
-   1. Check CLI requirements and Kubernetes access
-   2. Apply CRDs
-   3. Apply certifications
-   4. Apply common releases (monitoring, auth, etc.)
-   5. Apply ingresses
-
-3. **Verify deployment**:
-   ```bash
-   kubectl get pods -A
-   ```
 
 ---
 
 ## 🔧 Configuration
 
-### Environment-Specific Configuration
-
-The homelab supports multiple environments (dev, prod). Environment-specific configurations are stored in:
-- `helmfile/environments/<env>/values/` - Values files
-- `helmfile/environments/<env>/secrets/` - Encrypted secrets
-
-### Secrets Management
-
-Secrets are managed per-chart with SOPS encryption. Each chart has its own encrypted secrets file at `helmfile/environments/<env>/secrets/<chart>.enc.yaml`, matching the per-chart values pattern.
-
-```bash
-# Initialize secrets for a new environment (interactive prompts)
-./scripts/init-secrets.sh dev
-./scripts/init-secrets.sh prod
-
-# Encrypt all per-chart secrets
-./scripts/sops-encrypt-secrets.sh dev
-./scripts/sops-encrypt-secrets.sh prod
-
-# Encrypt a single chart
-./scripts/sops-encrypt-secrets.sh prod grafana
-
-# Decrypt all per-chart secrets
-./scripts/sops-decrypt-secrets.sh dev
-./scripts/sops-decrypt-secrets.sh prod
-
-# Decrypt a single chart
-./scripts/sops-decrypt-secrets.sh prod grafana
-```
-
-Secret templates with descriptions are in `helmfile/secret-templates/*.template.yaml`.
-
-For a full reference of all secrets, their criticality, and how to obtain them, see [docs/SECRETS.md](./docs/SECRETS.md).
+See [docs/CONFIG.md](./docs/CONFIG.md) for all available settings and [docs/SECRETS.md](./docs/SECRETS.md) for secrets management.
 
 ---
 
@@ -290,40 +166,7 @@ Grafana is exposed via MetalLB LoadBalancer. Access it using the external IP ass
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-### Commit Message Format
-
-This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification (Angular convention) for commit messages. This enables automatic versioning and changelog generation via semantic-release.
-
-**Format**: `type(scope): description`
-
-**Types**:
-- `feat`: A new feature
-- `fix`: A bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, missing semi-colons, etc.)
-- `refactor`: Code refactoring without feature changes or bug fixes
-- `perf`: Performance improvements
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks, dependency updates, etc.
-- `ci`: CI/CD configuration changes
-- `build`: Build system or external dependency changes
-- `revert`: Reverting a previous commit
-
-**Examples**:
-- `feat(helmfile): add prometheus monitoring stack`
-- `fix(cert-manager): resolve certificate renewal issue`
-- `docs(readme): update installation instructions`
-- `chore(deps): update helm chart versions`
-
-### Contribution Steps
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes using the conventional commit format (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+See [CONTRIBUTING.md](./CONTRIBUTING.md). Every PR with a meaningful change must include an ADR.
 
 ---
 

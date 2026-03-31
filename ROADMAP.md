@@ -51,7 +51,7 @@ GitOps-driven environment.
     - [x] Traefik
     - [x] External-dns
     - [x] Grafana (node-exporter, kubernetes-cluster, kubernetes-pods, coredns)
-- [x] Per-environment config system (ADR-006)
+- [x] Per-environment config system (ADR-005)
     - [x] Config template with descriptions and defaults
     - [x] Per-environment config.yaml (general, metallb, grafana, prometheus, alertmanager)
     - [x] Common values read config via readFile/fromYaml
@@ -62,7 +62,7 @@ GitOps-driven environment.
     - [x] Secrets reference doc (docs/SECRETS.md)
     - [x] Config reference doc (docs/CONFIG.md)
     - [x] Installation guide (docs/INSTALL.md)
-    - [x] ADR-006 config system decision record
+    - [x] ADR-005 config system decision record
 ---
 
 ## 🚧 In Progress

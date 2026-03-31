@@ -10,9 +10,9 @@ Decisions related to Helm charts, helmfile configuration, and Kubernetes service
 |-----|-------|------|--------|
 | [ADR-001](helmfile/ADR-001-loki-grafana-community-migration.md) | Migrate Loki to grafana-community chart | 2026-03-29 | Accepted |
 | [ADR-002](helmfile/ADR-002-alloy-replacing-promtail.md) | Replace Promtail with Alloy for log collection | 2026-03-29 | Accepted |
-| [ADR-004](helmfile/ADR-004-tracing-via-alloy.md) | Route application traces through Alloy instead of Tempo | 2026-03-30 | Accepted |
-| [ADR-005](helmfile/ADR-005-ebpf-kernel-symbol-access.md) | Enable eBPF kernel symbol access for Pyroscope profiling | 2026-03-30 | Accepted |
-| [ADR-006](helmfile/ADR-006-config-system.md) | Per-environment config system for user-configurable settings | 2026-03-31 | Accepted |
+| [ADR-003](helmfile/ADR-003-tracing-via-alloy.md) | Route application traces through Alloy instead of Tempo | 2026-03-30 | Accepted |
+| [ADR-004](helmfile/ADR-004-ebpf-kernel-symbol-access.md) | Enable eBPF kernel symbol access for Pyroscope profiling | 2026-03-30 | Accepted |
+| [ADR-005](helmfile/ADR-005-config-system.md) | Per-environment config system for user-configurable settings | 2026-03-31 | Accepted |
 
 ## Ansible
 
@@ -20,4 +20,4 @@ Decisions related to Ansible playbooks, bare metal provisioning, and K3s cluster
 
 | ADR | Title | Date | Status |
 |-----|-------|------|--------|
-| [ADR-003](ansible/ADR-003-sysctl-tuning.md) | Add sysctl tuning for K3s inotify limits | 2026-03-29 | Accepted |
+| [ADR-001](ansible/ADR-001-sysctl-tuning.md) | Add sysctl tuning for K3s inotify limits | 2026-03-29 | Accepted |

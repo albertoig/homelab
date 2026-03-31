@@ -1,4 +1,4 @@
-# ADR-006: Per-Environment Config System for User-Configurable Settings
+# ADR-005: Per-Environment Config System for User-Configurable Settings
 
 - **Date**: 2026-03-31
 - **Status**: Accepted

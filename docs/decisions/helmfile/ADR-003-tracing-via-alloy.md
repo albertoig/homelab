@@ -1,4 +1,4 @@
-# ADR-004: Route Application Traces Through Alloy Instead of Directly to Tempo
+# ADR-003: Route Application Traces Through Alloy Instead of Directly to Tempo
 
 - **Date**: 2026-03-30
 - **Status**: Accepted
@@ -94,7 +94,7 @@ All services point to Alloy's cluster-internal address:
 
 ## References
 
-- [ADR-002: Replace Promtail with Alloy for Log Collection](ADR-002-alloy-replacing-promtail.md)
+- [ADR-002](ADR-002-alloy-replacing-promtail.md)
 - [OpenTelemetry Collector pattern](https://opentelemetry.io/docs/collector/)
 - [Grafana Alloy OTLP receiver](https://grafana.com/docs/alloy/latest/reference/components/otelcol/otelcol.receiver.otlp/)
 - [ArgoCD OTLP tracing](https://argo-cd.readthedocs.io/en/stable/operator-manual/tracing/)
