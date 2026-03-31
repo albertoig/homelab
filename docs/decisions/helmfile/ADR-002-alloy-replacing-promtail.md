@@ -86,7 +86,7 @@ loki.source.kubernetes "pods" {
 
 loki.write "default" {
   endpoint {
-    url = "http://loki-gateway.prometheus.svc.cluster.local/loki/api/v1 push"
+    url = "http://loki-gateway.monitoring-system.svc.cluster.local/loki/api/v1 push"
     headers = { "X-Scope-OrgID" = "homelab" }
   }
 }

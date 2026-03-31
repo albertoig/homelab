@@ -9,7 +9,7 @@
 
 The cluster has an observability stack consisting of Prometheus (metrics), Loki (logs), Tempo (traces), and Pyroscope (profiling). Alloy was deployed as the unified OpenTelemetry collector (see [ADR-002](ADR-002-alloy-replacing-promtail.md)) to handle log collection, eBPF profiling, and trace forwarding.
 
-Initially, Traefik was configured to send traces directly to Tempo (`http://tempo.prometheus.svc.cluster.local:4318/v1/traces`). When adding tracing to additional services (ArgoCD, Grafana), the question arose: should traces go directly to Tempo, or through Alloy?
+Initially, Traefik was configured to send traces directly to Tempo (`http://tempo.monitoring-system.svc.cluster.local:4318/v1/traces`). When adding tracing to additional services (ArgoCD, Grafana), the question arose: should traces go directly to Tempo, or through Alloy?
 
 The existing Alloy configuration already exposes OTLP receiver ports (4317 gRPC, 4318 HTTP) and forwards traces to Tempo via `otelcol.exporter.otlp`:
 
@@ -28,7 +28,7 @@ otelcol.receiver.otlp "default" {
 
 otelcol.exporter.otlp "tempo" {
   client {
-    endpoint = "tempo.prometheus.svc.cluster.local:4317"
+    endpoint = "tempo.monitoring-system.svc.cluster.local:4317"
     tls {
       insecure = true
     }
@@ -88,9 +88,9 @@ All services point to Alloy's cluster-internal address:
 
 | Service | Endpoint | Protocol |
 |---------|----------|----------|
-| Traefik | `http://alloy.prometheus.svc.cluster.local:4318/v1/traces` | HTTP |
-| ArgoCD | `http://alloy.prometheus.svc.cluster.local:4317` | gRPC |
-| Grafana | `alloy.prometheus.svc.cluster.local:4317` | gRPC |
+| Traefik | `http://alloy.monitoring-system.svc.cluster.local:4318/v1/traces` | HTTP |
+| ArgoCD | `http://alloy.monitoring-system.svc.cluster.local:4317` | gRPC |
+| Grafana | `alloy.monitoring-system.svc.cluster.local:4317` | gRPC |
 
 ## References
 

@@ -72,6 +72,8 @@ GitOps-driven environment.
 - [ ] Authentik Auth
     - [ ] Grafana
 - [ ] Badges on Readme
+- [ ] Testing scrips
+- [ ] String with URL of the services
 ---
 
 ## 📝 Notes

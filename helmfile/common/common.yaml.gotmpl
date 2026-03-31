@@ -42,7 +42,7 @@ releases:
 
   # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
   - name: prometheus-stack
-    namespace: prometheus
+    namespace: monitoring-system
     createNamespace: true
     chart: prometheus-community/kube-prometheus-stack
     version: "82.15.1"
@@ -60,7 +60,7 @@ releases:
 
   # https://github.com/grafana-community/helm-charts/blob/main/charts/grafana/values.yaml
   - name: grafana
-    namespace: prometheus
+    namespace: monitoring-system
     createNamespace: true
     chart: grafana-community/grafana
     version: "11.3.6"
@@ -69,7 +69,7 @@ releases:
     labels:
       app: monitoring
     needs:
-      - prometheus/prometheus-stack
+      - monitoring-system/prometheus-stack
       - longhorn-system/longhorn
       - metallb-system/metallb
       - metallb-system/metallb-config
@@ -82,14 +82,14 @@ releases:
         args:
           - "-c"
           - |
-            for svc in $(kubectl get svc -n prometheus -l app.kubernetes.io/name=grafana -o name 2>/dev/null); do
-              kubectl patch "$svc" -n prometheus -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
+            for svc in $(kubectl get svc -n monitoring-system -l app.kubernetes.io/name=grafana -o name 2>/dev/null); do
+              kubectl patch "$svc" -n monitoring-system -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
             done
 
   # Loki - Log aggregation system
   # https://artifacthub.io/packages/helm/grafana/loki?modal=values
   - name: loki
-    namespace: prometheus
+    namespace: monitoring-system
     createNamespace: true
     chart: grafana-community/loki
     version: "9.3.6"
@@ -98,7 +98,7 @@ releases:
       app: logging
     needs:
       - longhorn-system/longhorn
-      - prometheus/prometheus-stack
+      - monitoring-system/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
     # Hook to clean up stuck pods with Longhorn volume mount issues
@@ -108,13 +108,13 @@ releases:
         args:
           - "-c"
           - |
-            for pod in $(kubectl get pods -n prometheus -o name 2>/dev/null); do
+            for pod in $(kubectl get pods -n monitoring-system -o name 2>/dev/null); do
               case $pod in
                 *loki*)
-                  status=$(kubectl get $pod -n prometheus -o jsonpath='{.status.phase}' 2>/dev/null)
+                  status=$(kubectl get $pod -n monitoring-system -o jsonpath='{.status.phase}' 2>/dev/null)
                   if [ "$status" = "Pending" ] || [ "$status" = "ContainerCreating" ]; then
                     echo "Force deleting stuck pod: $pod"
-                    kubectl delete $pod -n prometheus --force --grace-period=0 2>/dev/null || true
+                    kubectl delete $pod -n monitoring-system --force --grace-period=0 2>/dev/null || true
                   fi
                   ;;
               esac
@@ -124,7 +124,7 @@ releases:
   # Alloy - OpenTelemetry collector (log and profile collection)
   # https://artifacthub.io/packages/helm/grafana/alloy?modal=values
   - name: alloy
-    namespace: prometheus
+    namespace: monitoring-system
     createNamespace: true
     chart: grafana/alloy
     version: "1.6.2"
@@ -132,17 +132,17 @@ releases:
     labels:
       app: logging
     needs:
-      - prometheus/loki
-      - prometheus/grafana
-      - prometheus/pyroscope
-      - prometheus/tempo
+      - monitoring-system/loki
+      - monitoring-system/grafana
+      - monitoring-system/pyroscope
+      - monitoring-system/tempo
     inherit:
     - template: values_gotmpl_and_secrets
 
   # Tempo - Distributed tracing system
   # https://artifacthub.io/packages/helm/grafana-community/tempo?modal=values&path=serviceMonitor
   - name: tempo
-    namespace: prometheus
+    namespace: monitoring-system
     createNamespace: true
     chart: grafana-community/tempo
     version: "2.0.0"
@@ -151,7 +151,7 @@ releases:
       app: tracing
     needs:
       - longhorn-system/longhorn
-      - prometheus/prometheus-stack
+      - monitoring-system/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
     # Hook to clean up stuck pods with Longhorn volume mount issues
@@ -161,13 +161,13 @@ releases:
         args:
           - "-c"
           - |
-            for pod in $(kubectl get pods -n prometheus -o name 2>/dev/null); do
+            for pod in $(kubectl get pods -n monitoring-system -o name 2>/dev/null); do
               case $pod in
                 *tempo*)
-                  status=$(kubectl get $pod -n prometheus -o jsonpath='{.status.phase}' 2>/dev/null)
+                  status=$(kubectl get $pod -n monitoring-system -o jsonpath='{.status.phase}' 2>/dev/null)
                   if [ "$status" = "Pending" ] || [ "$status" = "ContainerCreating" ]; then
                     echo "Force deleting stuck pod: $pod"
-                    kubectl delete $pod -n prometheus --force --grace-period=0 2>/dev/null || true
+                    kubectl delete $pod -n monitoring-system --force --grace-period=0 2>/dev/null || true
                   fi
                   ;;
               esac
@@ -177,7 +177,7 @@ releases:
   # Pyroscope - Continuous profiling system
   # https://artifacthub.io/packages/helm/grafana/pyroscope?modal=values
   - name: pyroscope
-    namespace: prometheus
+    namespace: monitoring-system
     createNamespace: true
     chart: grafana/pyroscope
     version: "1.19.2"
@@ -186,7 +186,7 @@ releases:
       app: profiling
     needs:
       - longhorn-system/longhorn
-      - prometheus/prometheus-stack
+      - monitoring-system/prometheus-stack
       - metallb-system/metallb
       - metallb-system/metallb-config
     inherit:
@@ -205,7 +205,7 @@ releases:
     needs:
       - metallb-system/metallb
       - metallb-system/metallb-config
-      - prometheus/tempo
+      - monitoring-system/tempo
     inherit:
     - template: values_gotmpl_and_secrets
 
@@ -221,7 +221,7 @@ releases:
       app: identity
     needs:
       - longhorn-system/longhorn
-      - prometheus/prometheus-stack
+      - monitoring-system/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
 

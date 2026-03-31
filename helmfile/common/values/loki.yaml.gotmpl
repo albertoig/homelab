@@ -32,7 +32,7 @@ loki:
           writeback_size_limit: 500MB
         default_validity: 12h
         memcached_client:
-          addresses: dnssrvnoa+_memcached-client._tcp.loki-results-cache.prometheus.svc.cluster.local
+          addresses: dnssrvnoa+_memcached-client._tcp.loki-results-cache.monitoring-system.svc.cluster.local
           consistent_hash: true
           timeout: 500ms
           update_interval: 1m

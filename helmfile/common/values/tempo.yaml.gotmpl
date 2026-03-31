@@ -11,7 +11,7 @@ tempo:
   # https://grafana.com/docs/tempo/latest/metrics-generator/
   metricsGenerator:
     enabled: true
-    remoteWriteUrl: http://prometheus-stack-kube-prom-prometheus.prometheus.svc.cluster.local:9090/api/v1/write
+    remoteWriteUrl: http://prometheus-stack-kube-prom-prometheus.monitoring-system.svc.cluster.local:9090/api/v1/write
     processor:
       local_blocks:
         flush_to_storage: true
@@ -71,7 +71,7 @@ resources:
 
 serviceMonitor:
   enabled: true
-  namespace: prometheus
+  namespace: monitoring-system
   interval: 15s
   scrapeTimeout: 10s
   additionalLabels:

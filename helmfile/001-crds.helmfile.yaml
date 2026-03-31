@@ -13,7 +13,7 @@ lockFilePath: ../helmfile/locks/001-crds.helmfile.lock
 # Install Prometheus Operator CRDs first
 releases:
   - name: prometheus-operator-crds
-    namespace: prometheus
+    namespace: monitoring-system
     createNamespace: true
     chart: prometheus-community/prometheus-operator-crds
     version: "28.0.1"

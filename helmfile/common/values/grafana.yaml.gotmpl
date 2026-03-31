@@ -16,7 +16,7 @@ grafana.ini:
     check_for_updates: false
   tracing:
     open_telemetry:
-      address: "alloy.prometheus.svc.cluster.local:4318/v1/traces"
+      address: "alloy.monitoring-system.svc.cluster.local:4318/v1/traces"
       propagation: "w3c"
   log:
     level: info
@@ -68,7 +68,7 @@ datasources:
       - name: Prometheus
         type: prometheus
         uid: prometheus
-        url: http://prometheus-stack-kube-prom-prometheus.prometheus.svc.cluster.local:9090
+        url: http://prometheus-stack-kube-prom-prometheus.monitoring-system.svc.cluster.local:9090
         access: proxy
         isDefault: true
         jsonData:
@@ -77,7 +77,7 @@ datasources:
       - name: Loki
         type: loki
         uid: loki
-        url: http://loki-gateway.prometheus.svc.cluster.local
+        url: http://loki-gateway.monitoring-system.svc.cluster.local
         access: proxy
         jsonData:
           httpHeaderName1: 'X-Scope-OrgID'
@@ -103,7 +103,7 @@ datasources:
       - name: Tempo
         type: tempo
         uid: tempo
-        url: http://tempo.prometheus.svc.cluster.local:3200
+        url: http://tempo.monitoring-system.svc.cluster.local:3200
         access: proxy
         jsonData:
           nodeGraph:
@@ -123,7 +123,7 @@ datasources:
       - name: Pyroscope
         type: grafana-pyroscope-datasource
         uid: pyroscope
-        url: http://pyroscope.prometheus.svc.cluster.local:4040
+        url: http://pyroscope.monitoring-system.svc.cluster.local:4040
         access: proxy
         jsonData:
           profilesToLogs:

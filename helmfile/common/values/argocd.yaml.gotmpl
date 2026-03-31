@@ -5,7 +5,7 @@ configs:
   params:
     server.insecure: "true"
     # OTEL tracing — send traces to Alloy OTLP gRPC receiver
-    otlp.address: "alloy.prometheus.svc.cluster.local:4317"
+    otlp.address: "alloy.monitoring-system.svc.cluster.local:4317"
     otlp.insecure: "true"
 
 # Application Controller
@@ -13,7 +13,7 @@ controller:
   replicas: 1
   env:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: "http://alloy.prometheus.svc.cluster.local:4317"
+      value: "http://alloy.monitoring-system.svc.cluster.local:4317"
     - name: OTEL_TRACES_SAMPLER
       value: "parentbased_traceidratio"
     - name: OTEL_TRACES_SAMPLER_ARG
@@ -39,7 +39,7 @@ server:
   replicas: 1
   env:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: "http://alloy.prometheus.svc.cluster.local:4317"
+      value: "http://alloy.monitoring-system.svc.cluster.local:4317"
     - name: OTEL_TRACES_SAMPLER
       value: "parentbased_traceidratio"
     - name: OTEL_TRACES_SAMPLER_ARG
@@ -74,7 +74,7 @@ repoServer:
   replicas: 1
   env:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: "http://alloy.prometheus.svc.cluster.local:4317"
+      value: "http://alloy.monitoring-system.svc.cluster.local:4317"
     - name: OTEL_TRACES_SAMPLER
       value: "parentbased_traceidratio"
     - name: OTEL_TRACES_SAMPLER_ARG

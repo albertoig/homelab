@@ -44,7 +44,7 @@ alloy:
 
       loki.write "default" {
         endpoint {
-          url = "http://loki-gateway.prometheus.svc.cluster.local/loki/api/v1/push"
+          url = "http://loki-gateway.monitoring-system.svc.cluster.local/loki/api/v1/push"
           headers = { "X-Scope-OrgID" = "homelab" }
         }
       }
@@ -65,7 +65,7 @@ alloy:
 
       pyroscope.write "pyroscope" {
         endpoint {
-          url = "http://pyroscope.prometheus.svc.cluster.local:4040"
+          url = "http://pyroscope.monitoring-system.svc.cluster.local:4040"
         }
       }
 
@@ -84,7 +84,7 @@ alloy:
 
       otelcol.exporter.otlp "tempo" {
         client {
-          endpoint = "tempo.prometheus.svc.cluster.local:4317"
+          endpoint = "tempo.monitoring-system.svc.cluster.local:4317"
           tls {
             insecure = true
           }

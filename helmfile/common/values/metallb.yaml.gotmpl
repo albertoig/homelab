@@ -11,7 +11,7 @@ frr:
 # Enable Prometheus metrics
 prometheus:
   serviceAccount: metallb-prometheus
-  namespace: "prometheus"
+  namespace: "monitoring-system"
   serviceMonitor:
     enabled: true
     speaker:

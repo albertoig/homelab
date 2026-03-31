@@ -34,10 +34,10 @@ The homelab follows a layered architecture:
 | cert-manager | SSL/TLS certificate management | cert-manager-system |
 | external-dns | DNS management with Cloudflare | cert-manager-system |
 | Longhorn | Distributed block storage | longhorn-system |
-| Prometheus Stack | Monitoring and alerting | prometheus |
-| Grafana | Metrics visualization | prometheus |
-| Loki | Log aggregation | prometheus |
-| Tempo | Distributed tracing | prometheus |
+| Prometheus Stack | Monitoring and alerting | monitoring-system |
+| Grafana | Metrics visualization | monitoring-system |
+| Loki | Log aggregation | monitoring-system |
+| Tempo | Distributed tracing | monitoring-system |
 | Authentik | Identity provider | authentik |
 | ArgoCD | GitOps continuous delivery | argocd |
 
