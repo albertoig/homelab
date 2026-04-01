@@ -2,6 +2,8 @@
 
 Contributions are welcome. Before opening a PR, read this guide to understand the requirements.
 
+If you want to deploy this homelab for yourself, see [docs/FORKING.md](./docs/FORKING.md) instead.
+
 ## ADR Requirement
 
 **Every PR that introduces a meaningful change must include an Architecture Decision Record (ADR).**

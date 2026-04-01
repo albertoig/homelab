@@ -103,6 +103,8 @@ homelab/
 
 ## 🚀 Getting Started
 
+**Fork this repository** to store your own configs and secrets. See [docs/FORKING.md](./docs/FORKING.md) for setup.
+
 See [docs/INSTALL.md](./docs/INSTALL.md) for the full setup guide, including prerequisites, helm plugins, credentials, and step-by-step deployment.
 
 ```bash
@@ -158,6 +160,7 @@ Grafana is exposed via MetalLB LoadBalancer. Access it using the external IP ass
 - [Roadmap](./ROADMAP.md) — upcoming features and progress
 - [Configuration](./docs/CONFIG.md) — config system reference and all available settings
 - [Installation](./docs/INSTALL.md) — step-by-step setup guide
+- [Forking](./docs/FORKING.md) — how to fork and maintain your own configs and secrets
 - [Architecture Decisions](./docs/decisions/INDEX.md) — ADRs documenting significant infrastructure changes
 - [Scripts](./docs/SCRIPTS.md) — automation script documentation and usage
 - [Secrets](./docs/SECRETS.md) — full secrets reference with criticality levels

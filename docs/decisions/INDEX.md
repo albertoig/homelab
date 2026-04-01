@@ -21,3 +21,11 @@ Decisions related to Ansible playbooks, bare metal provisioning, and K3s cluster
 | ADR | Title | Date | Status |
 |-----|-------|------|--------|
 | [ADR-001](ansible/ADR-001-sysctl-tuning.md) | Add sysctl tuning for K3s inotify limits | 2026-03-29 | Accepted |
+
+## Project
+
+Decisions related to project structure, distribution model, and contribution workflow.
+
+| ADR | Title | Date | Status |
+|-----|-------|------|--------|
+| [ADR-001](project/ADR-001-fork-based-user-config.md) | Fork-based model for user configs and secrets | 2026-03-31 | Proposed |
