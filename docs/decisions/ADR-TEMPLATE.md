@@ -3,7 +3,7 @@
 - **Date**: YYYY-MM-DD
 - **Status**: [Proposed | Accepted | Deprecated | Superseded by ADR-XXX]
 - **Deciders**: [List of people involved in the decision]
-- **Category**: [monitoring | networking | storage | infrastructure | gitops | identity]
+- **Category**: [monitoring | networking | storage | infrastructure | gitops | identity | project]
 
 ## Context
 

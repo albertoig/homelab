@@ -68,16 +68,17 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
         │  │  [4/6] Destroy certs (002)   │
         │  │  [5/6] Destroy CRDs (001)    │
         │  │  [6/6] Clean stuck resources │
-        │  └──────────────────────────────┘
-        │
-        │
-        │  scripts/sops-encrypt-secrets.sh
-        │  ┌──────────────────────────────┐
-        │  │  Secrets Encryption           │
-        │  │  *.secrets.yaml -> *.enc.yaml │
-        └──┤  (standalone, not called by  │
-           │   other scripts)             │
-           └──────────────────────────────┘
+         │  └──────────────────────────────┘
+         │
+
+
+         scripts/sops-encrypt-secrets.sh
+         ┌──────────────────────────────┐
+         │  Secrets Encryption           │
+         │  *.secrets.yaml -> *.enc.yaml │
+         │  (standalone, not called by   │
+         │   other scripts)             │
+         └──────────────────────────────┘
 
 
         scripts/init-secrets.sh

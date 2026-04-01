@@ -15,7 +15,6 @@ Install the following tools:
 | [helmfile](https://helmfile.readthedocs.io/en/latest/#installation) | Helm releases management | Required |
 | [sops](https://github.com/mozilla/sops#installation) | Secrets encryption | Required |
 | [ansible](https://docs.ansible.com/ansible/latest/installation_guide/index.html) | Cluster provisioning | Required |
-| [terraform](https://developer.hashicorp.com/terraform/install) | Infrastructure management | Required |
 
 Verify all tools are installed:
 
@@ -39,6 +38,8 @@ chmod 600 ~/.config/helm/keys/jkroepke.gpg
 helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
 helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-getter-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
 helm plugin install https://github.com/jkroepke/helm-secrets/releases/download/v4.7.4/secrets-post-renderer-4.7.4.tgz --keyring ~/.config/helm/keys/jkroepke.gpg
+
+# helm-diff has no signed release; --verify false skips GPG verification
 helm plugin install https://github.com/databus23/helm-diff --verify false
 
 rm ~/.config/helm/keys/jkroepke.gpg.raw
@@ -112,7 +113,7 @@ This runs Ansible to provision K3s on bare-metal nodes defined in the inventory.
 
 This runs 4 steps in order:
 1. Apply CRDs (prometheus-operator)
-2. Apply certifications (cert-manager, cert-manager-config, external-dns)
+2. Apply certificates (cert-manager, cert-manager-config, external-dns)
 3. Apply common releases (monitoring, storage, networking, auth, gitops)
 4. Apply ingresses (external-facing ingress resources)
 

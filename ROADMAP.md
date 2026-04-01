@@ -83,14 +83,12 @@ GitOps-driven environment.
 - [ ] Backup solution
 - [ ] Disaster recovery plan
 - [ ] Helmfile configuration
-- [ ] Centralize scripting to run everything with one command
-- [ ] Create Grafana dashboards for Authentik and ArgoCD
 - [ ] Authentik Auth
     - [ ] Grafana
 - [ ] Badges on Readme
 - [ ] Testing scripts
 - [ ] Study to migrate HTTP URL in helm repositories to the new format
-- [ ] Explain angular stone principle in the readme
+- [ ] Explain cornerstone principle in the readme
 - [ ] Adjust scripts to number of environments in helmfile folder
 
 ---

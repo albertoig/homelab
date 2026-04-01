@@ -20,9 +20,10 @@ Trivial changes (typo fixes, formatting, minor doc updates) do not require an AD
 
 ### How to write an ADR
 
-1. Determine which category your change belongs to:
+1. Determine which category your change belongs to, and create your ADR in `docs/decisions/<category>/`:
    - `helmfile/` — Helm charts, helmfile configuration, Kubernetes service deployments
    - `ansible/` — Ansible playbooks, bare metal provisioning, K3s cluster configuration
+   - `project/` — Project structure, distribution model, contribution workflow
 
 2. Find the next available number in that folder. If the highest existing ADR is `ADR-005`, yours is `ADR-006`.
 

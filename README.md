@@ -9,7 +9,7 @@ A personal homelab setup using Kubernetes (K3s), Helmfile, and GitOps practices 
 This repository contains the infrastructure as code (IaC) and configurations for managing a personal homelab environment. It leverages modern DevOps tools and best practices to automate and manage the entire lifecycle of the infrastructure.
 
 The homelab is designed to be:
-- **Automated**: Infrastructure is managed as code using Terraform and Helmfile
+- **Automated**: Infrastructure is managed as code using Helmfile and Ansible
 - **Secure**: Secrets are encrypted using SOPS
 - **Observable**: Comprehensive monitoring with Prometheus, Grafana, Loki, Tempo, and Pyroscope
 - **GitOps-driven**: ArgoCD for continuous delivery and GitOps workflows
@@ -184,17 +184,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [K3s](https://k3s.io/) for the lightweight Kubernetes distribution
 - [Helmfile](https://helmfile.readthedocs.io/) for Helm releases management
 - [ArgoCD](https://argoproj.github.io/cd/) for GitOps continuous delivery
-- [Prometheus](https://prometheus.io/) for monitoring
-- [Grafana](https://grafana.com/) for visualization
-- [Loki](https://grafana.com/oss/loki/) for log aggregation
-- [Tempo](https://grafana.com/oss/tempo/) for distributed tracing
-- [Pyroscope](https://grafana.com/oss/pyroscope/) for continuous profiling
-- [Grafana Alloy](https://grafana.com/docs/alloy/) for OpenTelemetry collection
+- [Grafana](https://grafana.com/) and the Grafana stack for observability
 - [Longhorn](https://longhorn.io/) for cloud-native block storage
 - [MetalLB](https://metallb.universe.tf/) for bare metal load balancing
 - [Traefik](https://traefik.io/) for reverse proxy and ingress
 - [cert-manager](https://cert-manager.io/) for certificate management
-- [external-dns](https://github.com/kubernetes-sigs/external-dns/) for DNS automation
 - [Authentik](https://goauthentik.io/) for identity management
 - [SOPS](https://github.com/mozilla/sops) for secrets encryption
 - [Ansible](https://www.ansible.com/) for cluster provisioning
