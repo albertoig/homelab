@@ -2,6 +2,8 @@
 
 This homelab is designed as a template. Fork it to your own repository to store your configs, secrets, and environment-specific settings. The upstream repository contains only the shared infrastructure code — your fork holds everything that makes the deployment yours.
 
+This project is the cornerstone of your homelab — it deploys the base infrastructure. Application deployments (websites, APIs, custom services) should live in separate repositories, not inside this one.
+
 This project supports two environments: `dev` and `prod`. Two environments is enough for a homelab. If enough people request a third one, we can consider adding another.
 
 ## What lives in your fork

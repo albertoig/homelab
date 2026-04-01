@@ -13,6 +13,7 @@ Decisions related to Helm charts, helmfile configuration, and Kubernetes service
 | [ADR-003](helmfile/ADR-003-tracing-via-alloy.md) | Route application traces through Alloy instead of Tempo | 2026-03-30 | Accepted |
 | [ADR-004](helmfile/ADR-004-ebpf-kernel-symbol-access.md) | Enable eBPF kernel symbol access for Pyroscope profiling | 2026-03-30 | Accepted |
 | [ADR-005](helmfile/ADR-005-config-system.md) | Per-environment config system for user-configurable settings | 2026-03-31 | Accepted |
+| [ADR-006](helmfile/ADR-006-helmfile-separation.md) | Split helmfile into staged files to avoid chicken-and-egg dependencies | 2026-04-01 | Accepted |
 
 ## Ansible
 

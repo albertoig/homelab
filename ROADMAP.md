@@ -66,6 +66,12 @@ GitOps-driven environment.
 ---
 
 ## 🚧 In Progress
+- [ ] Authentik Auth
+    - [ ] Grafana
+
+---
+
+## 📋 Planned
 - [ ] Automate kubeconfig setup with helm-diff and helm-secrets plugins for new developer onboarding
 - [ ] ADR integration into merge request workflow
 - [ ] Grafana Dashboards
@@ -75,20 +81,13 @@ GitOps-driven environment.
     - [ ] Cert-Manager
 - [ ] Review meta monitoring https://grafana.com/docs/loki/latest/operations/meta-monitoring/
 - [ ] Migrate Loki (longhorn) to distributed from single binary
-
----
-
-## 📋 Planned
 - [ ] Investigate Grafana Beyla eBPF auto-instrumentation for services without native tracing (Authentik, Longhorn, MetalLB, Cert-Manager, External-DNS)
 - [ ] Backup solution
 - [ ] Disaster recovery plan
 - [ ] Helmfile configuration
-- [ ] Authentik Auth
-    - [ ] Grafana
 - [ ] Badges on Readme
 - [ ] Testing scripts
 - [ ] Study to migrate HTTP URL in helm repositories to the new format
-- [ ] Explain cornerstone principle in the readme
 - [ ] Adjust scripts to number of environments in helmfile folder
 
 ---

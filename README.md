@@ -6,13 +6,9 @@ A personal homelab setup using Kubernetes (K3s), Helmfile, and GitOps practices 
 
 ## 📋 Overview
 
-This repository contains the infrastructure as code (IaC) and configurations for managing a personal homelab environment. It leverages modern DevOps tools and best practices to automate and manage the entire lifecycle of the infrastructure.
+This repository manages a personal homelab running on Kubernetes (K3s), using Helmfile to deploy services and Ansible to provision bare-metal nodes. Secrets are encrypted with SOPS, and ArgoCD handles GitOps delivery.
 
-The homelab is designed to be:
-- **Automated**: Infrastructure is managed as code using Helmfile and Ansible
-- **Secure**: Secrets are encrypted using SOPS
-- **Observable**: Comprehensive monitoring with Prometheus, Grafana, Loki, Tempo, and Pyroscope
-- **GitOps-driven**: ArgoCD for continuous delivery and GitOps workflows
+This project is the **cornerstone** of a homelab — it provides the base infrastructure (cluster, networking, monitoring, identity). If you want to deploy your own applications (a portfolio site, a blog, custom services, etc.), those should live in a separate repository and be deployed on top of this foundation. This keeps the infrastructure clean and your application deployments independent.
 
 ---
 
