@@ -89,7 +89,8 @@ GitOps-driven environment.
 - [ ] Testing scripts
 - [ ] Study to migrate HTTP URL in helm repositories to the new format
 - [ ] Adjust scripts to number of environments in helmfile folder
-
+- [ ] Remove duplicates secrets
+- [ ] Make easier configs with scripts (DNS reused in secrets and normal config) 
 ---
 
 ## 📝 Notes
