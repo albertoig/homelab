@@ -1,12 +1,11 @@
 
 bases:
-- templates.yaml.gotmpl
-- environments.yaml.gotmpl
-- repositories.yaml
+- ./../templates.yaml.gotmpl
+- ./../repositories.yaml
 
 ---
 
-lockFilePath: ../helmfile/locks/001-crds.helmfile.lock
+lockFilePath: ./../locks/{{ .Environment.Name }}/001-crds.helmfile.lock
 
 ---
 

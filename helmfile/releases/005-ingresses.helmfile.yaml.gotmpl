@@ -1,0 +1,25 @@
+bases:
+- ./../templates.yaml.gotmpl
+- ./../repositories.yaml
+
+---
+
+lockFilePath: ./../locks/{{ .Environment.Name }}/004-ingresses.helmfile.lock
+
+---
+
+releases:
+  # Authentik Ingress
+  - name: authentik-ingress
+    namespace: auth-system
+    chart: ./../../charts/external-ingress
+    version: "0.1.0"
+    labels:
+      app: external-ingress
+      service: authentik
+      type: ingress
+    wait: true
+    disableValidation: true
+    missingFileHandler: Warn
+    values:
+    - ../common/values/external-ingress.yaml.gotmpl

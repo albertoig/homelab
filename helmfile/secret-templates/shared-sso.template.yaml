@@ -1,0 +1,12 @@
+# --- shared-sso ---
+sso:
+  admin:
+    # Shared SSO admin email (another admin account)
+    email: ""
+    # Shared SSO admin password
+    password: ""
+  grafana:
+    # OAuth2 client ID for Grafana SSO (generate with: openssl rand -hex 16)
+    client_id: ""
+    # OAuth2 client secret for Grafana SSO (generate with: openssl rand -hex 32)
+    client_secret: ""

@@ -1,0 +1,11 @@
+apiVersion: v2
+name: authentik-blueprints
+description: Authentik blueprint ConfigMaps for automated provider/app/user provisioning
+type: application
+version: 0.1.0
+appVersion: "2026.2.1"
+keywords:
+  - authentik
+  - blueprint
+  - sso
+  - identity

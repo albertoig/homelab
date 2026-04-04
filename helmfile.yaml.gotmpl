@@ -1,30 +1,28 @@
 
+environments:
+  dev:
+    kubeContext: homelab-dev
+    secrets:
+    - ./helmfile/environments/dev/secrets/shared-sso.enc.yaml
+  prod:
+    kubeContext: homelab-prod
+    secrets:
+    - ./helmfile/environments/prod/secrets/shared-sso.enc.yaml
+
+---
+
 bases:
-- helmfile/templates.yaml.gotmpl
-- helmfile/environments.yaml.gotmpl
-- helmfile/repositories.yaml
-- helmfile/common/common.yaml.gotmpl
-- helmfile/environments/{{ .Environment.Name }}/{{ .Environment.Name }}.yaml
+- ./helmfile/templates.yaml.gotmpl
+- ./helmfile/repositories.yaml
 
 ---
 
 helmfiles:
-- path: helmfile/001-crds.helmfile.yaml
-- path: helmfile/002-certs.helmfile.yaml.gotmpl
-- path: helmfile/003-ingresses.helmfile.yaml.gotmpl
-
+- path: helmfile/releases/*
+  values:
+    - {{ toYaml .Values | nindent 8 }}
 
 ---
 
-lockFilePath: helmfile/locks/envs/{{ .Environment.Name }}.helmfile.lock
-
-helmDefaults:
-  wait: true
-  waitForJobs: true
-  timeout: 600
-  cleanupOnFail: true
-  diffArgs:
-    - "--dry-run=server"
-
-commonLabels:
-  stack: homelab
+repositories:
+# None here

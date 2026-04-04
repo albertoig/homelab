@@ -1,0 +1,6 @@
+{{- $cert := genSelfSignedCert "authentik-internal" nil (list "authentik-internal") 3650 }}
+secrets:
+  signingKey: {{ $cert.Key | b64enc }}
+  signingCert: {{ $cert.Cert | b64enc }}
+
+root_dns: ""

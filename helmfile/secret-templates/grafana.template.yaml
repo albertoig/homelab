@@ -1,4 +1,4 @@
 # --- grafana ---
 grafana:
-  # The admin password for the Grafana dashboard
+  # The admin password for the Grafana dashboard (emergency local access)
   adminPassword: ""

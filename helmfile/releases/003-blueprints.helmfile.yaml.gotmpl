@@ -1,0 +1,24 @@
+bases:
+- ./../templates.yaml.gotmpl
+- ./../repositories.yaml
+- ./../environments/{{ .Environment.Name }}/{{ .Environment.Name }}.yaml
+
+---
+
+lockFilePath: ./../locks/{{ .Environment.Name }}/002-blueprints.helmfile.lock
+
+---
+
+releases:
+  # Authentik Blueprints - Declarative provider/app/user provisioning
+  - name: authentik-blueprints
+    namespace: auth-system
+    createNamespace: true
+    chart: ./../../charts/authentik-blueprints
+    version: "0.1.0"
+    wait: true
+    missingFileHandler: Warn
+    labels:
+      app: identity
+    inherit:
+    - template: values_gotmpl_secrets_and_shared

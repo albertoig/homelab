@@ -1,5 +1,7 @@
 # --- authentik ---
 authentik:
+  # Bootstrap API token for initial setup (generate with: openssl rand -hex 32)
+  bootstrap_token: ""
   # Secret key for cryptographic operations (generate with: openssl rand -hex 32)
   secret_key: ""
   email:
@@ -14,6 +16,12 @@ authentik:
   # PostgreSQL credentials for Authentik's internal database
   postgresql:
     # Database user password
+    password: ""
+  # Admin user for Authentik (used to log in to Grafana via SSO)
+  admin:
+    # Admin user email
+    email: ""
+    # Admin user password
     password: ""
 postgresql:
   auth:

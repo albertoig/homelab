@@ -1,3 +1,14 @@
+bases:
+- ./../templates.yaml.gotmpl
+- ./../repositories.yaml
+- ./../environments/{{ .Environment.Name }}/{{ .Environment.Name }}.yaml
+
+---
+
+lockFilePath: ./../locks/{{ .Environment.Name }}/003-core-apps.helmfile.lock
+
+---
+
 releases:
   # Longhorn - Cloud-native distributed block storage for Kubernetes
   # https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
@@ -29,8 +40,8 @@ releases:
   - name: metallb-config
     namespace: lb-system
     createNamespace: true
-    chart: charts/metallb-config
-    version: "0.15.3"
+    chart: ./../../charts/metallb-config
+    version: "0.1.0"
     wait: true
     disableValidation: true
     labels:
@@ -74,7 +85,7 @@ releases:
       - lb-system/metallb
       - lb-system/metallb-config
     inherit:
-    - template: values_gotmpl_and_secrets
+    - template: values_gotmpl_secrets_and_shared
     # Hook to clean up stuck MetalLB services before grafana installation
     hooks:
       - events: ["prepare"]
@@ -223,7 +234,7 @@ releases:
       - longhorn-system/longhorn
       - monitoring-system/prometheus-stack
     inherit:
-    - template: values_gotmpl_and_secrets
+    - template: values_gotmpl_secrets_and_shared
 
   # ArgoCD - GitOps Continuous Delivery
   # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml

@@ -31,7 +31,6 @@ echo ""
 
 bold "CLI tools:"
 check_command kubectl
-check_command terraform
 check_command helm
 check_command helmfile
 check_command sops

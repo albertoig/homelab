@@ -1,6 +1,6 @@
 #!/bin/bash
 # Initialize secrets for an environment from per-chart template files.
-# Prompts interactively for each secret value, generates per-chart .secrets.yaml
+# Iterates over each secret template, prompts for values, generates .secrets.yaml
 # files, and encrypts them with sops.
 #
 # Usage: ./scripts/init-secrets.sh <environment>
@@ -13,18 +13,6 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
 HELMFILE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TEMPLATES_DIR="$HELMFILE_DIR/helmfile/secret-templates"
 ENVIRONMENT="${1:-}"
-
-# Colors for interactive prompts (local to this script)
-_C_CYAN='\033[0;36m'
-_C_YELLOW='\033[0;33m'
-_C_RESET='\033[0m'
-
-# Suppress colors if not a terminal
-if [[ ! -t 1 ]]; then
-    _C_CYAN=''
-    _C_YELLOW=''
-    _C_RESET=''
-fi
 
 # --- Validation ---
 
@@ -42,355 +30,374 @@ fi
 
 SECRETS_DIR="$HELMFILE_DIR/helmfile/environments/$ENVIRONMENT/secrets"
 
-# Check for template files
 if [ ! -d "$TEMPLATES_DIR" ] || [ -z "$(ls "$TEMPLATES_DIR"/*.template.yaml 2>/dev/null)" ]; then
     error "No template files found in $TEMPLATES_DIR"
     exit 1
 fi
 
-# Ensure secrets directory exists
 mkdir -p "$SECRETS_DIR"
 
-# --- AWK helpers (used across phases) ---
+# --- Helpers ---
 
-AWK_TRIM='function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }'
-AWK_FIND_COLON='function find_colon(line,    i, c, in_quote) {
-    in_quote = 0
-    for (i = 1; i <= length(line); i++) {
-        c = substr(line, i, 1)
-        if (c == "\042" || c == "\047") in_quote = !in_quote
-        if (!in_quote && c == ":") return i
-    }
-    return 0
-}'
-AWK_BUILD_PATH='function build_path(ilen,    p, k) {
-    p = ""; for (k = 0; k < ilen; k++) p = p (k == 0 ? "" : ".") key_stack[k]; return p
-}'
+# Escape a value for YAML output: wrap in quotes if it contains special chars
+yaml_value() {
+    local val="$1"
+    # Always quote if value matches any YAML special character or whitespace
+    local special=':*#{}&!|>%@`[]-?'
+    local needs_quote=false
+    if [[ "$val" =~ [[:space:]] ]]; then
+        needs_quote=true
+    elif [[ "${val:0:1}" =~ [?\[-] ]]; then
+        needs_quote=true
+    else
+        for ((ci = 0; ci < ${#val}; ci++)); do
+            if [[ "$special" == *"${val:$ci:1}"* ]]; then
+                needs_quote=true
+                break
+            fi
+        done
+    fi
+    if $needs_quote; then
+        val="${val//\\/\\\\}"
+        val="${val//\"/\\\"}"
+        echo "\"$val\""
+    else
+        echo "$val"
+    fi
+}
 
-# --- Phase 1: Extract key paths, descriptions, and current values ---
+# Build dot-separated path from path_parts array up to given depth
+build_path() {
+    local depth=$1
+    local p=""
+    for ((i = 0; i < depth; i++)); do
+        [ -n "$p" ] && p="${p}."
+        p="${p}${path_parts[$i]}"
+    done
+    echo "$p"
+}
+
+# Find the position (1-indexed) of the first unquoted colon in a string
+find_colon() {
+    local s="$1"
+    local in_quote=0
+    local dq=$'\x22'  # double quote
+    local sq=$'\x27'  # single quote
+    for ((j = 0; j < ${#s}; j++)); do
+        local c="${s:$j:1}"
+        if [[ "$c" == "$dq" ]] || [[ "$c" == "$sq" ]]; then
+            in_quote=$((1 - in_quote))
+        elif [[ "$c" == ":" ]] && [ "$in_quote" -eq 0 ]; then
+            echo $((j + 1))
+            return
+        fi
+    done
+    echo 0
+}
+
+# Look up a value in a YAML file by dot-separated path (e.g., "authentik.email.from")
+# Uses Python for reliable YAML parsing
+yaml_lookup() {
+    local file="$1"
+    local path="$2"
+    python3 -c "
+import yaml, sys
+try:
+    with open('$file') as f:
+        data = yaml.safe_load(f)
+    keys = '$path'.split('.')
+    for k in keys:
+        if isinstance(data, dict) and k in data:
+            data = data[k]
+        elif isinstance(data, list) and data:
+            print(data[0])
+            sys.exit(0)
+        else:
+            sys.exit(0)
+    if data is not None:
+        print(data)
+except Exception:
+    sys.exit(0)
+" 2>/dev/null || true
+}
+
+# --- Main ---
 
 header "Initializing secrets for environment: $ENVIRONMENT"
 echo ""
 
-extract_key_paths() {
-    local template_file="$1"
-    local section="$2"
-
-    awk -v section="$section" '
-    '"$AWK_TRIM"'
-    '"$AWK_FIND_COLON"'
-    '"$AWK_BUILD_PATH"'
-
-    BEGIN { indent = 0; desc = "" }
-
-    /^[ \t]*$/ { desc = ""; next }
-    /^[ \t]*# ---/ { desc = ""; next }
-    /^[ \t]*#/ { gsub(/^[ \t]*#[ \t]*/, ""); desc = desc (desc == "" ? "" : " ") $0; next }
-
-    {
-        leading = 0
-        while (substr($0, leading + 1, 1) == " " || substr($0, leading + 1, 1) == "\t") leading++
-        new_indent = int(leading / 2)
-
-        is_list = match($0, /^[ \t]*-[ \t]*""[ \t]*$/)
-        colon_pos = find_colon($0)
-        is_kv = (!is_list && colon_pos > 0)
-
-        if (is_kv) {
-            key = trim(substr($0, leading + 1, colon_pos - leading - 1))
-            key_stack[new_indent] = key
-        }
-
-        indent = new_indent
-
-        if (is_list) {
-            print section "\t" build_path(indent) "\t" desc "\tlist_item"
-        } else if (is_kv) {
-            value = trim(substr($0, colon_pos + 1))
-            if (value == "\042\042") {
-                print section "\t" build_path(indent + 1) "\t" desc "\tvalue"
-            }
-        }
-
-        desc = ""
-    }
-    ' "$template_file"
-}
-
-# Extract section name from template file (from # --- name --- comment)
-get_section_name() {
-    awk '
-    /^[ \t]*# ---/ {
-        s = $0
-        gsub(/^[ \t]*#[ \t]*/, "", s)
-        gsub(/^[[:space:]]*---[[:space:]]*/, "", s)
-        gsub(/[[:space:]]*---[[:space:]]*$/, "", s)
-        gsub(/^[ \t]+|[ \t]+$/, "", s)
-        print s
-        exit
-    }
-    ' "$1"
-}
-
-# Collect key paths from all templates
-TMPDIR_WORK=$(mktemp -d)
-trap 'rm -rf "$TMPDIR_WORK"' EXIT
-
-ALL_ENTRIES="$TMPDIR_WORK/all_entries.txt"
-> "$ALL_ENTRIES"
+TOTAL_ENCRYPTED=0
+TOTAL_FAILED=0
 
 for template in "$TEMPLATES_DIR"/*.template.yaml; do
-    section=$(get_section_name "$template")
-    if [ -z "$section" ]; then
-        section=$(basename "$template" .template.yaml)
+    chart_name=$(basename "$template" .template.yaml)
+    secrets_file="$SECRETS_DIR/${chart_name}.secrets.yaml"
+    enc_file="$SECRETS_DIR/${chart_name}.enc.yaml"
+
+    # --- Check existing secrets ---
+    existing_source=""
+    if [ -f "$enc_file" ]; then
+        existing_source=$(mktemp "${TMPDIR:-/tmp}/${chart_name}.existing.XXXXXX")
+        if ! sops --decrypt "$enc_file" > "$existing_source" 2>/dev/null; then
+            existing_source=""
+            rm -f "$existing_source" 2>/dev/null
+        fi
+    elif [ -f "$secrets_file" ]; then
+        existing_source="$secrets_file"
     fi
-    extract_key_paths "$template" "$section" >> "$ALL_ENTRIES"
-done
 
-if [ ! -s "$ALL_ENTRIES" ]; then
-    warn "No secret values found in templates."
-    exit 0
-fi
-
-# --- Phase 2: Check for existing per-chart secrets ---
-
-# Find existing source for pre-filling: prefer .secrets.yaml, fallback to sops-decrypt .enc.yaml
-get_existing_source() {
-    local chart_name="$1"
-    local secrets_file="$SECRETS_DIR/${chart_name}.secrets.yaml"
-    local enc_file="$SECRETS_DIR/${chart_name}.enc.yaml"
-
-    if [ -f "$secrets_file" ]; then
-        echo "$secrets_file"
-    elif [ -f "$enc_file" ]; then
-        local decrypted="$TMPDIR_WORK/${chart_name}.existing.yaml"
-        sops --decrypt "$enc_file" > "$decrypted" 2>/dev/null && echo "$decrypted" || true
-    fi
-}
-
-# Check if any chart already has secrets (for overwrite warning)
-any_existing=false
-while IFS=$'\t' read -r section rest; do
-    existing_source=$(get_existing_source "$section")
+    # --- Ask to overwrite or proceed ---
     if [ -n "$existing_source" ]; then
-        any_existing=true
-        break
-    fi
-done < "$ALL_ENTRIES"
-
-if [ "$any_existing" = true ]; then
-    warn "Some charts already have secrets in: $SECRETS_DIR"
-    echo ""
-    msg "${_C_YELLOW}  Existing per-chart secrets:${_C_RESET}"
-    for f in "$SECRETS_DIR"/*.secrets.yaml "$SECRETS_DIR"/*.enc.yaml; do
-        [ -f "$f" ] && msg "    $(basename "$f")"
-    done
-    echo ""
-    read -rp "$(echo -e "${_C_YELLOW}  Overwrite existing values? [y/N] ${_C_RESET}")" confirm
-    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-        info "Aborted. Existing secrets preserved."
-        exit 0
-    fi
-    echo ""
-fi
-
-# --- Phase 3: Prompt for values ---
-
-RESPONSES_FILE="$TMPDIR_WORK/responses.txt"
-> "$RESPONSES_FILE"
-
-current_section=""
-
-while IFS=$'\t' read -r section key_path description line_type; do
-    [ -z "$key_path" ] && continue
-
-    # Show section header when it changes
-    if [ "$section" != "$current_section" ]; then
-        [ -n "$current_section" ] && echo ""
-        echo -e "${_C_CYAN}  === $section ===${_C_RESET}"
-        current_section="$section"
+        echo -e "${_C_CYAN}  [$chart_name]${_C_RESET} Secrets already exist."
+        read -rp "$(echo -e "  ${_C_YELLOW}Overwrite? [y/N] ${_C_RESET}")" confirm
+        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+            info "[$chart_name] Skipping."
+            echo ""
+            # Clean up temp file
+            [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source"
+            continue
+        fi
+        echo ""
     fi
 
-    # Show description
-    if [ -n "$description" ]; then
-        echo -e "  ${description}"
-    fi
+    # --- Phase 1: Parse template into entries ---
+    entries=0
+    declare -a entry_path=()
+    declare -a entry_desc=()
+    declare -a entry_type=()
+    declare -a entry_indent=()
+    declare -a path_parts=()
 
-    # Get existing value from per-chart source
-    existing=""
-    existing_source=$(get_existing_source "$section")
-    if [ -n "$existing_source" ]; then
-        existing=$(awk -v kp="$key_path" '
-        '"$AWK_TRIM"'
-        '"$AWK_FIND_COLON"'
-        '"$AWK_BUILD_PATH"'
+    current_desc=""
+    indent_level=0
 
-        BEGIN { indent = 0 }
-        /^[ \t]*$/ { next }
-        /^[ \t]*#/ { next }
+    while IFS= read -r line || [ -n "$line" ]; do
+        # Skip blank lines
+        [[ "$line" =~ ^[[:space:]]*$ ]] && { current_desc=""; continue; }
 
-        {
-            leading = 0
-            while (substr($0, leading + 1, 1) == " " || substr($0, leading + 1, 1) == "\t") leading++
-            new_indent = int(leading / 2)
+        # Skip section header comments (# --- name ---)
+        if [[ "$line" =~ ^[[:space:]]*#[[:space:]]*--- ]]; then
+            current_desc=""
+            continue
+        fi
 
-            is_list = match($0, /^[ \t]*-[ \t]*""[ \t]*$/)
-            colon_pos = find_colon($0)
-            is_kv = (!is_list && colon_pos > 0)
+        # Accumulate comment lines
+        if [[ "$line" =~ ^[[:space:]]*# ]]; then
+            comment="${line#"${line%%[![:space:]]*}"}"
+            comment="${comment#\#}"
+            comment="${comment#"${comment%%[![:space:]]*}"}"
+            if [ -n "$current_desc" ]; then
+                current_desc="$current_desc $comment"
+            else
+                current_desc="$comment"
+            fi
+            continue
+        fi
 
-            if (is_kv) {
-                key = trim(substr($0, leading + 1, colon_pos - leading - 1))
-                key_stack[new_indent] = key
-            }
-            indent = new_indent
+        # Calculate indentation (2 spaces per level)
+        leading="${line%%[![:space:]]*}"
+        indent_level=$(( ${#leading} / 2 ))
 
-            if (is_list) {
-                path = build_path(indent)
-                if (path == kp) {
-                    val = trim(substr($0, leading + 2))
-                    gsub(/^-[ \t]*/, "", val)
-                    gsub(/^\042|\042$/, "", val)
-                    print val
-                    exit
-                }
-            } else if (is_kv) {
-                path = build_path(indent + 1)
-                if (path == kp) {
-                    val = trim(substr($0, colon_pos + 1))
-                    gsub(/^\042|\042$/, "", val)
-                    print val
-                    exit
-                }
-            }
-        }
-        ' "$existing_source")
-    fi
+        trimmed="${line#"${line%%[![:space:]]*}"}"
+        trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
 
-    # Display prompt
-    if [ -n "$existing" ]; then
-        printf "    ${_C_YELLOW}%s${_C_RESET} [%s]: " "$key_path" "$existing"
-    else
-        printf "    ${_C_YELLOW}%s${_C_RESET}: " "$key_path"
-    fi
+        if [[ "$trimmed" == "- \"\"" ]]; then
+            # List item placeholder
+            path_parts[$indent_level]="_item"
+            p=$(build_path "$indent_level")
+            entry_path[$entries]="$p"
+            entry_desc[$entries]="$current_desc"
+            entry_type[$entries]="list_item"
+            entry_indent[$entries]=$indent_level
+            entries=$((entries + 1))
+            current_desc=""
+        else
+            # Key: value line
+            colon_pos=$(find_colon "$trimmed")
+            if [ "$colon_pos" -gt 0 ]; then
+                key="${trimmed:0:$((colon_pos - 1))}"
+                key="${key%"${key##*[![:space:]]}"}"
+                value="${trimmed:$colon_pos}"
+                value="${value#"${value%%[![:space:]]*}"}"
 
-    read -r response
+                path_parts[$indent_level]="$key"
 
-    # Use existing value if no response given
-    if [ -z "$response" ] && [ -n "$existing" ]; then
-        response="$existing"
-    fi
+                if [ "$value" = '""' ]; then
+                    p=$(build_path "$((indent_level + 1))")
+                    entry_path[$entries]="$p"
+                    entry_desc[$entries]="$current_desc"
+                    entry_type[$entries]="value"
+                    entry_indent[$entries]=$indent_level
+                    entries=$((entries + 1))
+                fi
+                current_desc=""
+            fi
+        fi
+    done < "$template"
 
-    # Skip if still empty (user chose to leave blank)
-    if [ -z "$response" ]; then
+    # --- Phase 2: Prompt for values ---
+
+    echo -e "${_C_BOLD}${_C_CYAN}  === $chart_name ===${_C_RESET}"
+
+    if [ "$entries" -eq 0 ]; then
+        warn "[$chart_name] No secret values found in template."
+        echo ""
         continue
     fi
 
-    echo "${key_path}|${response}" >> "$RESPONSES_FILE"
+    declare -a responses_key=()
+    declare -a responses_val=()
+    rcount=0
 
-done < "$ALL_ENTRIES"
+    for ((i = 0; i < entries; i++)); do
+        desc="${entry_desc[$i]}"
+        kp="${entry_path[$i]}"
 
-echo ""
+        # Look up existing value using Python YAML parser
+        existing=""
+        if [ -n "$existing_source" ]; then
+            existing=$(yaml_lookup "$existing_source" "$kp")
+        fi
 
-# --- Phase 4: Generate per-chart .secrets.yaml files ---
+        # Display description and example
+        if [ -n "$desc" ]; then
+            echo ""
+            echo -e "    ${_C_BLUE}${desc}${_C_RESET}"
+        fi
 
-info "Generating per-chart secrets files..."
+        # Prompt
+        if [ -n "$existing" ]; then
+            printf "    ${_C_YELLOW}%s${_C_RESET} [%s]: " "$kp" "$existing"
+        else
+            printf "    ${_C_YELLOW}%s${_C_RESET}: " "$kp"
+        fi
 
-generate_output() {
-    local template_file="$1"
+        read -r response
 
-    awk -v responses_file="$RESPONSES_FILE" '
-    '"$AWK_TRIM"'
-    '"$AWK_FIND_COLON"'
-    '"$AWK_BUILD_PATH"'
+        # Use existing value if no new input
+        if [ -z "$response" ] && [ -n "$existing" ]; then
+            response="$existing"
+        fi
 
-    BEGIN {
-        while ((getline line < responses_file) > 0) {
-            idx = index(line, "|")
-            if (idx > 0) {
-                responses[substr(line, 1, idx - 1)] = substr(line, idx + 1)
-            }
-        }
-        close(responses_file)
-        indent = 0
-    }
+        if [ -n "$response" ]; then
+            responses_key[$rcount]="$kp"
+            responses_val[$rcount]="$response"
+            rcount=$((rcount + 1))
+        fi
+    done
 
-    # Skip comments and blank lines
-    /^[ \t]*#/ { next }
-    /^[ \t]*$/ { next }
+    echo ""
+
+    # --- Phase 3: Generate .secrets.yaml ---
 
     {
-        leading = 0
-        while (substr($0, leading + 1, 1) == " " || substr($0, leading + 1, 1) == "\t") leading++
-        new_indent = int(leading / 2)
+        current_desc=""
+        indent_level=0
 
-        is_list = match($0, /^[ \t]*-[ \t]*""[ \t]*$/)
-        colon_pos = find_colon($0)
-        is_kv = (!is_list && colon_pos > 0)
+        while IFS= read -r line || [ -n "$line" ]; do
+            # Blank lines
+            if [[ "$line" =~ ^[[:space:]]*$ ]]; then
+                echo ""
+                current_desc=""
+                continue
+            fi
 
-        if (is_kv) {
-            key = trim(substr($0, leading + 1, colon_pos - leading - 1))
-            key_stack[new_indent] = key
-        }
-        indent = new_indent
+            # Pass through section header comments
+            if [[ "$line" =~ ^[[:space:]]*#[[:space:]]*--- ]]; then
+                echo "$line"
+                current_desc=""
+                continue
+            fi
 
-        if (is_list) {
-            path = build_path(indent)
-            if (path in responses) {
-                print substr($0, 1, leading) "- " responses[path]
-            } else {
-                print $0
-            }
-        } else if (is_kv) {
-            path = build_path(indent + 1)
-            value = trim(substr($0, colon_pos + 1))
-            if (value == "\042\042" && (path in responses)) {
-                print substr($0, 1, leading) key ": " responses[path]
-            } else {
-                print $0
-            }
-        } else {
-            print $0
-        }
-    }
-    ' "$template_file"
-}
+            # Pass through comments (strip trailing spaces only)
+            if [[ "$line" =~ ^[[:space:]]*# ]]; then
+                echo "$line"
+                continue
+            fi
 
-for template in "$TEMPLATES_DIR"/*.template.yaml; do
-    chart_name=$(get_section_name "$template")
-    if [ -z "$chart_name" ]; then
-        chart_name=$(basename "$template" .template.yaml)
+            # YAML content line
+            leading="${line%%[![:space:]]*}"
+            indent_level=$(( ${#leading} / 2 ))
+            trimmed="${line#"${line%%[![:space:]]*}"}"
+            trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+
+            if [[ "$trimmed" == "- \"\"" ]]; then
+                # List item — look up response by path
+                p=$(build_path "$indent_level")
+                found=false
+                for ((r = 0; r < rcount; r++)); do
+                    if [ "${responses_key[$r]}" = "$p" ]; then
+                        echo "${leading}- $(yaml_value "${responses_val[$r]}")"
+                        found=true
+                        break
+                    fi
+                done
+                if ! $found; then echo "$line"; fi
+            else
+                # Key: value line
+                colon_pos=$(find_colon "$trimmed")
+                if [ "$colon_pos" -gt 0 ]; then
+                    key="${trimmed:0:$((colon_pos - 1))}"
+                    key="${key%"${key##*[![:space:]]}"}"
+                    value="${trimmed:$colon_pos}"
+                    value="${value#"${value%%[![:space:]]*}"}"
+
+                    path_parts[$indent_level]="$key"
+
+                    if [ "$value" = '""' ]; then
+                        p=$(build_path "$((indent_level + 1))")
+                        found=false
+                        for ((r = 0; r < rcount; r++)); do
+                            if [ "${responses_key[$r]}" = "$p" ]; then
+                                echo "${leading}${key}: $(yaml_value "${responses_val[$r]}")"
+                                found=true
+                                break
+                            fi
+                        done
+                        if ! $found; then echo "$line"; fi
+                    else
+                        echo "$line"
+                    fi
+                else
+                    echo "$line"
+                fi
+            fi
+        done < "$template"
+    } > "$secrets_file"
+
+    success "[$chart_name] Created $(basename "$secrets_file")"
+
+    # Clean up temporary decrypted file
+    if [[ "$existing_source" == /tmp/* ]] || [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]]; then
+        rm -f "$existing_source"
     fi
-    output_file="$SECRETS_DIR/${chart_name}.secrets.yaml"
-    generate_output "$template" > "$output_file"
-    success "Created: $output_file"
+
+    unset entry_path entry_desc entry_type entry_indent path_parts responses_key responses_val
 done
 
-# --- Phase 5: Encrypt per-chart files ---
+# --- Encrypt all .secrets.yaml files ---
 
 echo ""
-header "Encrypting per-chart secrets"
-
-encrypted=0
-failed=0
+header "Encrypting secrets for $ENVIRONMENT"
 
 for secrets_file in "$SECRETS_DIR"/*.secrets.yaml; do
     [ -f "$secrets_file" ] || continue
     chart_name=$(basename "$secrets_file" .secrets.yaml)
     enc_file="$SECRETS_DIR/${chart_name}.enc.yaml"
 
-    info "Encrypting: ${chart_name}.secrets.yaml -> ${chart_name}.enc.yaml"
+    info "Encrypting: $(basename "$secrets_file") -> $(basename "$enc_file")"
     if sops --encrypt "$secrets_file" > "$enc_file" 2>/dev/null; then
-        success "Created: $(basename "$enc_file")"
-        encrypted=$((encrypted + 1))
+        success "Created $(basename "$enc_file")"
+        TOTAL_ENCRYPTED=$((TOTAL_ENCRYPTED + 1))
     else
-        error "Failed to encrypt: $(basename "$secrets_file")"
-        failed=$((failed + 1))
+        error "Failed to encrypt $(basename "$secrets_file")"
+        TOTAL_FAILED=$((TOTAL_FAILED + 1))
     fi
 done
 
 echo ""
-if [ "$failed" -gt 0 ]; then
-    warn "Encrypted $encrypted chart(s), $failed failed."
+if [ "$TOTAL_FAILED" -gt 0 ]; then
+    warn "Encrypted $TOTAL_ENCRYPTED file(s), $TOTAL_FAILED failed."
 else
-    success "All $encrypted chart(s) encrypted successfully!"
+    success "All $TOTAL_ENCRYPTED secret file(s) encrypted for $ENVIRONMENT."
 fi

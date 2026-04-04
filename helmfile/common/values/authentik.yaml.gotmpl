@@ -2,6 +2,9 @@
 # https://github.com/goauthentik/helm/blob/authentik-2026.2.1/charts/authentik/values.yaml
 
 authentik:
+  bootstrap_token: "" # Set via secrets: authentik.bootstrap_token
+  bootstrap_password: "" # Set via secrets: authentik.admin.password
+  bootstrap_email: "" # Set via secrets: authentik.admin.email
   # Secret key used for cryptographic operations
   secret_key: "" # Set via secrets: authentik.secret_key
 
@@ -13,7 +16,14 @@ authentik:
     password: ""  # Set via secrets: authentik.email.password
     use_tls: true
     use_ssl: false
-    from: "authentik@example.com" # Set via secrets: authentik.email.from
+    from: "" # Set via secrets: authentik.email.from
+
+# Blueprint ConfigMaps for automated provisioning
+blueprints:
+  configMaps:
+    - authentik-grafana-blueprint
+  secrets:
+    - grafana-sso-credentials
 
 server:
   # Expose Authentik via MetalLB LoadBalancer
@@ -38,6 +48,57 @@ server:
         release: prometheus-stack
 
 worker:
+  env:
+    - name: HOMELAB_ADMIN_EMAIL
+      valueFrom:
+        secretKeyRef:
+          name: grafana-sso-credentials
+          key: HOMELAB_ADMIN_EMAIL
+    - name: HOMELAB_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: grafana-sso-credentials
+          key: HOMELAB_ADMIN_PASSWORD
+    - name: SHARED_SSO_ADMIN_EMAIL
+      valueFrom:
+        secretKeyRef:
+          name: grafana-sso-credentials
+          key: SHARED_SSO_ADMIN_EMAIL
+    - name: SHARED_SSO_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: grafana-sso-credentials
+          key: SHARED_SSO_ADMIN_PASSWORD
+    - name: GRAFANA_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: grafana-sso-credentials
+          key: GRAFANA_CLIENT_ID
+    - name: GRAFANA_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: grafana-sso-credentials
+          key: GRAFANA_CLIENT_SECRET
+    - name: OAUTH_CERT_DATA
+      valueFrom:
+        secretKeyRef:
+          name: authentik-signing-key-secret # Name of your cert-manager secret
+          key: tls.crt
+    - name: OAUTH_KEY_DATA
+      valueFrom:
+        secretKeyRef:
+          name: authentik-signing-key-secret
+          key: tls.key
+  volumeMounts:
+    - name: grafana-sso-credentials
+      mountPath: /etc/authentik/secrets
+      readOnly: true
+  volumes:
+    - name: grafana-sso-credentials
+      secret:
+        secretName: grafana-sso-credentials
+
+
   metrics:
     enabled: true
     serviceMonitor:
@@ -49,6 +110,8 @@ worker:
 
 postgresql:
   enabled: true
+  auth:
+    password: "" # Set via secrets: postgres.password
   persistence:
     enabled: true
     storageClassName: longhorn

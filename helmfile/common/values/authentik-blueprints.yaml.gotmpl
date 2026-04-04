@@ -1,0 +1,2 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+root_dns: {{ $cfg.general.root_dns }}
