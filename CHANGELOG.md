@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/albertoig/homelab/compare/v5.1.0...v5.2.0) (2026-04-04)
+
+
+### Features
+
+* **authentik:** add bootstrap token and admin configuration ([7cb5529](https://github.com/albertoig/homelab/commit/7cb55296d91a8c03feb777bd1b522da6f0bf1cec))
+
 # [5.1.0](https://github.com/albertoig/homelab/compare/v5.0.0...v5.1.0) (2026-03-31)
 
 
