@@ -3,8 +3,9 @@
 
 authentik:
   bootstrap_token: "" # Set via secrets: authentik.bootstrap_token
-  bootstrap_password: "" # Set via secrets: authentik.admin.password
-  bootstrap_email: "" # Set via secrets: authentik.admin.email
+  bootstrap_password: "" # Set via secrets: authentik.bootstrap_password
+  bootstrap_email: "" # Set via secrets: authentik.bootstrap_email
+
   # Secret key used for cryptographic operations
   secret_key: "" # Set via secrets: authentik.secret_key
 
@@ -21,9 +22,9 @@ authentik:
 # Blueprint ConfigMaps for automated provisioning
 blueprints:
   configMaps:
-    - authentik-grafana-blueprint
+    - authentik-initial-config-blueprint
   secrets:
-    - grafana-sso-credentials
+    - authentik-initial-config-secrets
 
 server:
   # Expose Authentik via MetalLB LoadBalancer
@@ -49,35 +50,35 @@ server:
 
 worker:
   env:
+    - name: HOMELAB_ADMIN_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: authentik-initial-config-secrets
+          key: HOMELAB_ADMIN_USERNAME
+    - name: HOMELAB_ADMIN_NAME
+      valueFrom:
+        secretKeyRef:
+          name: authentik-initial-config-secrets
+          key: HOMELAB_ADMIN_NAME
     - name: HOMELAB_ADMIN_EMAIL
       valueFrom:
         secretKeyRef:
-          name: grafana-sso-credentials
+          name: authentik-initial-config-secrets
           key: HOMELAB_ADMIN_EMAIL
     - name: HOMELAB_ADMIN_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: grafana-sso-credentials
+          name: authentik-initial-config-secrets
           key: HOMELAB_ADMIN_PASSWORD
-    - name: SHARED_SSO_ADMIN_EMAIL
-      valueFrom:
-        secretKeyRef:
-          name: grafana-sso-credentials
-          key: SHARED_SSO_ADMIN_EMAIL
-    - name: SHARED_SSO_ADMIN_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: grafana-sso-credentials
-          key: SHARED_SSO_ADMIN_PASSWORD
     - name: GRAFANA_CLIENT_ID
       valueFrom:
         secretKeyRef:
-          name: grafana-sso-credentials
+          name: authentik-initial-config-secrets
           key: GRAFANA_CLIENT_ID
     - name: GRAFANA_CLIENT_SECRET
       valueFrom:
         secretKeyRef:
-          name: grafana-sso-credentials
+          name: authentik-initial-config-secrets
           key: GRAFANA_CLIENT_SECRET
     - name: OAUTH_CERT_DATA
       valueFrom:
@@ -90,13 +91,13 @@ worker:
           name: authentik-signing-key-secret
           key: tls.key
   volumeMounts:
-    - name: grafana-sso-credentials
+    - name: authentik-initial-config-secrets
       mountPath: /etc/authentik/secrets
       readOnly: true
   volumes:
-    - name: grafana-sso-credentials
+    - name: authentik-initial-config-secrets
       secret:
-        secretName: grafana-sso-credentials
+        secretName: authentik-initial-config-secrets
 
 
   metrics:

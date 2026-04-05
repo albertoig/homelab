@@ -1,6 +1,10 @@
 # --- shared-sso ---
 sso:
   admin:
+    # Shared SSO admin username
+    username: ""
+    # Shared SSO admin display name
+    name: ""
     # Shared SSO admin email (another admin account)
     email: ""
     # Shared SSO admin password

@@ -17,7 +17,7 @@ helmfile/environments/<env>/secrets/<chart>.enc.yaml   (encrypted, committed)
 Kubernetes Secrets / Helm values
 ```
 
-Only charts that actually need secrets have template files. Charts without secrets (longhorn, metallb, loki, alloy, tempo, pyroscope, traefik, argocd) use `common_values_only` and skip the secrets step entirely via `missingFileHandler: Warn`.
+Only charts that actually need secrets have template files. Charts without template files (longhorn, metallb, loki, alloy, tempo, pyroscope, traefik, argocd, external-dns) use the `values_gotmpl_and_secrets` template with `missingFileHandler: Warn`, which causes helmfile to skip but not fail when the secrets file is missing.
 
 Shared credentials that span multiple charts use the `shared-sso.enc.yaml` file, loaded alongside per-chart secrets via the `values_gotmpl_secrets_and_shared` inherit template.
 
@@ -29,8 +29,15 @@ Shared credentials that span multiple charts use the `shared-sso.enc.yaml` file,
 **Used by:** `authentik` and `grafana` releases (via `values_gotmpl_secrets_and_shared` template)
 **Criticality:** High — breaks SSO for all integrated applications
 
+> [!WARNING]
+> If any `sso.*` fields are wrong, the Authentik blueprint will fail to create SSO applications, groups, and the homelab user. This is because the blueprint reads these values directly from the secrets file. Ensure these values are correct before deploying.
+
 | Key | Criticality | Description |
 |-----|-------------|-------------|
+| `sso.admin.username` | **High** | Admin username. Used by Authentik blueprint to create an additional admin account. |
+| `sso.admin.name` | **High** | Display name for the admin. |
+| `sso.admin.email` | **High** | Email for the admin account. Should be different from `authentik.bootstrap_email`. |
+| `sso.admin.password` | **High** | Password for the admin account. |
 | `sso.grafana.client_id` | **High** | OAuth2 client ID for Grafana SSO. Single source of truth — both Authentik (via worker env vars / blueprint `!Env`) and Grafana (via env vars) read from here. |
 | `sso.grafana.client_secret` | **High** | OAuth2 client secret for Grafana SSO. |
 
@@ -67,8 +74,17 @@ openssl rand -base64 24  # adminPassword (emergency use)
 **Chart:** `authentik/authentik`
 **Criticality:** Critical — multiple secrets, any wrong value breaks the identity provider
 
+> [!NOTE]
+> There are two admin accounts in Authentik:
+> - **Bootstrap user** (`authentik.bootstrap_email`): Initial admin created by the helm chart. Only for emergency use when the blueprint fails. Keep these credentials secure.
+> - **Homelab user** (`sso.admin`): Created by the Authentik blueprint for daily administration. Use this account for regular Authentik admin tasks.
+> - Both should use **different emails** to avoid conflicts.
+
 | Key | Criticality | Description |
 |-----|-------------|-------------|
+| `authentik.bootstrap_token` | **High** | Bootstrap API token for initial setup. Used by the init container to authenticate during first bootstrap. |
+| `authentik.bootstrap_password` | **High** | Initial bootstrap admin password. Only for emergency use when blueprint fails. |
+| `authentik.bootstrap_email` | **High** | Initial bootstrap admin email. Only for emergency use. Use a different email than `sso.admin.email`. |
 | `authentik.secret_key` | **Critical** | Master cryptographic key used for signing sessions, tokens, cookies, and encrypting internal data. Must remain stable across restarts. |
 | `authentik.email.from` | Low | Sender address shown on outbound emails (password resets, enrollments, notifications). Example: `"Homelab <homelab@iglesias.cloud>"`. |
 | `authentik.email.password` | **Medium** | SMTP authentication password. If wrong, Authentik cannot send any emails. |
@@ -88,12 +104,15 @@ openssl rand -base64 24  # adminPassword (emergency use)
 **If `admin.email`/`admin.password` are wrong:** The blueprint-created admin user cannot log in to Authentik or Grafana via SSO.
 
 **How to obtain:**
+- `authentik.bootstrap_token`: `openssl rand -hex 32`
+- `authentik.bootstrap_password`: Strong password for initial bootstrap (emergency use only)
+- `authentik.bootstrap_email`: Different email than `sso.admin.email` (emergency use only)
 - `authentik.secret_key`: `openssl rand -hex 32`
 - `authentik.email.*`: Your SMTP provider credentials (ProtonMail, Gmail app password, SendGrid API key, etc.)
 - `authentik.postgresql.password`: `openssl rand -base64 24`
 - `postgresql.auth.password`: `openssl rand -base64 24`
-- `authentik.admin.email`: Your admin email address
-- `authentik.admin.password`: Strong password for the admin user
+- `authentik.admin.email`: Different email than `authentik.bootstrap_email` (blueprint-created for daily use)
+- `authentik.admin.password`: Strong password for the admin user (daily use)
 
 ---
 
@@ -154,9 +173,16 @@ This is the most complex secrets file. It powers two charts: the local `cert-man
 
 | Chart | Secret file | Key | Criticality | Impact if wrong |
 |-------|------------|-----|-------------|-----------------|
+| shared | `shared-sso.enc.yaml` | `sso.admin.username` | High | Missing additional admin |
+| shared | `shared-sso.enc.yaml` | `sso.admin.name` | High | Wrong display name |
+| shared | `shared-sso.enc.yaml` | `sso.admin.email` | High | Wrong admin email |
+| shared | `shared-sso.enc.yaml` | `sso.admin.password` | High | Cannot log in as admin |
 | shared | `shared-sso.enc.yaml` | `sso.grafana.client_id` | High | SSO login fails (invalid_client) |
 | shared | `shared-sso.enc.yaml` | `sso.grafana.client_secret` | High | SSO login fails (invalid_client) |
 | grafana | `grafana.enc.yaml` | `adminPassword` | High | Cannot log in via local auth (emergency only) |
+| authentik | `authentik.enc.yaml` | `authentik.bootstrap_token` | High | Bootstrap fails |
+| authentik | `authentik.enc.yaml` | `authentik.bootstrap_password` | High | Cannot bootstrap |
+| authentik | `authentik.enc.yaml` | `authentik.bootstrap_email` | High | Cannot bootstrap |
 | authentik | `authentik.enc.yaml` | `authentik.secret_key` | Critical | Identity provider fails to start |
 | authentik | `authentik.enc.yaml` | `authentik.email.from` | Low | Emails show wrong sender |
 | authentik | `authentik.enc.yaml` | `authentik.email.password` | Medium | Email sending fails |

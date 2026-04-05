@@ -25,17 +25,24 @@ The homelab follows a layered architecture:
 
 | Service | Purpose | Namespace |
 |---------|---------|-----------|
-| MetalLB | Load balancer for bare metal | lb-system |
-| Traefik | Reverse proxy and ingress | ingress-system |
+| prometheus-operator-crds | Prometheus Operator CRDs | monitoring-system |
 | cert-manager | SSL/TLS certificate management | cert-manager-system |
+| cert-manager-config | Certificate configuration | cert-manager-system |
 | external-dns | DNS management with Cloudflare | cert-manager-system |
-| Longhorn | Distributed block storage | longhorn-system |
-| Prometheus Stack | Monitoring and alerting | monitoring-system |
-| Grafana | Metrics visualization | monitoring-system |
-| Loki | Log aggregation | monitoring-system |
-| Tempo | Distributed tracing | monitoring-system |
-| Authentik | Identity provider | auth-system |
-| ArgoCD | GitOps continuous delivery | gitops-system |
+| authentik-blueprints | Declarative provider/app/user provisioning | auth-system |
+| longhorn | Distributed block storage | longhorn-system |
+| metallb | Load balancer for bare metal | lb-system |
+| metallb-config | MetalLB IP Address Pool and L2 Advertisement | lb-system |
+| prometheus-stack | Monitoring and alerting | monitoring-system |
+| grafana | Metrics visualization | monitoring-system |
+| loki | Log aggregation | monitoring-system |
+| alloy | OpenTelemetry collector (logs, traces, profiling) | monitoring-system |
+| tempo | Distributed tracing | monitoring-system |
+| pyroscope | Continuous profiling | monitoring-system |
+| traefik | Reverse proxy and ingress | ingress-system |
+| authentik | Identity provider | auth-system |
+| argocd | GitOps continuous delivery | gitops-system |
+| authentik-ingress | Authentik ingress configuration | auth-system |
 
 ---
 

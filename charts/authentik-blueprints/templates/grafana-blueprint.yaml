@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: authentik-grafana-blueprint
+  name: authentik-initial-config-blueprint
   namespace: auth-system
   labels:
     app.kubernetes.io/managed-by: helm
@@ -10,8 +10,12 @@ data:
   grafana-sso.yaml: |
     version: 1
     metadata:
-      name: Grafana SSO + Admin User
+      name: Homelab SSO
     entries:
+
+    # ============================================
+    # CERTIFICATE (shared across providers)
+    # ============================================
     - model: authentik_crypto.certificatekeypair
       state: present
       id: authentik-main-cert
@@ -19,12 +23,47 @@ data:
           name: authentik-main-cert
       attrs:
         name: authentik-main-cert
-        # OAUTH_CERT_DATA and OAUTH_KEY_DATA come from the authentik Helm chart values.
-        # In helmfile/common/values/authentik.yaml.gotmpl, these are injected as environment variables
-        # from the 'authentik-signing-key-secret' TLS secret (managed by cert-manager).
-        # They are NOT defined in the secrets files - cert-manager creates and manages this secret.
         certificate_data: !Env OAUTH_CERT_DATA
         key_data: !Env OAUTH_KEY_DATA
+
+    # ============================================
+    # GROUPS
+    # ============================================
+    - model: authentik_core.group
+      state: present
+      id: group-grafana-admins
+      identifiers:
+        name: Grafana Admins
+      attrs:
+        name: Grafana Admin
+        
+    - model: authentik_core.group
+      state: present
+      id: group-argocd-admins
+      identifiers:
+        name: ArgoCD Admins
+      attrs:
+        name: ArgoCD Admins
+
+    # ============================================
+    # USERS
+    # ============================================
+    - model: authentik_core.user
+      state: present
+      id: homelab-admin
+      identifiers:
+        username: !Env HOMELAB_ADMIN_USERNAME
+      attrs:
+        username: !Env HOMELAB_ADMIN_USERNAME
+        name: !Env HOMELAB_ADMIN_NAME
+        email: !Env HOMELAB_ADMIN_EMAIL
+        is_active: true
+        type: internal
+        password: !Env HOMELAB_ADMIN_PASSWORD
+
+    # ============================================
+    # GRAFANA - Own provider + application
+    # ============================================
     - model: authentik_providers_oauth2.oauth2provider
       state: present
       id: grafana-provider
