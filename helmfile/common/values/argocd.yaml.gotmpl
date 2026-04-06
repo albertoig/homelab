@@ -12,6 +12,31 @@ configs:
     # OTEL tracing — send traces to Alloy OTLP gRPC receiver
     otlp.address: "alloy.monitoring-system.svc.cluster.local:4317"
     otlp.insecure: "true"
+  cm:
+    url: "https://{{ $argocdHost }}"
+    oidc.config: |
+      name: Authentik
+      issuer: https://auth.{{ $cfg.general.root_dns }}/application/o/argocd/
+      clientID: {{ .Values.sso.argocd.client_id }}
+      clientSecret: $oidc.authentik.clientSecret
+      requestedScopes:
+        - openid
+        - profile
+        - email
+        - offline_access
+      grantType: authorization_code
+      # Optional: enable PKCE for additional security
+      # Uses SHA256 hash of code verifier
+      # This is recommended and enabled by default in Argo CD 2.9+
+      # For older versions, add: usePKCE: true
+    resource.customizations: |
+      # Optional: Customize how Argo CD maps OIDC claims to internal roles
+      # See: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#customizing-claims
+  secret:
+    extra:
+      oidc.authentik.clientSecret: {{ .Values.sso.argocd.client_secret }}
+  admin:
+    enabled: false
 
 # Application Controller
 controller:

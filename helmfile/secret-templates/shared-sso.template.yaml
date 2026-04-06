@@ -14,3 +14,8 @@ sso:
     client_id: ""
     # OAuth2 client secret for Grafana SSO (generate with: openssl rand -hex 32)
     client_secret: ""
+  argocd:
+    # OAuth2 client ID for ArgoCD SSO (generate with: openssl rand -hex 16)
+    client_id: ""
+    # OAuth2 client secret for ArgoCD SSO (generate with: openssl rand -hex 32)
+    client_secret: ""

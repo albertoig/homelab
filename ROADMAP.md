@@ -63,11 +63,17 @@ GitOps-driven environment.
     - [x] Config reference doc (docs/CONFIG.md)
     - [x] Installation guide (docs/INSTALL.md)
     - [x] ADR-005 config system decision record
+- [x] Authentik SSO Auth
+    - [x] Grafana
+    - [ ] ARGO CD
 ---
-
+carlos enrique sone morales
+enrique sone
 ## 🚧 In Progress
 - [ ] Authentik Auth
-    - [ ] Grafana
+    - [ ] LongHorn
+    - [ ] Prometheus
+    - [ ] Review best practices SSO
 
 ---
 
