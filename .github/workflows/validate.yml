@@ -9,7 +9,7 @@ on:
   workflow_call:
 
 concurrency:
-  group: homelab-${{ github.ref }}
+  group: validate-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

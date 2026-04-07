@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: homelab-${{ github.ref }}
+  group: release-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
