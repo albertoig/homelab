@@ -3,7 +3,9 @@ name: Validate
 on:
   pull_request:
   push:
-    # branches-ignore: []
+    branches-ignore:
+      - main
+      - master
   workflow_call:
 
 concurrency:
@@ -67,9 +69,12 @@ jobs:
 
       - name: Set up helmfile
         run: |
-          curl -fsSL https://raw.githubusercontent.com/helmfile/helmfile/main/scripts/get_helmfile.sh | sh
+          curl -fsSL -o /tmp/helmfile.tar.gz https://github.com/helmfile/helmfile/releases/download/v1.3.0/helmfile_v1.3.0_linux_amd64.tar.gz
+          tar -xzf /tmp/helmfile.tar.gz -C /tmp
+          sudo mv /tmp/helmfile /usr/local/bin/helmfile
+          rm /tmp/helmfile.tar.gz
 
       - name: Run helmfile lint
         run: |
-          helmfile -f helmfile.yaml.gotmpl -e dev lint -l 'app!=gitops'
+          helmfile -f helmfile.yaml.gotmpl -e dev lint
           helmfile -f helmfile.yaml.gotmpl -e prod lint

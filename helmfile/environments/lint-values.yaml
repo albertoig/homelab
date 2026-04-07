@@ -1,0 +1,58 @@
+# Stub values file for helmfile lint in pre-commit hooks.
+#
+# This file provides empty placeholder values for all secrets that are
+# normally loaded from encrypted .enc.yaml files.
+#
+# Why is this needed:
+# - helmfile lint requires values for all chart templates
+# - Encrypted secrets (.enc.yaml) require GPG keys to decrypt
+# - Not all developers have GPG keys or decrypted secrets
+# - This allows lint to run without access to real secrets
+#
+# The stub values are empty strings that satisfy chart value requirements
+# during validation, without exposing any real secrets.
+#
+# When to update:
+# - Add new empty values here when new secret templates are created
+# - Keep keys in sync with secret-templates/*.template.yaml
+authentik:
+  bootstrap_token: ""
+  bootstrap_password: ""
+  bootstrap_email: ""
+  secret_key: ""
+  email:
+    from: ""
+    password: ""
+    host: ""
+    username: ""
+  postgresql:
+    password: ""
+postgresql:
+  auth:
+    password: ""
+sso:
+  admin:
+    username: ""
+    name: ""
+    email: ""
+    password: ""
+  grafana:
+    client_id: ""
+    client_secret: ""
+  argocd:
+    client_id: ""
+    client_secret: ""
+grafana:
+  adminPassword: ""
+prometheus-stack:
+  alertmanagerSlackWebhook: ""
+secret:
+  apiKey: ""
+  email: ""
+clusterIssuer:
+  email: ""
+  cloudflare:
+    email: ""
+certificate:
+  dnsNames:
+    - ""

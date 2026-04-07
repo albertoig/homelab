@@ -27,4 +27,4 @@ repos:
         files: ^helmfile/
         always_run: true
         pass_filenames: false
-        args: ["-c", "helmfile -f helmfile.yaml.gotmpl -e dev lint -l 'app!=gitops' && helmfile -f helmfile.yaml.gotmpl -e prod lint"]
+        args: ["-c", "helmfile --skip-deps -f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml lint && helmfile --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values-file helmfile/environments/lint-values.yaml lint"]

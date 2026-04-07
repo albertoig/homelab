@@ -111,6 +111,24 @@ brew install helmfile
 helmfile lint
 ```
 
+### Bypassing Encrypted Secrets
+
+By default, `helmfile lint` loads secrets from encrypted `.enc.yaml` files, which requires GPG keys. To run lint without access to real secrets (e.g., in pre-commit hooks), use the `--state-values-file` flag:
+
+```bash
+helmfile -f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml lint
+```
+
+This uses `helmfile/environments/lint-values.yaml` - a stub values file with empty placeholder values for all secrets. It allows lint to pass without GPG keys or decrypted secrets.
+
+#### When to Update lint-values.yaml
+
+If you add new secret templates or create new releases with secrets, update the lint-values file to include the new keys:
+
+1. Check `helmfile/secret-templates/*.template.yaml` for new secret keys
+2. Add corresponding empty values to `helmfile/environments/lint-values.yaml`
+3. The lint will fail if required secret values are missing
+
 ### Configuration
 
 The helmfile-lint hook is configured to run on YAML files in `helmfile/`. See `.pre-commit-config.yaml` for details.
