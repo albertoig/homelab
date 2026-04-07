@@ -77,5 +77,5 @@ jobs:
 
       - name: Run helmfile lint
         run: |
-          helmfile -f helmfile.yaml.gotmpl -e dev lint
-          helmfile -f helmfile.yaml.gotmpl -e prod lint
+          helmfile -f helmfile.yaml.gotmpl --state-values-file helmfile/environments/lint-values.yaml -e dev lint
+          helmfile -f helmfile.yaml.gotmpl --state-values-file helmfile/environments/lint-values.yaml -e prod lint

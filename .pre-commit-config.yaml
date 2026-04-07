@@ -1,4 +1,10 @@
 repos:
+  - repo: https://github.com/rhysd/actionlint
+    rev: main
+    hooks:
+      - id: actionlint
+        types: [yaml]
+        files: ^\.github/workflows/
   - repo: local
     hooks:
       - id: ansible-lint
