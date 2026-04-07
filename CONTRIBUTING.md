@@ -54,6 +54,21 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 - `fix(cert-manager): resolve certificate renewal issue`
 - `docs(readme): update installation instructions`
 
+## Pre-commit
+
+It is recommended to install the pre-commit hooks to catch issues before committing:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+This runs ansible-lint on YAML files in `metal/k3s/` on every commit.
+
+## Testing
+
+See [docs/TESTING.md](./docs/TESTING.md) for testing guidelines.
+
 ## Steps
 
 1. Fork the repository

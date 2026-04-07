@@ -97,6 +97,7 @@ enrique sone
 - [ ] Adjust scripts to number of environments in helmfile folder
 - [ ] Remove duplicates secrets
 - [ ] Make easier configs with scripts (DNS reused in secrets and normal config) 
+- [ ] Look for a centralized dashboard system that add all the services that are exposed through load balancer.
 ---
 
 ## 📝 Notes
