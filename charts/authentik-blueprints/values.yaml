@@ -1,0 +1,19 @@
+# Default values for authentik-blueprints chart.
+# This file is used by helm lint and provides defaults for template rendering.
+
+sso:
+  grafana:
+    client_id: ""
+    client_secret: ""
+  argocd:
+    client_id: ""
+    client_secret: ""
+  admin:
+    username: ""
+    name: ""
+    email: ""
+    password: ""
+
+# Legacy values (for backward compatibility)
+secrets: {}
+root_dns: ""

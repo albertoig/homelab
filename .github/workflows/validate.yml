@@ -41,3 +41,20 @@ jobs:
       - name: Run ansible-lint
         if: steps.check-files.outputs.exists == 'true'
         run: ansible-lint --project-dir metal/k3s
+
+  helm-lint:
+    name: Helm Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: latest
+
+      - name: Run helm lint
+        run: |
+          for chart in charts/*/; do
+            helm lint "$chart" || exit 1
+          done

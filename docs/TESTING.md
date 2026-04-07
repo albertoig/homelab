@@ -20,6 +20,7 @@ pre-commit install
 | Hook | Purpose |
 |------|---------|
 | ansible-lint | Lints Ansible playbooks in `metal/k3s/playbooks/` |
+| helm-lint | Lints Helm charts in `charts/` |
 
 ### Running Hooks
 
@@ -64,3 +65,29 @@ ansible-lint
 ### Configuration
 
 The ansible-lint hook is configured to run on YAML files in `metal/k3s/playbooks/`. See `.pre-commit-config.yaml` for details.
+
+## Helm Lint
+
+[helm lint](https://helm.sh/docs/chart_template_guide/getting_started/) validates Helm chart structure, syntax, and best practices.
+
+### Installation
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+# or
+brew install helm
+```
+
+### Usage
+
+Lint all charts:
+
+```bash
+for chart in charts/*/; do
+  helm lint "$chart"
+done
+```
+
+### Configuration
+
+The helm-lint hook is configured to run on chart directories in `charts/`. See `.pre-commit-config.yaml` for details.

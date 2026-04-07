@@ -10,3 +10,12 @@ repos:
         always_run: true
         pass_filenames: false
         args: ["--project-dir", "metal/k3s"]
+      - id: helm-lint
+        name: helm-lint
+        entry: bash
+        language: system
+        types: [yaml]
+        files: ^charts/
+        always_run: true
+        pass_filenames: false
+        args: ["-c", "for chart in charts/*/; do helm lint \"$chart\" || exit 1; done"]
