@@ -69,7 +69,8 @@ jobs:
 
       - name: Set up helmfile
         run: |
-          curl -fsSL -o /tmp/helmfile.tar.gz https://github.com/helmfile/helmfile/releases/download/v1.3.0/helmfile_v1.3.0_linux_amd64.tar.gz
+          HELMFILE_VERSION=$(curl -s https://api.github.com/repos/helmfile/helmfile/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | sed 's/^v//')
+          curl -fsSL -o /tmp/helmfile.tar.gz "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz"
           tar -xzf /tmp/helmfile.tar.gz -C /tmp
           sudo mv /tmp/helmfile /usr/local/bin/helmfile
           rm /tmp/helmfile.tar.gz
