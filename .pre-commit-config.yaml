@@ -6,4 +6,7 @@ repos:
         entry: ansible-lint
         language: system
         types: [yaml]
-        files: ^metal/k3s/playbooks/
+        files: ^metal/k3s/
+        always_run: true
+        pass_filenames: false
+        args: ["--project-dir", "metal/k3s"]

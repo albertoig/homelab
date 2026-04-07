@@ -1,0 +1,10 @@
+# Ansible-lint configuration
+# https://ansible-lint.readthedocs.io/en/latest/configuration/
+
+profile: min
+
+skip_list:
+  # Skip line-length - inventory files have long lines for SSH config
+  - line-length
+  # Skip yaml - other projects handle formatting
+  - yaml

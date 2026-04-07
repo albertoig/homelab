@@ -3,7 +3,7 @@ name: Validate
 on:
   pull_request:
   push:
-    branches-ignore: []
+    # branches-ignore: []
   workflow_call:
 
 concurrency:
@@ -22,10 +22,22 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Check for playbook files
+        id: check-files
+        run: |
+          if ls metal/k3s/playbooks/*.yml 1> /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No ansible playbooks found, skipping lint"
+          fi
+
       - name: Install dependencies
+        if: steps.check-files.outputs.exists == 'true'
         run: |
           pip install ansible-core ansible-lint
           ansible-galaxy collection install ansible.posix
 
       - name: Run ansible-lint
-        run: ansible-lint metal/k3s/playbooks/
+        if: steps.check-files.outputs.exists == 'true'
+        run: ansible-lint --project-dir metal/k3s
