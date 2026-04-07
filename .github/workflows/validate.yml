@@ -58,3 +58,18 @@ jobs:
           for chart in charts/*/; do
             helm lint "$chart" || exit 1
           done
+
+  helmfile-lint:
+    name: Helmfile Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up helmfile
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/helmfile/helmfile/main/scripts/get_helmfile.sh | sh
+
+      - name: Run helmfile lint
+        run: |
+          helmfile -f helmfile.yaml.gotmpl -e dev lint -l 'app!=gitops'
+          helmfile -f helmfile.yaml.gotmpl -e prod lint

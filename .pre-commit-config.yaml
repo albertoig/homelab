@@ -19,3 +19,12 @@ repos:
         always_run: true
         pass_filenames: false
         args: ["-c", "for chart in charts/*/; do helm lint \"$chart\" || exit 1; done"]
+      - id: helmfile-lint
+        name: helmfile-lint
+        entry: bash
+        language: system
+        types: [yaml]
+        files: ^helmfile/
+        always_run: true
+        pass_filenames: false
+        args: ["-c", "helmfile -f helmfile.yaml.gotmpl -e dev lint -l 'app!=gitops' && helmfile -f helmfile.yaml.gotmpl -e prod lint"]
