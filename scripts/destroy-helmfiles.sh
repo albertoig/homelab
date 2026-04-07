@@ -32,8 +32,11 @@ fi
 header "Destroying environment: $ENVIRONMENT"
 echo ""
 
+warn "⚠️  WARNING: This will delete ALL PersistentVolumes and permanent storage data!"
+echo ""
+
 # Confirm destruction
-read -rp "$(echo -e "${_C_YELLOW}  Are you sure you want to destroy the '${ENVIRONMENT}' environment? This is irreversible. [y/N] ${_C_RESET}")" confirm
+read -rp "$(echo -e "${_C_YELLOW}  Are you sure you want to destroy the '${ENVIRONMENT}' environment? This is irreversible and will delete all data. [y/N] ${_C_RESET}")" confirm
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
     warn "Aborted."
     exit 0
@@ -42,7 +45,7 @@ fi
 echo ""
 
 # --- Step 1: Set Longhorn deleting-confirmation-flag ---
-step 1 6 "Setting Longhorn deleting-confirmation-flag..."
+step 1 4 "Setting Longhorn deleting-confirmation-flag..."
 if kubectl -n longhorn-system get settings.longhorn.io deleting-confirmation-flag &>/dev/null; then
     kubectl -n longhorn-system patch settings.longhorn.io deleting-confirmation-flag \
         -p '{"value":"true"}' --type=merge
@@ -52,32 +55,14 @@ else
 fi
 echo ""
 
-# --- Step 2: Destroy ingresses (003) ---
-step 2 6 "Destroying ingresses (003)..."
-helmfile -f "$HELMFILE_DIR/helmfile/003-ingresses.helmfile.yaml.gotmpl" \
-    --environment "$ENVIRONMENT" destroy --skip-deps 2>&1 || true
-echo ""
-
-# --- Step 3: Destroy common releases ---
-step 3 6 "Destroying common releases..."
+# --- Step 2: Destroy all helmfiles ---
+step 2 4 "Destroying all helmfiles..."
 helmfile -f "$HELMFILE_DIR/helmfile.yaml.gotmpl" \
     --environment "$ENVIRONMENT" destroy --skip-deps 2>&1 || true
 echo ""
 
-# --- Step 4: Destroy certifications (002) ---
-step 4 6 "Destroying certifications (002)..."
-helmfile -f "$HELMFILE_DIR/helmfile/002-certs.helmfile.yaml.gotmpl" \
-    --environment "$ENVIRONMENT" destroy --skip-deps 2>&1 || true
-echo ""
-
-# --- Step 5: Destroy CRDs (001) ---
-step 5 6 "Destroying CRDs (001)..."
-helmfile -f "$HELMFILE_DIR/helmfile/001-crds.helmfile.yaml" \
-    --environment "$ENVIRONMENT" destroy --skip-deps 2>&1 || true
-echo ""
-
-# --- Step 6: Clean up stuck resources ---
-step 6 6 "Cleaning up stuck resources..."
+# --- Step 3: Clean up stuck resources ---
+step 3 4 "Cleaning up stuck resources..."
 
 # Remove stuck Longhorn volumes and PVCs
 info "Cleaning Longhorn volumes..."

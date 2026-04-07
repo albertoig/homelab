@@ -53,27 +53,9 @@ fi
 
 echo ""
 
-# --- Step 1: Apply CRDs (001) ---
-step 1 4 "Applying CRDs (001)..."
-helmfile -f "$HELMFILE_DIR/helmfile/001-crds.helmfile.yaml" \
-    --environment "$ENVIRONMENT" sync --skip-deps
-echo ""
-
-# --- Step 2: Apply certifications (002) ---
-step 2 4 "Applying certifications (002)..."
-helmfile -f "$HELMFILE_DIR/helmfile/002-certs.helmfile.yaml.gotmpl" \
-    --environment "$ENVIRONMENT" sync --skip-deps
-echo ""
-
-# --- Step 3: Apply common releases ---
-step 3 4 "Applying common releases..."
+# --- Step 1: Apply all releases ---
+step 1 1 "Applying all releases..."
 helmfile -f "$HELMFILE_DIR/helmfile.yaml.gotmpl" \
-    --environment "$ENVIRONMENT" sync --skip-deps
-echo ""
-
-# --- Step 4: Apply ingresses (003) ---
-step 4 4 "Applying ingresses (003)..."
-helmfile -f "$HELMFILE_DIR/helmfile/003-ingresses.helmfile.yaml.gotmpl" \
     --environment "$ENVIRONMENT" sync --skip-deps
 echo ""
 

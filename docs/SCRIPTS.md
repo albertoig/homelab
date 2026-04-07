@@ -46,29 +46,23 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
         │                                  │  └──────────┬────────────┘ │
         │                                  │             │              │
         │                                  │  Steps:     │              │
-        │                                  │  [1/4] Apply CRDs (001)   │
-        │                                  │  [2/4] Apply certs (002)  │
-        │                                  │  [3/4] Apply common       │
-        │                                  │  [4/4] Apply ingresses(003)│
+        │                                  │  [1/1] Sync all releases   │
         │                                  └──────────────────────────────┘
         │                                            │
         │                                            ▼
         │                                     Helmfile Releases
-        │                                     (001-crds, 002-certs,
-        │                                      003-ingresses, common)
+        │                                     (all via principal helmfile)
         │
         │
-        │  scripts/destroy-helmfiles.sh
-        │  ┌──────────────────────────────┐
-        │  │  Helmfile Destroy Orchestrator│
-        │  │                              │
-        │  │  [1/6] Longhorn deletion flag│
-        │  │  [2/6] Destroy ingresses (003)│
-        │  │  [3/6] Destroy common        │
-        │  │  [4/6] Destroy certs (002)   │
-        │  │  [5/6] Destroy CRDs (001)    │
-        │  │  [6/6] Clean stuck resources │
-         │  └──────────────────────────────┘
+          │  scripts/destroy-helmfiles.sh
+          │  ┌──────────────────────────────┐
+          │  │  Helmfile Destroy Orchestrator│
+          │  │                              │
+          │  │  [1/4] Longhorn deletion flag│
+          │  │  [2/4] Destroy all helmfiles │
+          │  │  [3/4] Clean stuck resources │
+          │  │  [4/4] Final message         │
+          │  └──────────────────────────────┘
          │
 
 
@@ -146,11 +140,8 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
 ./scripts/install-helmfiles.sh prod
 ```
 
-**Execution flow (4 steps):**
-1. Apply CRDs via `helmfile/001-crds.helmfile.yaml`
-2. Apply certifications via `helmfile/002-certs.helmfile.yaml.gotmpl`
-3. Apply common releases via `helmfile.yaml.gotmpl`
-4. Apply ingresses via `helmfile/003-ingresses.helmfile.yaml.gotmpl`
+**Execution flow (1 step):**
+1. Sync all releases using principal `helmfile.yaml.gotmpl` (includes CRDs, certs, common, ingresses)
 
 **Prerequisites (run automatically):**
 - `check-requirements.sh`
@@ -174,13 +165,13 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
 ./scripts/destroy-helmfiles.sh prod
 ```
 
-**Execution flow (6 steps):**
+**Execution flow (4 steps):**
 1. Set Longhorn `deleting-confirmation-flag` to allow cleanup
-2. Destroy ingresses (`003-ingresses.helmfile.yaml.gotmpl`)
-3. Destroy common releases (`helmfile.yaml.gotmpl`)
-4. Destroy certifications (`002-certs.helmfile.yaml.gotmpl`)
-5. Destroy CRDs (`001-crds.helmfile.yaml`)
-6. Clean stuck resources (Longhorn volumes/PVCs, namespace finalizers, Longhorn CRDs)
+2. Destroy all helmfiles using principal `helmfile.yaml.gotmpl` (includes CRDs, certs, common, ingresses)
+3. Clean stuck resources (Longhorn volumes/PVCs, namespace finalizers, Longhorn CRDs)
+4. Display completion message
+
+**⚠️ Warning:** This will delete ALL PersistentVolumes and permanent storage data. Data loss is irreversible.
 
 **Interactive:** Prompts for confirmation before proceeding (irreversible).
 
@@ -318,21 +309,16 @@ metal/k3s/run.sh  ──>  K3s Cluster
 install-helmfiles.sh <env>
   ├── check-requirements.sh
   ├── check-kubernetes.sh
-  ├── helmfile: 001-crds
-  ├── helmfile: 002-certs
-  ├── helmfile: common
-  └── helmfile: 003-ingresses
+  └── helmfile sync (all releases via principal helmfile)
 ```
 
 ### Destroy Environment
 
 ```
 destroy-helmfiles.sh <env>
-  ├── Longhorn cleanup
-  ├── helmfile: 003-ingresses (destroy)
-  ├── helmfile: common (destroy)
-  ├── helmfile: 002-certs (destroy)
-  ├── helmfile: 001-crds (destroy)
+  ├── ⚠️ Warning: deletes all PVs and storage
+  ├── Longhorn deletion flag
+  ├── helmfile destroy (all releases via principal helmfile)
   └── Stuck resource cleanup
 ```
 

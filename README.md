@@ -69,6 +69,8 @@ The homelab follows a layered architecture:
 | [external-dns](https://github.com/kubernetes-sigs/external-dns/) | Synchronize exposed services with DNS providers |
 | [Authentik](https://goauthentik.io/) | Identity provider |
 | [Cloudflare](https://www.cloudflare.com/) | DNS and CDN provider |
+| [pre-commit](https://pre-commit.com/) | Git hooks for code quality |
+| [ansible-lint](https://ansible-lint.readthedocs.io/) | Ansible playbook linting |
 
 ---
 
@@ -161,6 +163,7 @@ Grafana is exposed via MetalLB LoadBalancer. Access it using the external IP ass
 ## 📚 Documentation
 
 - [Roadmap](./ROADMAP.md) — upcoming features and progress
+- [Testing](./docs/TESTING.md) — pre-commit hooks and ansible-lint
 - [Configuration](./docs/CONFIG.md) — config system reference and all available settings
 - [Installation](./docs/INSTALL.md) — step-by-step setup guide
 - [Forking](./docs/FORKING.md) — how to fork and maintain your own configs and secrets
