@@ -67,8 +67,7 @@ GitOps-driven environment.
     - [x] Grafana
     - [ ] ARGO CD
 ---
-carlos enrique sone morales
-enrique sone
+
 ## 🚧 In Progress
 - [ ] Authentik Auth
     - [ ] LongHorn

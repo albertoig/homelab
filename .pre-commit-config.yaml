@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/rhysd/actionlint
-    rev: main
+    rev: v1.7.12
     hooks:
       - id: actionlint
         types: [yaml]
