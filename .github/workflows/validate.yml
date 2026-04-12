@@ -60,10 +60,13 @@ jobs:
           for chart in charts/*/; do
             helm lint "$chart" || exit 1
           done
-
+          
   helmfile-lint:
     name: Helmfile Lint
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/docked-titan-foundation/helmkit:latest
+      options: --user 1000:1000 --read-only
     steps:
       - uses: actions/checkout@v4
 
