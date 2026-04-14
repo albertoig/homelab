@@ -69,6 +69,9 @@ jobs:
 
       - uses: helmfile/helmfile-action@v2
         with:
+          helm-plugins: >
+            https://github.com/databus23/helm-diff@v3.15.2,
+            https://github.com/jkroepke/helm-secrets@v4.7.4
           helmfile-args: >
             -f helmfile.yaml.gotmpl
             --state-values-file helmfile/environments/lint-values.yaml
