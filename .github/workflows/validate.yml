@@ -64,12 +64,17 @@ jobs:
   helmfile-lint:
     name: Helmfile Lint
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/docked-titan-foundation/helmkit:latest
     steps:
       - uses: actions/checkout@v6
 
-      - name: Run helmfile lint
-        run: |
-          helmfile -f helmfile.yaml.gotmpl --state-values-file helmfile/environments/lint-values.yaml -e dev lint
-          helmfile -f helmfile.yaml.gotmpl --state-values-file helmfile/environments/lint-values.yaml -e prod lint
+      - uses: helmfile/helmfile-action@v2
+        with:
+          helmfile-args: >
+            -f helmfile.yaml.gotmpl
+            --state-values-file helmfile/environments/lint-values.yaml
+            -e dev lint
+            && 
+            helmfile
+            -f helmfile.yaml.gotmpl
+            --state-values-file helmfile/environments/lint-values.yaml
+            -e prod lint
