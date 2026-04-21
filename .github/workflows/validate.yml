@@ -60,24 +60,16 @@ jobs:
           for chart in charts/*/; do
             helm lint "$chart" || exit 1
           done
-          
+
   helmfile-lint:
     name: Helmfile Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - uses: helmfile/helmfile-action@v2
+      - name: Run helmfile lint
+        uses: docked-titan-foundation/helmkit@v1
         with:
-          helm-plugins: >
-            https://github.com/databus23/helm-diff@v3.15.2,
-            https://github.com/jkroepke/helm-secrets@v4.7.4
-          helmfile-args: >
-            -f helmfile.yaml.gotmpl
-            --state-values-file helmfile/environments/lint-values.yaml
-            -e dev lint
-            && 
-            helmfile
-            -f helmfile.yaml.gotmpl
-            --state-values-file helmfile/environments/lint-values.yaml
-            -e prod lint
+          tool: helmfile
+          args: "lint --dry-run"
+          
