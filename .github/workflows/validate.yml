@@ -71,5 +71,5 @@ jobs:
         uses: docked-titan-foundation/helmkit@v1.4.0
         with:
           tool: helmfile
-          args: "lint --dry-run"
+          args: "lint --color"
           
