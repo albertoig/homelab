@@ -1,3 +1,14 @@
+## [5.2.1](https://github.com/albertoig/homelab/compare/v5.2.0...v5.2.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* configure ansible-lint to skip formatting rules ([bd5ca62](https://github.com/albertoig/homelab/commit/bd5ca620ce7a4e2bf5a65a4604beae1e7a2c6ff0))
+* **github:** use lint values with void secrets ([f0434c1](https://github.com/albertoig/homelab/commit/f0434c156470b75c01ce8a1bf2aec38f85350bce))
+* **github:** use shared concurrency group to prevent deadlock ([8817c3f](https://github.com/albertoig/homelab/commit/8817c3fabbe3f14bc4106170cdcf18773f511164))
+* **github:** use shared concurrency group to prevent deadlock ([ff46ea0](https://github.com/albertoig/homelab/commit/ff46ea048b09190777ac68f0fd926f9e4c9a86fe))
+* **github:** use shared concurrency group to prevent deadlock ([5b84775](https://github.com/albertoig/homelab/commit/5b84775d04bbb83f2ce1db06e78ac175053a5bec))
+
 # [5.2.0](https://github.com/albertoig/homelab/compare/v5.1.0...v5.2.0) (2026-04-04)
 
 
