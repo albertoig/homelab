@@ -71,10 +71,10 @@ jobs:
         uses: docked-titan-foundation/helmkit@v1.4.0
         with:
           tool: helmfile
-          args: "-f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml lint"
+          args: "lint -f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml"
 
       - name: Run helmfile lint Prod Environment
         uses: docked-titan-foundation/helmkit@v1.4.0
         with:
           tool: helmfile
-          args: "-f helmfile.yaml.gotmpl -e prod --state-values-file helmfile/environments/lint-values.yaml lint"
+          args: "lint -f helmfile.yaml.gotmpl -e prod --state-values-file helmfile/environments/lint-values.yaml"
