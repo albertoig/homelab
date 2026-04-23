@@ -68,7 +68,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Run helmfile lint
-        uses: docked-titan-foundation/helmkit@v1
+        uses: docked-titan-foundation/helmkit@v1.4.0
         with:
           tool: helmfile
           args: "lint --dry-run"
