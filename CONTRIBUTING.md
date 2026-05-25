@@ -47,10 +47,6 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 
 **Format**: `type(scope): description`
 
----
-
-### Scopes
-
 Use the **repo area** as the scope, not the service name. `fix(helmfile):` is correct; `fix(cert-manager):` is not — semantic-release uses the scope to decide whether to cut a release.
 
 | Scope | Covers |
@@ -64,45 +60,6 @@ Use the **repo area** as the scope, not the service name. `fix(helmfile):` is co
 | `scripts` | Scripts under `scripts/` |
 | `docs` | Documentation files |
 
----
-
-### What triggers a version release
-
-Only changes that affect the **deployed infrastructure state** produce a new release. The scope must be `helmfile` or `charts` (or a breaking change) for a release to be cut.
-
-| Commit | Release |
-|--------|---------|
-| `feat(helmfile): add X service` | minor |
-| `feat(helmfile): upgrade X from v1 to v2` | minor |
-| `fix(helmfile): patch X from v1.0.0 to v1.0.1` | patch |
-| `feat(charts): add new template to X chart` | minor |
-| `fix(charts): fix rendering bug in X chart` | patch |
-| Any commit with `BREAKING CHANGE` in the footer | major |
-
----
-
-### What does NOT trigger a release
-
-Everything below is a silent commit — no tag, no changelog entry, no GitHub release.
-
-| Area | Commit type to use | Why |
-|------|--------------------|-----|
-| `docs/` — README, ADRs, guides | `docs(docs):` | Documentation does not change deployed state |
-| `.github/workflows/` | `ci:` | Pipeline changes do not affect the cluster |
-| `.pre-commit-config.yaml` | `ci:` or `build:` | Tooling, not infrastructure |
-| `package.json` devDependencies | `chore:` | Build tooling only |
-| `scripts/` | `chore:` or `refactor(scripts):` | Helper scripts, not deployed |
-| `metal/k3s/` (Ansible, k3s version) | `chore(metal):` or `feat(metal):` | Provisioning is separate from the helmfile release state |
-| `helmfile/environments/*/config.yaml` | `chore(helmfile):` | Env tuning (domains, IPs, replicas) without a chart version change |
-| `helmfile/environments/*/secrets/` | `chore(helmfile):` | Secret rotation does not change what is deployed |
-| `helmfile/repositories.yaml` | `chore(helmfile):` | Adding a repo is prep work; the release entry is the trigger |
-| `helmfile/locks/` | `chore(helmfile):` | Auto-generated, reflects no intent |
-| `helmfile/secret-templates/` | `chore(helmfile):` | Templates for local setup, not deployed config |
-| `helmfile/config.template.yaml` | `docs:` | User-facing template, not deployed |
-| Values file refactor (no behavior change) | `refactor(helmfile):` | Structure change only |
-
----
-
 ### Examples
 
 ```
@@ -115,6 +72,8 @@ docs(docs): add ADR for secret handling refactor
 refactor(helmfile): extract shared ingress values to common template
 chore(helmfile): rotate grafana secret
 ```
+
+For the full rules on what triggers a release versus what is silent, see [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ## Pre-commit
 
