@@ -1,0 +1,157 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "baseBranches": ["beta"],
+  "labels": ["dependencies"],
+  "reviewers": ["albertoig"],
+  "assignees": ["albertoig"],
+  "prConcurrentLimit": 10,
+  "minimumReleaseAge": "3 days",
+  "schedule": ["after 9am and before 5pm on weekdays"],
+  "semanticCommits": "enabled",
+  "packageRules": [
+    {
+      "matchManagers": ["helmfile"],
+      "ignorePrerelease": true
+    },
+    {
+      "matchManagers": ["custom.regex"],
+      "ignorePrerelease": true
+    },
+    {
+      "matchManagers": ["helmfile"],
+      "matchUpdateTypes": ["patch"],
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "helmfile",
+      "addLabels": ["helm-chart"]
+    },
+    {
+      "matchManagers": ["helmfile"],
+      "matchUpdateTypes": ["minor"],
+      "semanticCommitType": "feat",
+      "semanticCommitScope": "helmfile",
+      "addLabels": ["helm-chart"]
+    },
+    {
+      "matchManagers": ["helmfile"],
+      "matchUpdateTypes": ["major"],
+      "semanticCommitType": "feat",
+      "semanticCommitScope": "helmfile",
+      "addLabels": ["helm-chart"],
+      "commitBody": "BREAKING CHANGE: major version bump — validate compatibility before merging"
+    },
+    {
+      "matchManagers": ["custom.regex"],
+      "matchFileNames": ["versions.yaml"],
+      "matchUpdateTypes": ["patch"],
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "helmfile",
+      "addLabels": ["versions"]
+    },
+    {
+      "matchManagers": ["custom.regex"],
+      "matchFileNames": ["versions.yaml"],
+      "matchUpdateTypes": ["minor"],
+      "semanticCommitType": "feat",
+      "semanticCommitScope": "helmfile",
+      "addLabels": ["versions"]
+    },
+    {
+      "matchManagers": ["custom.regex"],
+      "matchFileNames": ["versions.yaml"],
+      "matchUpdateTypes": ["major"],
+      "semanticCommitType": "feat",
+      "semanticCommitScope": "helmfile",
+      "addLabels": ["versions"],
+      "commitBody": "BREAKING CHANGE: major version bump — validate compatibility before merging"
+    },
+    {
+      "matchManagers": ["custom.regex"],
+      "matchFileNames": ["metal/k3s/inventory.example.yml"],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "metal",
+      "addLabels": ["metal"]
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "ci",
+      "addLabels": ["github-actions"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "dependencies",
+      "addLabels": ["npm"]
+    },
+    {
+      "matchManagers": ["pre-commit"],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "pre-commit",
+      "addLabels": ["pre-commit"]
+    }
+  ],
+  "helmfile": {
+    "fileMatch": ["^helmfile/releases/.*\\.yaml\\.gotmpl$"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^versions\\.yaml$"],
+      "matchStrings": ["helm:\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "helm/helm",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^versions\\.yaml$"],
+      "matchStrings": ["helmkit:\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "docked-titan-foundation/helmkit",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^versions\\.yaml$"],
+      "matchStrings": ["node:\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^versions\\.yaml$"],
+      "matchStrings": ["python:\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "python",
+      "datasourceTemplate": "python-version"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^versions\\.yaml$"],
+      "matchStrings": ["ansible_core:\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "ansible-core",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^versions\\.yaml$"],
+      "matchStrings": ["ansible_lint:\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "ansible-lint",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^versions\\.yaml$"],
+      "matchStrings": ["ansible_posix:\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "ansible.posix",
+      "datasourceTemplate": "galaxy-collection"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^metal/k3s/inventory\\.example\\.yml$"],
+      "matchStrings": ["k3s_version:\\s*(?<currentValue>v[\\d.]+\\+k3s\\d+)"],
+      "depNameTemplate": "k3s-io/k3s",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
+}
