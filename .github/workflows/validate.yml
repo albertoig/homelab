@@ -9,8 +9,8 @@ on:
   workflow_call:
 
 concurrency:
-  group: validate-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'workflow_call' && format('validate-call-{0}', github.run_id) || format('validate-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
 
 jobs:
   ansible-lint:
