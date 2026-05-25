@@ -93,3 +93,40 @@ jobs:
         with:
           tool: helmfile
           args: "lint --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values-file helmfile/environments/lint-values.yaml"
+
+  commitlint:
+    name: Commitlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Load versions
+        id: versions
+        run: echo "node=$(yq '.node' versions.yaml)" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ steps.versions.outputs.node }}
+
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm clean-install
+
+      - name: Lint commit messages
+        run: |
+          FROM="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$FROM" ] || [ "$FROM" = "0000000000000000000000000000000000000000" ]; then
+            FROM="HEAD~1"
+          fi
+          npx commitlint --from "$FROM" --to "${{ github.sha }}" --verbose
