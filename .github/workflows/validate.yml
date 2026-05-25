@@ -19,10 +19,18 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Load versions
+        id: versions
+        run: |
+          echo "python=$(yq '.python' versions.yaml)" >> $GITHUB_OUTPUT
+          echo "ansible_core=$(yq '.ansible_core' versions.yaml)" >> $GITHUB_OUTPUT
+          echo "ansible_lint=$(yq '.ansible_lint' versions.yaml)" >> $GITHUB_OUTPUT
+          echo "ansible_posix=$(yq '.ansible_posix' versions.yaml)" >> $GITHUB_OUTPUT
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ steps.versions.outputs.python }}
 
       - name: Check for playbook files
         id: check-files
@@ -37,8 +45,8 @@ jobs:
       - name: Install dependencies
         if: steps.check-files.outputs.exists == 'true'
         run: |
-          pip install "ansible-core==2.17.0" "ansible-lint==24.2.0"
-          ansible-galaxy collection install "ansible.posix:==1.5.4"
+          pip install "ansible-core==${{ steps.versions.outputs.ansible_core }}" "ansible-lint==${{ steps.versions.outputs.ansible_lint }}"
+          ansible-galaxy collection install "ansible.posix:==${{ steps.versions.outputs.ansible_posix }}"
 
       - name: Run ansible-lint
         if: steps.check-files.outputs.exists == 'true'
@@ -50,10 +58,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Load versions
+        id: versions
+        run: echo "helm=$(yq '.helm' versions.yaml)" >> $GITHUB_OUTPUT
+
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: latest
+          version: ${{ steps.versions.outputs.helm }}
 
       - name: Run helm lint
         run: |
@@ -67,6 +79,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # helmkit version is tracked in versions.yaml but cannot be read dynamically
+      # here because GitHub Actions does not support expressions in `uses:` fields.
+      # Update this value manually when bumping helmkit in versions.yaml.
       - name: Run helmfile lint Dev Environment
         uses: docked-titan-foundation/helmkit@v1.1.0
         with:

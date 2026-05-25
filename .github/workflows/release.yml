@@ -34,10 +34,14 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Load versions
+        id: versions
+        run: echo "node=$(yq '.node' versions.yaml)" >> $GITHUB_OUTPUT
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "24"
+          node-version: ${{ steps.versions.outputs.node }}
 
       - name: Cache node_modules
         id: cache-node-modules
