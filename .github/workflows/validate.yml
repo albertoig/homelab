@@ -13,8 +13,31 @@ concurrency:
   cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
 
 jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      ansible: ${{ steps.filter.outputs.ansible }}
+      helm: ${{ steps.filter.outputs.helm }}
+      helmfile: ${{ steps.filter.outputs.helmfile }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ansible:
+              - 'metal/k3s/**'
+            helm:
+              - 'charts/**'
+            helmfile:
+              - 'helmfile/**'
+              - 'helmfile.yaml.gotmpl'
+
   ansible-lint:
     name: Ansible Lint
+    needs: changes
+    if: needs.changes.outputs.ansible == 'true' || github.event_name == 'workflow_call'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -54,6 +77,8 @@ jobs:
 
   helm-lint:
     name: Helm Lint
+    needs: changes
+    if: needs.changes.outputs.helm == 'true' || github.event_name == 'workflow_call'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -75,6 +100,8 @@ jobs:
 
   helmfile-lint:
     name: Helmfile Lint
+    needs: changes
+    if: needs.changes.outputs.helmfile == 'true' || github.event_name == 'workflow_call'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
