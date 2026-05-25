@@ -1,6 +1,6 @@
 {
   "name": "homelab",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Homelab automation repository",
   "private": true,
   "devDependencies": {
