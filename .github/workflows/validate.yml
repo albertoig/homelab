@@ -68,13 +68,13 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Run helmfile lint Dev Environment
-        uses: docked-titan-foundation/helmkit@v1.4.0
+        uses: docked-titan-foundation/helmkit@v1.1.0
         with:
           tool: helmfile
-          args: "lint -f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml"
+          args: "lint --skip-deps -f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml"
 
       - name: Run helmfile lint Prod Environment
-        uses: docked-titan-foundation/helmkit@v1.4.0
+        uses: docked-titan-foundation/helmkit@v1.1.0
         with:
           tool: helmfile
-          args: "lint -f helmfile.yaml.gotmpl -e prod --state-values-file helmfile/environments/lint-values.yaml"
+          args: "lint --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values-file helmfile/environments/lint-values.yaml"
