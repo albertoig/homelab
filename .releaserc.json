@@ -1,7 +1,21 @@
 {
   "branches": ["main", { "name": "beta", "prerelease": true }],
   "plugins": [
-    "@semantic-release/commit-analyzer",
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "angular",
+        "releaseRules": [
+          { "breaking": true, "release": "major" },
+          { "type": "feat", "scope": "helmfile", "release": "minor" },
+          { "type": "feat", "scope": "charts", "release": "minor" },
+          { "type": "fix", "scope": "helmfile", "release": "patch" },
+          { "type": "fix", "scope": "charts", "release": "patch" },
+          { "type": "feat", "release": false },
+          { "type": "fix", "release": false }
+        ]
+      }
+    ],
     "@semantic-release/release-notes-generator",
     [
       "@semantic-release/changelog",
