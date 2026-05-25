@@ -7,6 +7,12 @@ repos:
         files: ^\.github/workflows/
   - repo: local
     hooks:
+      - id: commitlint
+        name: commitlint
+        entry: npx commitlint --edit
+        language: system
+        stages: [commit-msg]
+        pass_filenames: false
       - id: ansible-lint
         name: ansible-lint
         entry: ansible-lint
