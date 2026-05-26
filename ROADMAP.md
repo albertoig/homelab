@@ -6,7 +6,6 @@ This roadmap tracks the progress of the homelab setup,
 from initial infrastructure provisioning to a fully automated
 GitOps-driven environment.
 
-
 ---
 
 ## ✅ Completed
@@ -78,7 +77,7 @@ GitOps-driven environment.
 
 ## 🚧 In Progress
 - [ ] Authentik Auth
-    - [ ] LongHorn
+    - [ ] Longhorn
     - [ ] Prometheus
     - [ ] Review best practices SSO
 
@@ -86,41 +85,38 @@ GitOps-driven environment.
 
 ## 📋 Planned
 
-### Critical — breaks fresh installs
-- [ ] Fix ClusterIssuer hardcoded to `letsencrypt-prod` — dev environment requests certs against a non-existent issuer (`charts/cert-manager-config/values.yaml:13`, `helmfile/common/values/cert-manager-config.yaml.gotmpl`)
-- [ ] Fix lock file numbering mismatch — `005-ingresses.helmfile.yaml.gotmpl` references `004-ingresses.helmfile.lock` (`helmfile/releases/005-ingresses.helmfile.yaml.gotmpl:7`)
+### P1 — Fix now
+- [ ] Fix ClusterIssuer hardcoded to `letsencrypt-prod` — dev environment requests certs against a non-existent issuer (`charts/cert-manager-config/values.yaml:13`)
+- [ ] Delete plaintext `prod/secrets/*.secrets.yaml` — decrypted files must not persist on disk after encryption
+- [ ] Remove duplicate Cloudflare email in `cert-manager-config.template.yaml` — `secret.email` and `clusterIssuer.cloudflare.email` are the same value, prompted twice during `secrets-init`
+- [ ] Wire `alertmanagerSlackWebhook` into Alertmanager config or remove it from the secret template — currently collected and encrypted but never used
 
-### Significant — dead config / silent failures
-- [ ] Wire `alertmanagerSlackWebhook` into Prometheus Alertmanager config — secret is collected and encrypted but never referenced in `prometheus-stack.yaml.gotmpl`
-- [ ] Remove empty `dev.yaml` and `prod.yaml` environment stubs or give them a purpose (`helmfile/environments/dev/dev.yaml`, `helmfile/environments/prod/prod.yaml`)
-- [ ] Remove scripts hard-limit to `dev`/`prod` — `install-helmfiles.sh`, `destroy-helmfiles.sh`, `init-secrets.sh` reject any other environment name
+### P2 — Reliability and completeness
+- [ ] Backup solution — no data backup exists for Longhorn volumes (Grafana, Loki, Prometheus, Authentik PostgreSQL)
+- [ ] Disaster recovery plan — document how to rebuild the cluster and restore data from scratch
+- [ ] Add preflight validation for empty `root_dns` — helmfile silently generates ingresses with empty hostnames if `general.root_dns` is unset in config.yaml
+- [ ] Remove empty `dev.yaml` and `prod.yaml` environment stubs — referenced in release files but contain no content (`helmfile/environments/dev/dev.yaml`, `helmfile/environments/prod/prod.yaml`)
 
-### Minor — maintainability
-- [ ] Track helm-secrets plugin version with Renovate — `docs/INSTALL.md:38` pins v4.7.4 with a direct URL but Renovate doesn't update it
-- [ ] Delete plaintext `prod/secrets/*.secrets.yaml` files — decrypted files should not persist on disk after encryption
-- [ ] Add preflight validation for empty `root_dns` — helmfile silently generates ingresses with empty hostnames if `general.root_dns` is unset
-- [ ] Remove duplicate Cloudflare email in `cert-manager-config.template.yaml` — `secret.email` and `clusterIssuer.cloudflare.email` are the same value, asked twice during `secrets-init`
-- [ ] Enforce `shared-sso.enc.yaml` pattern for future SSO integrations — Longhorn and Prometheus OAuth credentials must go into `shared-sso` when added, not new per-chart files
-
-### Existing planned items
-- [ ] Automate kubeconfig setup with helm-diff and helm-secrets plugins for new developer onboarding
-- [ ] ADR integration into merge request workflow
+### P3 — Quality of life
 - [ ] Grafana Dashboards
     - [ ] Authentik
-    - [ ] Argocd
+    - [ ] ArgoCD
     - [ ] Tempo
     - [ ] Cert-Manager
-- [ ] Review meta monitoring https://grafana.com/docs/loki/latest/operations/meta-monitoring/
-- [ ] Migrate Loki (longhorn) to distributed from single binary
+- [ ] ADR integration into merge request workflow — automate the ADR requirement check on PRs
+- [ ] Track helm-secrets plugin version — `docs/INSTALL.md` pins v4.7.4 with a direct URL, not tracked by Renovate
+- [ ] Remove scripts hard-limit to `dev`/`prod` — `install-helmfiles.sh`, `destroy-helmfiles.sh`, `init-secrets.sh` reject any other environment name
+- [ ] Fix lock file numbering — `005-ingresses.helmfile.yaml.gotmpl` references `004-ingresses.helmfile.lock` (cosmetic inconsistency)
+- [ ] Simplify config with scripts — `root_dns` is set in `config.yaml` but DNS-related values are also prompted separately in `secrets-init`; reduce duplication
+
+### P4 — Nice to have
+- [ ] Grafana Dashboards
+    - [ ] Review meta monitoring (Loki self-monitoring)
 - [ ] Investigate Grafana Beyla eBPF auto-instrumentation for services without native tracing (Authentik, Longhorn, MetalLB, Cert-Manager, External-DNS)
-- [ ] Backup solution
-- [ ] Disaster recovery plan
-- [ ] Helmfile configuration
-- [ ] Testing scripts
-- [ ] Study to migrate HTTP URL in helm repositories to the new format
-- [ ] Remove duplicates secrets
-- [ ] Make easier configs with scripts (DNS reused in secrets and normal config)
-- [ ] Look for a centralized dashboard system that add all the services that are exposed through load balancer.
+- [ ] Look for a centralized service dashboard (e.g. Heimdall) for all LoadBalancer-exposed services
+- [ ] Study migration of HTTP helm repository URLs to OCI format
+- [ ] Migrate Loki to distributed mode — only relevant at scale, low priority for a homelab
+
 ---
 
 ## 📝 Notes
