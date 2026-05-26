@@ -30,11 +30,13 @@ configs:
       # This is recommended and enabled by default in Argo CD 2.9+
       # For older versions, add: usePKCE: true
     resource.customizations: |
-      # Optional: Customize how Argo CD maps OIDC claims to internal roles
-      # See: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#customizing-claims
   secret:
     extra:
       oidc.authentik.clientSecret: {{ .Values.sso.argocd.client_secret }}
+  rbac:
+    policy.default: role:readonly
+    policy.csv: |
+      g, ArgoCD Admins, role:admin
   admin:
     enabled: false
 
