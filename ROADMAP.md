@@ -92,13 +92,18 @@ GitOps-driven environment.
 - [ ] Wire `alertmanagerSlackWebhook` into Alertmanager config or remove it from the secret template — currently collected and encrypted but never used
 
 ### P2 — Reliability and completeness
-- [ ] Backup solution — no data backup exists for Longhorn volumes (Grafana, Loki, Prometheus, Authentik PostgreSQL)
+- [ ] Velero — Kubernetes backup and restore; use Cloudflare R2 or Backblaze B2 as the S3-compatible backend (offsite, no extra services on-cluster)
 - [ ] Disaster recovery plan — document how to rebuild the cluster and restore data from scratch
 - [ ] Add preflight validation for empty `root_dns` — helmfile silently generates ingresses with empty hostnames if `general.root_dns` is unset in config.yaml
 - [ ] Remove empty `dev.yaml` and `prod.yaml` environment stubs — referenced in release files but contain no content (`helmfile/environments/dev/dev.yaml`, `helmfile/environments/prod/prod.yaml`)
 
-### P3 — Quality of life
-- [ ] HashiCorp Vault / OpenBao — deploy a secret manager on the cluster for runtime secret injection into pods; evaluate Vault Agent Injector or CSI Secrets Store provider as complement to existing SOPS-at-rest approach
+### P3 — Platform (build on top of this infra)
+- [ ] OpenBao — runtime secret manager; deploy with External Secrets Operator to bridge OpenBao → Kubernetes Secrets automatically
+- [ ] CloudNativePG — PostgreSQL operator for Kubernetes; replaces embedded per-chart Postgres with a managed, reusable database layer for all applications
+- [ ] Kyverno — policy enforcement at the admission layer; baseline policies: require resource limits, block root containers, enforce label schemas
+- [ ] Zot or Harbor — container registry for storing images built by CI; Zot is lightweight and OCI-native, Harbor adds scanning and access control
+
+### P4 — Quality of life
 - [ ] Grafana Dashboards
     - [ ] Authentik
     - [ ] ArgoCD
@@ -110,7 +115,7 @@ GitOps-driven environment.
 - [ ] Fix lock file numbering — `005-ingresses.helmfile.yaml.gotmpl` references `004-ingresses.helmfile.lock` (cosmetic inconsistency)
 - [ ] Simplify config with scripts — `root_dns` is set in `config.yaml` but DNS-related values are also prompted separately in `secrets-init`; reduce duplication
 
-### P4 — Nice to have
+### P5 — Nice to have
 - [ ] Grafana Dashboards
     - [ ] Review meta monitoring (Loki self-monitoring)
 - [ ] Investigate Grafana Beyla eBPF auto-instrumentation for services without native tracing (Authentik, Longhorn, MetalLB, Cert-Manager, External-DNS)
