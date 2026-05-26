@@ -98,6 +98,7 @@ GitOps-driven environment.
 - [ ] Remove empty `dev.yaml` and `prod.yaml` environment stubs — referenced in release files but contain no content (`helmfile/environments/dev/dev.yaml`, `helmfile/environments/prod/prod.yaml`)
 
 ### P3 — Quality of life
+- [ ] HashiCorp Vault / OpenBao — deploy a secret manager on the cluster for runtime secret injection into pods; evaluate Vault Agent Injector or CSI Secrets Store provider as complement to existing SOPS-at-rest approach
 - [ ] Grafana Dashboards
     - [ ] Authentik
     - [ ] ArgoCD
