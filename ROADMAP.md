@@ -99,6 +99,8 @@ GitOps-driven environment.
 - [ ] Track helm-secrets plugin version with Renovate — `docs/INSTALL.md:38` pins v4.7.4 with a direct URL but Renovate doesn't update it
 - [ ] Delete plaintext `prod/secrets/*.secrets.yaml` files — decrypted files should not persist on disk after encryption
 - [ ] Add preflight validation for empty `root_dns` — helmfile silently generates ingresses with empty hostnames if `general.root_dns` is unset
+- [ ] Remove duplicate Cloudflare email in `cert-manager-config.template.yaml` — `secret.email` and `clusterIssuer.cloudflare.email` are the same value, asked twice during `secrets-init`
+- [ ] Enforce `shared-sso.enc.yaml` pattern for future SSO integrations — Longhorn and Prometheus OAuth credentials must go into `shared-sso` when added, not new per-chart files
 
 ### Existing planned items
 - [ ] Automate kubeconfig setup with helm-diff and helm-secrets plugins for new developer onboarding
