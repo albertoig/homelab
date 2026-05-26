@@ -185,6 +185,53 @@ kubectl get svc -A | grep LoadBalancer
 
 Verify the `metallb.ipPool` in your config is correct for your network.
 
+### Emergency access — Authentik is unavailable
+
+Both Grafana and ArgoCD are configured for SSO-only access. If Authentik is unreachable, use the procedures below to regain access without SSO.
+
+#### Grafana
+
+Grafana auto-redirects to Authentik on every login attempt. To bypass this and show the local login form, navigate to:
+
+```
+https://grafana.internal.<root_dns>/login?disableAutoLogin
+```
+
+No local admin user exists by default (`disable_initial_admin_creation: true`). Create one via the Grafana CLI without redeploying:
+
+```bash
+kubectl exec -n monitoring-system deploy/grafana -- \
+  grafana-cli admin reset-admin-password <new-password>
+```
+
+Then log in at the URL above with username `admin` and the password you set. Revert the password or disable the admin account once Authentik is restored.
+
+#### ArgoCD
+
+ArgoCD's built-in admin account is disabled by default (`configs.admin.enabled: false`). To re-enable it temporarily, add an environment values override:
+
+```yaml
+# helmfile/environments/<env>/values/argocd.yaml.gotmpl
+configs:
+  admin:
+    enabled: true
+```
+
+Redeploy ArgoCD:
+
+```bash
+make install ENV=<env>
+```
+
+Retrieve the admin password:
+
+```bash
+kubectl get secret -n gitops-system argocd-initial-admin-secret \
+  -o jsonpath='{.data.password}' | base64 -d
+```
+
+Remove the override and redeploy again once Authentik is restored.
+
 ---
 
 ## Related
