@@ -65,10 +65,7 @@ GitOps-driven environment.
     - [x] ADR-005 config system decision record
 - [x] Authentik SSO Auth
     - [x] Grafana
-    - [ ] ARGO CD
----
-
-## 🚧 In Progress
+    - [x] ArgoCD
 - [x] Authentication layer fixes (zero manual steps after install)
     - [x] Fix hardcoded `iglesias.cloud` domain in blueprint redirect URIs and launch URLs
     - [x] Add admin user to Grafana Admins and ArgoCD Admins groups in blueprint
@@ -76,6 +73,10 @@ GitOps-driven environment.
     - [x] Remove dead `genSelfSignedCert` from `authentik-blueprints/values.yaml.gotmpl`
     - [x] Remove dead `grafana.adminPassword` from secret template and Grafana values
     - [x] Document emergency access for Grafana (`/login?disableAutoLogin`) and ArgoCD
+
+---
+
+## 🚧 In Progress
 - [ ] Authentik Auth
     - [ ] LongHorn
     - [ ] Prometheus
@@ -84,6 +85,22 @@ GitOps-driven environment.
 ---
 
 ## 📋 Planned
+
+### Critical — breaks fresh installs
+- [ ] Fix ClusterIssuer hardcoded to `letsencrypt-prod` — dev environment requests certs against a non-existent issuer (`charts/cert-manager-config/values.yaml:13`, `helmfile/common/values/cert-manager-config.yaml.gotmpl`)
+- [ ] Fix lock file numbering mismatch — `005-ingresses.helmfile.yaml.gotmpl` references `004-ingresses.helmfile.lock` (`helmfile/releases/005-ingresses.helmfile.yaml.gotmpl:7`)
+
+### Significant — dead config / silent failures
+- [ ] Wire `alertmanagerSlackWebhook` into Prometheus Alertmanager config — secret is collected and encrypted but never referenced in `prometheus-stack.yaml.gotmpl`
+- [ ] Remove empty `dev.yaml` and `prod.yaml` environment stubs or give them a purpose (`helmfile/environments/dev/dev.yaml`, `helmfile/environments/prod/prod.yaml`)
+- [ ] Remove scripts hard-limit to `dev`/`prod` — `install-helmfiles.sh`, `destroy-helmfiles.sh`, `init-secrets.sh` reject any other environment name
+
+### Minor — maintainability
+- [ ] Track helm-secrets plugin version with Renovate — `docs/INSTALL.md:38` pins v4.7.4 with a direct URL but Renovate doesn't update it
+- [ ] Delete plaintext `prod/secrets/*.secrets.yaml` files — decrypted files should not persist on disk after encryption
+- [ ] Add preflight validation for empty `root_dns` — helmfile silently generates ingresses with empty hostnames if `general.root_dns` is unset
+
+### Existing planned items
 - [ ] Automate kubeconfig setup with helm-diff and helm-secrets plugins for new developer onboarding
 - [ ] ADR integration into merge request workflow
 - [ ] Grafana Dashboards
@@ -97,12 +114,10 @@ GitOps-driven environment.
 - [ ] Backup solution
 - [ ] Disaster recovery plan
 - [ ] Helmfile configuration
-- [ ] Badges on Readme
 - [ ] Testing scripts
 - [ ] Study to migrate HTTP URL in helm repositories to the new format
-- [ ] Adjust scripts to number of environments in helmfile folder
 - [ ] Remove duplicates secrets
-- [ ] Make easier configs with scripts (DNS reused in secrets and normal config) 
+- [ ] Make easier configs with scripts (DNS reused in secrets and normal config)
 - [ ] Look for a centralized dashboard system that add all the services that are exposed through load balancer.
 ---
 
