@@ -69,13 +69,13 @@ GitOps-driven environment.
 ---
 
 ## 🚧 In Progress
-- [ ] Authentication layer fixes (zero manual steps after install)
-    - [ ] Fix hardcoded `iglesias.cloud` domain in blueprint redirect URIs and launch URLs
-    - [ ] Add admin user to Grafana Admins and ArgoCD Admins groups in blueprint
-    - [ ] Add ArgoCD RBAC policy to map Authentik groups to ArgoCD roles
-    - [ ] Remove dead `genSelfSignedCert` from `authentik-blueprints/values.yaml.gotmpl`
-    - [ ] Remove dead `grafana.adminPassword` from secret template and Grafana values
-    - [ ] Document emergency access for Grafana (`/login?disableAutoLogin`) and ArgoCD
+- [x] Authentication layer fixes (zero manual steps after install)
+    - [x] Fix hardcoded `iglesias.cloud` domain in blueprint redirect URIs and launch URLs
+    - [x] Add admin user to Grafana Admins and ArgoCD Admins groups in blueprint
+    - [x] Add ArgoCD RBAC policy to map Authentik groups to ArgoCD roles
+    - [x] Remove dead `genSelfSignedCert` from `authentik-blueprints/values.yaml.gotmpl`
+    - [x] Remove dead `grafana.adminPassword` from secret template and Grafana values
+    - [x] Document emergency access for Grafana (`/login?disableAutoLogin`) and ArgoCD
 - [ ] Authentik Auth
     - [ ] LongHorn
     - [ ] Prometheus
