@@ -75,7 +75,7 @@ data:
         client_secret: !Env GRAFANA_CLIENT_SECRET
         client_type: confidential
         redirect_uris:
-          - url: "https://grafana.internal.iglesias.cloud/login/generic_oauth"
+          - url: "https://grafana.internal.{{ .Values.root_dns }}/login/generic_oauth"
             matching_mode: strict
         signing_key: !KeyOf authentik-main-cert
         authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
@@ -101,7 +101,7 @@ data:
         name: Grafana
         slug: grafana
         provider: !KeyOf grafana-provider
-        meta_launch_url: https://grafana.internal.iglesias.cloud/
+        meta_launch_url: "https://grafana.internal.{{ .Values.root_dns }}/"
         policy_engine_mode: any
 
     # ============================================
@@ -118,7 +118,7 @@ data:
         client_secret: !Env ARGOCD_CLIENT_SECRET
         client_type: confidential
         redirect_uris:
-          - url: "https://argocd.internal.iglesias.cloud/auth/callback"
+          - url: "https://argocd.internal.{{ .Values.root_dns }}/auth/callback"
             matching_mode: strict
         signing_key: !KeyOf authentik-main-cert
         authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
@@ -143,5 +143,5 @@ data:
         name: ArgoCD
         slug: argocd
         provider: !KeyOf argocd-provider
-        meta_launch_url: https://argocd.internal.iglesias.cloud/
+        meta_launch_url: "https://argocd.internal.{{ .Values.root_dns }}/"
         policy_engine_mode: any
