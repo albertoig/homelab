@@ -27,25 +27,6 @@ data:
         key_data: !Env OAUTH_KEY_DATA
 
     # ============================================
-    # GROUPS
-    # ============================================
-    - model: authentik_core.group
-      state: present
-      id: group-grafana-admins
-      identifiers:
-        name: Grafana Admins
-      attrs:
-        name: Grafana Admin
-        
-    - model: authentik_core.group
-      state: present
-      id: group-argocd-admins
-      identifiers:
-        name: ArgoCD Admins
-      attrs:
-        name: ArgoCD Admins
-
-    # ============================================
     # USERS
     # ============================================
     - model: authentik_core.user
@@ -60,6 +41,29 @@ data:
         is_active: true
         type: internal
         password: !Env HOMELAB_ADMIN_PASSWORD
+
+    # ============================================
+    # GROUPS
+    # ============================================
+    - model: authentik_core.group
+      state: present
+      id: group-grafana-admins
+      identifiers:
+        name: Grafana Admins
+      attrs:
+        name: Grafana Admins
+        users:
+          - !KeyOf homelab-admin
+
+    - model: authentik_core.group
+      state: present
+      id: group-argocd-admins
+      identifiers:
+        name: ArgoCD Admins
+      attrs:
+        name: ArgoCD Admins
+        users:
+          - !KeyOf homelab-admin
 
     # ============================================
     # GRAFANA - Own provider + application
