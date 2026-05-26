@@ -2,6 +2,26 @@
 
 This document describes all automation scripts in the homelab repository, their purpose, usage, and how they relate to each other.
 
+## Makefile shortcuts
+
+The `Makefile` at the repo root wraps the most common script operations. Run `make help` to see all available targets.
+
+| Make target | Underlying script | Notes |
+|-------------|-------------------|-------|
+| `make check` | `scripts/check-requirements.sh` | |
+| `make check-k8s` | `scripts/check-kubernetes.sh` | |
+| `make provision [PLAYBOOK=site]` | `metal/k3s/run.sh` | |
+| `make install [ENV=dev]` | `scripts/install-helmfiles.sh` | |
+| `make destroy [ENV=dev]` | `scripts/destroy-helmfiles.sh` | |
+| `make secrets-init [ENV=dev]` | `scripts/init-secrets.sh` | |
+| `make secrets-encrypt [ENV=dev] [CHART=]` | `scripts/sops-encrypt-secrets.sh` | |
+| `make secrets-decrypt [ENV=dev] [CHART=]` | `scripts/sops-decrypt-secrets.sh` | |
+| `make secrets-check` | `scripts/check-secrets.sh` | |
+| `make lint` | `pre-commit run --all-files` | |
+| `make helm-lint` | `helm lint` loop over `charts/*/` | |
+| `make helmfile-lint [ENV=dev]` | `helmfile lint --skip-deps` | |
+| `make pre-commit-install` | `pre-commit install` (both hooks) | Run once after cloning |
+
 ## Overview
 
 The repository contains 8 shell scripts organized into three functional groups:

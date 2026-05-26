@@ -81,8 +81,7 @@ It is recommended to install the pre-commit hooks to catch issues before committ
 
 ```bash
 pip install pre-commit
-pre-commit install
-pre-commit install --hook-type commit-msg
+make pre-commit-install
 ```
 
 The second command installs the `commit-msg` hook required for commitlint to enforce the conventional commit format locally.

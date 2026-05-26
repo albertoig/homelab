@@ -12,7 +12,7 @@ Install pre-commit hooks:
 
 ```bash
 pip install pre-commit
-pre-commit install
+make pre-commit-install
 ```
 
 ### Available Hooks
@@ -28,7 +28,7 @@ pre-commit install
 Run all hooks manually:
 
 ```bash
-pre-commit run --all-files
+make lint
 ```
 
 Skip hooks (use with caution):
@@ -84,9 +84,7 @@ brew install helm
 Lint all charts:
 
 ```bash
-for chart in charts/*/; do
-  helm lint "$chart"
-done
+make helm-lint
 ```
 
 ### Configuration
@@ -108,7 +106,7 @@ brew install helmfile
 ### Usage
 
 ```bash
-helmfile lint
+make helmfile-lint ENV=dev
 ```
 
 ### Bypassing Encrypted Secrets
@@ -116,7 +114,8 @@ helmfile lint
 By default, `helmfile lint` loads secrets from encrypted `.enc.yaml` files, which requires GPG keys. To run lint without access to real secrets (e.g., in pre-commit hooks), use the `--state-values-file` flag:
 
 ```bash
-helmfile -f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml lint
+helmfile lint --skip-deps -f helmfile.yaml.gotmpl -e dev \
+  --state-values-file helmfile/environments/lint-values.yaml
 ```
 
 This uses `helmfile/environments/lint-values.yaml` - a stub values file with empty placeholder values for all secrets. It allows lint to pass without GPG keys or decrypted secrets.

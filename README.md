@@ -116,11 +116,11 @@ See [docs/INSTALL.md](./docs/INSTALL.md) for the full setup guide, including pre
 
 ```bash
 # Quick start
-./scripts/check-requirements.sh      # verify tools
-cp helmfile/config.template.yaml helmfile/environments/<env>/config.yaml  # configure
-./scripts/init-secrets.sh <env>       # set up secrets
-cd metal/k3s && ./run.sh             # provision cluster
-./scripts/install-helmfiles.sh <env> # deploy services
+make check                                                                   # verify tools
+cp helmfile/config.template.yaml helmfile/environments/<env>/config.yaml    # configure
+make secrets-init ENV=<env>                                                  # set up secrets
+make provision                                                               # provision cluster
+make install ENV=<env>                                                       # deploy services
 ```
 
 ---

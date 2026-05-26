@@ -19,7 +19,7 @@ Install the following tools:
 Verify all tools are installed:
 
 ```bash
-./scripts/check-requirements.sh
+make check
 ```
 
 ### Helm plugins
@@ -89,7 +89,7 @@ See [CONFIG.md](./CONFIG.md) for all available options.
 ### 2. Initialize secrets
 
 ```bash
-./scripts/init-secrets.sh <env>
+make secrets-init ENV=<env>
 ```
 
 This prompts interactively for each secret value (passwords, API keys, tokens) and auto-encrypts them with SOPS.
@@ -99,8 +99,7 @@ See [SECRETS.md](./SECRETS.md) for a full reference of required secrets.
 ### 3. Provision the cluster
 
 ```bash
-cd metal/k3s
-./run.sh
+make provision
 ```
 
 This runs Ansible to provision K3s on bare-metal nodes defined in the inventory.
@@ -108,7 +107,7 @@ This runs Ansible to provision K3s on bare-metal nodes defined in the inventory.
 ### 4. Deploy services
 
 ```bash
-./scripts/install-helmfiles.sh <env>
+make install ENV=<env>
 ```
 
 This runs 4 steps in order:
@@ -130,14 +129,14 @@ kubectl get pods -A
 ### Deploy a specific environment
 
 ```bash
-./scripts/install-helmfiles.sh dev
-./scripts/install-helmfiles.sh prod
+make install ENV=dev
+make install ENV=prod
 ```
 
 ### Destroy an environment
 
 ```bash
-./scripts/destroy-helmfiles.sh <env>
+make destroy ENV=<env>
 ```
 
 This tears down all releases in reverse dependency order and cleans up stuck resources.
@@ -146,12 +145,12 @@ This tears down all releases in reverse dependency order and cleans up stuck res
 
 ```bash
 # Interactive re-initialization (overwrites existing)
-./scripts/init-secrets.sh <env>
+make secrets-init ENV=<env>
 
 # Or manual edit workflow:
-./scripts/sops-decrypt-secrets.sh <env> [chart]
+make secrets-decrypt ENV=<env> CHART=<chart>
 vim helmfile/environments/<env>/secrets/<chart>.secrets.yaml
-./scripts/sops-encrypt-secrets.sh <env> [chart]
+make secrets-encrypt ENV=<env> CHART=<chart>
 ```
 
 ### Preview changes without applying
