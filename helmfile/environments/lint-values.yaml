@@ -42,8 +42,7 @@ sso:
   argocd:
     client_id: ""
     client_secret: ""
-grafana:
-  adminPassword: ""
+grafana: {}
 prometheus-stack:
   alertmanagerSlackWebhook: ""
 secret:
