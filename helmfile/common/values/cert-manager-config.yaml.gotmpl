@@ -1,3 +1,7 @@
+clusterIssuer:
+  name: "letsencrypt-{{ .Environment.Name }}"
+  server: https://acme-v02.api.letsencrypt.org/directory
+
 certificate:
   enabled: true
 

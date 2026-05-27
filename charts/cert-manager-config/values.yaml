@@ -9,8 +9,10 @@ secret:
 
 # ClusterIssuer configuration
 clusterIssuer:
-  # The name of the ClusterIssuer
-  name: letsencrypt-prod
+  # The name of the ClusterIssuer — set per environment (e.g. letsencrypt-dev, letsencrypt-prod)
+  name: ""
+  # ACME server URL
+  server: https://acme-v02.api.letsencrypt.org/directory
   # Email address for Let's Encrypt certificates
   email: admin@example.com
   # Cloudflare solver configuration

@@ -86,7 +86,7 @@ GitOps-driven environment.
 ## 📋 Planned
 
 ### P1 — Fix now
-- [ ] Fix ClusterIssuer hardcoded to `letsencrypt-prod` — dev environment requests certs against a non-existent issuer (`charts/cert-manager-config/values.yaml:13`)
+- [x] Fix ClusterIssuer hardcoded to `letsencrypt-prod` — dev environment requests certs against a non-existent issuer (`charts/cert-manager-config/values.yaml:13`)
 - [ ] Delete plaintext `prod/secrets/*.secrets.yaml` — decrypted files must not persist on disk after encryption
 - [ ] Remove duplicate Cloudflare email in `cert-manager-config.template.yaml` — `secret.email` and `clusterIssuer.cloudflare.email` are the same value, prompted twice during `secrets-init`
 - [ ] Wire `alertmanagerSlackWebhook` into Alertmanager config or remove it from the secret template — currently collected and encrypted but never used
