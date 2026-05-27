@@ -47,7 +47,8 @@ if [ -n "$CHART" ]; then
 
     info "Encrypting: ${CHART}.secrets.yaml -> ${CHART}.enc.yaml"
     if sops --encrypt "$SECRETS_FILE" > "$ENCRYPTED_FILE"; then
-        success "Created: $(basename "$ENCRYPTED_FILE")"
+        rm "$SECRETS_FILE"
+        success "Created: $(basename "$ENCRYPTED_FILE") (plaintext removed)"
         encrypted=1
     else
         error "Failed to encrypt: $(basename "$SECRETS_FILE")"
@@ -64,7 +65,8 @@ else
 
         info "Encrypting: ${chart_name}.secrets.yaml -> ${chart_name}.enc.yaml"
         if sops --encrypt "$secrets_file" > "$enc_file"; then
-            success "Created: $(basename "$enc_file")"
+            rm "$secrets_file"
+            success "Created: $(basename "$enc_file") (plaintext removed)"
             encrypted=$((encrypted + 1))
         else
             error "Failed to encrypt: $(basename "$secrets_file")"
