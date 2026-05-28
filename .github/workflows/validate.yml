@@ -98,28 +98,29 @@ jobs:
             helm lint "$chart" || exit 1
           done
 
-  helmfile-lint:
-    name: Helmfile Lint
-    needs: changes
-    if: needs.changes.outputs.helmfile == 'true' || github.event_name == 'workflow_call'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      # helmkit version is tracked in versions.yaml but cannot be read dynamically
-      # here because GitHub Actions does not support expressions in `uses:` fields.
-      # Update this value manually when bumping helmkit in versions.yaml.
-      - name: Run helmfile lint Dev Environment
-        uses: docked-titan-foundation/helmkit@v1.1.0
-        with:
-          tool: helmfile
-          args: "lint --skip-deps -f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml"
-
-      - name: Run helmfile lint Prod Environment
-        uses: docked-titan-foundation/helmkit@v1.1.0
-        with:
-          tool: helmfile
-          args: "lint --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values-file helmfile/environments/lint-values.yaml"
+  # helmfile-lint is disabled until a self-hosted runner with the SOPS key is available.
+  # Helmfile lint requires secret decryption against the real prod environment — a CI age
+  # key would expose credentials to GitHub. The plan is to deploy actions-runner-controller
+  # on the homelab cluster so the key never leaves the network.
+  # See ROADMAP.md P2 — Self-hosted runner for CI secret decryption.
+  #
+  # helmfile-lint:
+  #   name: Helmfile Lint
+  #   needs: changes
+  #   if: needs.changes.outputs.helmfile == 'true' || github.event_name == 'workflow_call'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #     - name: Run helmfile lint Dev Environment
+  #       uses: docked-titan-foundation/helmkit@v1.1.0
+  #       with:
+  #         tool: helmfile
+  #         args: "lint --skip-deps -f helmfile.yaml.gotmpl -e dev"
+  #     - name: Run helmfile lint Prod Environment
+  #       uses: docked-titan-foundation/helmkit@v1.1.0
+  #       with:
+  #         tool: helmfile
+  #         args: "lint --skip-deps -f helmfile.yaml.gotmpl -e prod"
 
   commitlint:
     name: Commitlint

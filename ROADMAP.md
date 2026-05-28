@@ -92,6 +92,7 @@ GitOps-driven environment.
 - [x] Wire `alertmanagerSlackWebhook` into Alertmanager config or remove it from the secret template — currently collected and encrypted but never used
 
 ### P2 — Reliability and completeness
+- [ ] Self-hosted GitHub Actions runner — deploy `actions-runner-controller` on the homelab cluster so CI jobs run on-prem; required to re-enable helmfile lint against real dev/prod environments without exposing the SOPS key to GitHub
 - [ ] Velero — Kubernetes backup and restore; use Cloudflare R2 or Backblaze B2 as the S3-compatible backend (offsite, no extra services on-cluster)
 - [ ] Disaster recovery plan — document how to rebuild the cluster and restore data from scratch
 - [ ] Add preflight validation for empty `root_dns` — helmfile silently generates ingresses with empty hostnames if `general.root_dns` is unset in config.yaml
