@@ -43,15 +43,10 @@ sso:
     client_id: ""
     client_secret: ""
 grafana: {}
-prometheus-stack:
-  alertmanagerSlackWebhook: ""
 secret:
   apiKey: ""
-  email: ""
 clusterIssuer:
   email: ""
-  cloudflare:
-    email: ""
 certificate:
   dnsNames:
     - ""

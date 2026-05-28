@@ -88,8 +88,8 @@ GitOps-driven environment.
 ### P1 — Fix now
 - [x] Fix ClusterIssuer hardcoded to `letsencrypt-prod` — dev environment requests certs against a non-existent issuer (`charts/cert-manager-config/values.yaml:13`)
 - [x] Delete plaintext `prod/secrets/*.secrets.yaml` — decrypted files must not persist on disk after encryption
-- [ ] Remove duplicate Cloudflare email in `cert-manager-config.template.yaml` — `secret.email` and `clusterIssuer.cloudflare.email` are the same value, prompted twice during `secrets-init`
-- [ ] Wire `alertmanagerSlackWebhook` into Alertmanager config or remove it from the secret template — currently collected and encrypted but never used
+- [x] Remove duplicate Cloudflare email in `cert-manager-config.template.yaml` — `secret.email` and `clusterIssuer.cloudflare.email` are the same value, prompted twice during `secrets-init`
+- [x] Wire `alertmanagerSlackWebhook` into Alertmanager config or remove it from the secret template — currently collected and encrypted but never used
 
 ### P2 — Reliability and completeness
 - [ ] Velero — Kubernetes backup and restore; use Cloudflare R2 or Backblaze B2 as the S3-compatible backend (offsite, no extra services on-cluster)

@@ -1,4 +1,1 @@
 # --- prometheus-stack ---
-prometheus-stack:
-  # Slack webhook URL for alertmanager notifications
-  alertmanagerSlackWebhook: ""

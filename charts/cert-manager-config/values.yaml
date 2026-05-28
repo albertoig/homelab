@@ -4,8 +4,6 @@ secret:
   name: cloudflare-api-key
   # The Cloudflare API key
   apiKey: ""
-  # The Cloudflare API email
-  email: ""
 
 # ClusterIssuer configuration
 clusterIssuer:
@@ -17,8 +15,6 @@ clusterIssuer:
   email: admin@example.com
   # Cloudflare solver configuration
   cloudflare:
-    # Email associated with Cloudflare account (optional, using token auth)
-    email: ""
     # Reference to the secret containing the API key
     secretRef:
       name: cloudflare-api-key
