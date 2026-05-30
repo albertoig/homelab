@@ -37,10 +37,12 @@ provision: ## Provision the K3s cluster via Ansible  [PLAYBOOK=site]
 # ── Helmfile deployment ───────────────────────────────────────────────────────
 
 install: ## Deploy all helmfile releases for ENV  [ENV=dev]
+	terraform -chdir=terraform apply
 	./scripts/install-helmfiles.sh $(ENV)
 
 destroy: ## Tear down all helmfile releases for ENV  [ENV=dev]
 	./scripts/destroy-helmfiles.sh $(ENV)
+	terraform -chdir=terraform destroy
 
 # ── Secrets management ────────────────────────────────────────────────────────
 
