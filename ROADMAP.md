@@ -79,7 +79,7 @@ GitOps-driven environment.
 - [ ] Authentik Auth
     - [ ] Longhorn
     - [ ] Prometheus
-    - [ ] Review best practices SSO
+    - [x] Review best practices SSO
 
 ---
 
@@ -90,6 +90,15 @@ GitOps-driven environment.
 - [x] Delete plaintext `prod/secrets/*.secrets.yaml` — decrypted files must not persist on disk after encryption
 - [x] Remove duplicate Cloudflare email in `cert-manager-config.template.yaml` — `secret.email` and `clusterIssuer.cloudflare.email` are the same value, prompted twice during `secrets-init`
 - [x] Wire `alertmanagerSlackWebhook` into Alertmanager config or remove it from the secret template — currently collected and encrypted but never used
+
+### P2 — SSO Security Hardening
+- [ ] Implement `!File` + volume mount for Authentik blueprint secrets — all credentials (`GRAFANA_CLIENT_SECRET`, `ARGOCD_CLIENT_SECRET`, `HOMELAB_ADMIN_PASSWORD`, etc.) are currently injected as env vars and are visible in `kubectl describe pod`; switch to volume-mounted files via `!File` as planned in `docs/decisions/blueprints-secret-handling.md`
+- [ ] Disable ArgoCD local authentication completely — the built-in admin is already disabled (`configs.admin.enabled: false`); additionally, ensure no local accounts are ever created via `configs.cm.accounts.*`, as these bypass Authentik entirely; document this restriction in `CONTRIBUTING.md` so future contributors are aware
+- [ ] Add group-based access policy bindings to Authentik applications — currently both Grafana and ArgoCD applications use `policy_engine_mode: any` with no policy bindings, meaning any user that can authenticate to Authentik gains access; bind a group policy (e.g. `Grafana Admins` / `ArgoCD Admins`) to each application so access is explicitly scoped
+- [ ] Add Traefik security headers middleware — configure a global middleware with `Strict-Transport-Security`, `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, and `Content-Security-Policy` and apply it to all ingresses
+- [ ] Fix `issuer_mode` on Grafana OAuth2 provider — Grafana provider uses `issuer_mode: global` while ArgoCD uses `per_provider`; both should use `per_provider` to scope the OIDC issuer URL to the specific application
+- [ ] Add MFA stage to Authentik authorization flows — both providers currently use `default-provider-authorization-implicit-consent` with no MFA; add a TOTP or WebAuthn stage to the authorization flow to protect admin tools behind a second factor
+- [ ] Review MetalLB self-signed certificate for metrics — 0.16.0 switched to native TLS with a self-signed cert for Prometheus scraping; evaluate whether replacing it with a cert-manager issued certificate is worth the added complexity for a homelab (currently mitigated with `insecureSkipVerify: true`)
 
 ### P2 — Reliability and completeness
 - [ ] Self-hosted GitHub Actions runner — deploy `actions-runner-controller` on the homelab cluster so CI jobs run on-prem; required to re-enable helmfile lint against real dev/prod environments without exposing the SOPS key to GitHub
