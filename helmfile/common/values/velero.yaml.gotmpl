@@ -1,0 +1,70 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+
+# Velero - Kubernetes backup and restore
+# https://github.com/vmware-tanzu/helm-charts/blob/main/charts/velero/values.yaml
+
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.13.1
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+configuration:
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: {{ $cfg.velero.bucket | quote }}
+      prefix: {{ $cfg.velero.prefix | quote }}
+      credential:
+        name: velero
+        key: cloud
+      config:
+        region: auto
+        s3ForcePathStyle: "true"
+        s3Url: {{ $cfg.velero.s3Url | quote }}
+
+  volumeSnapshotLocation:
+    - name: default
+      provider: csi
+
+  features: "EnableCSI"
+  defaultVolumesToFsBackup: false
+
+credentials:
+  useSecret: true
+  name: velero
+  secretContents:
+    cloud: |
+      [default]
+      aws_access_key_id={{ dig "velero" "accessKeyId" "" .Values }}
+      aws_secret_access_key={{ dig "velero" "secretAccessKey" "" .Values }}
+
+schedules:
+  daily-backup:
+    disabled: false
+    schedule: "{{ $cfg.velero.schedule }}"
+    template:
+      ttl: "{{ $cfg.velero.retention }}"
+      storageLocation: default
+      volumeSnapshotLocations:
+        - default
+      includedNamespaces:
+        - "*"
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    autodetect: false
+    additionalLabels:
+      release: prometheus-stack
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

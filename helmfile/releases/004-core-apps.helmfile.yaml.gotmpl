@@ -250,3 +250,19 @@ releases:
       - ingress-system/traefik
     inherit:
     - template: values_gotmpl_secrets_and_shared
+
+  # Velero - Kubernetes backup and restore
+  # https://github.com/vmware-tanzu/helm-charts/blob/main/charts/velero/values.yaml
+  - name: velero
+    namespace: velero-system
+    createNamespace: true
+    chart: vmware-tanzu/velero
+    version: "12.0.1"
+    wait: true
+    labels:
+      app: backup
+    needs:
+      - longhorn-system/longhorn
+      - monitoring-system/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets
