@@ -20,3 +20,95 @@ python = "3.12"
 "pipx:ansible-core" = "2.17.0"
 "pipx:ansible-lint" = "24.2.0"
 "pipx:pre-commit"   = "3.8.0"
+
+[env]
+# Place sensitive or machine-specific vars in .mise.local.toml (gitignored).
+# Example .mise.local.toml:
+#   [env]
+#   CLOUDFLARE_API_TOKEN = "your-token"
+#   KUBECONFIG           = "~/.kube/homelab"
+
+# ── Setup ─────────────────────────────────────────────────────────────────────
+
+[tasks.setup]
+description = "Bootstrap local environment (tools, helm plugins, git hooks, terraform)"
+run = """
+mise install
+./scripts/install-helm-plugins.sh
+pre-commit install
+pre-commit install --hook-type commit-msg
+terraform -chdir=terraform init
+"""
+
+# ── Validation ────────────────────────────────────────────────────────────────
+
+[tasks.check]
+description = "Validate tools, Helm plugins, and Kubernetes cluster access"
+run = """
+./scripts/check-requirements.sh
+./scripts/check-kubernetes.sh
+"""
+
+# ── Cluster provisioning ──────────────────────────────────────────────────────
+
+[tasks.provision]
+description = "Provision the K3s cluster via Ansible  [playbook: site]"
+run = "./metal/k3s/run.sh ${1:-site}"
+
+# ── Helmfile deployment ───────────────────────────────────────────────────────
+
+[tasks.install]
+description = "Deploy all helmfile releases  [env: dev|prod]"
+run = """
+terraform -chdir=terraform apply
+./scripts/install-helmfiles.sh "${1:-dev}"
+"""
+
+[tasks.destroy]
+description = "Tear down all helmfile releases  [env: dev|prod]"
+run = """
+./scripts/destroy-helmfiles.sh "${1:-dev}"
+terraform -chdir=terraform destroy
+"""
+
+# ── Secrets management ────────────────────────────────────────────────────────
+
+[tasks."secrets:init"]
+description = "Initialise secrets from templates  [env: dev|prod]"
+run = "./scripts/init-secrets.sh \"${1:-dev}\""
+
+[tasks."secrets:encrypt"]
+description = "Encrypt secrets  [env: dev|prod]  [chart?]"
+run = "./scripts/sops-encrypt-secrets.sh \"${1:-dev}\" \"${2:-}\""
+
+[tasks."secrets:decrypt"]
+description = "Decrypt secrets  [env: dev|prod]  [chart?]"
+run = "./scripts/sops-decrypt-secrets.sh \"${1:-dev}\" \"${2:-}\""
+
+[tasks."secrets:check"]
+description = "Validate secrets are present and complete for all environments"
+run = "./scripts/check-secrets.sh"
+
+# ── Linting ───────────────────────────────────────────────────────────────────
+
+[tasks.lint]
+description = "Run all linters (pre-commit, helm charts, helmfile)"
+run = "pre-commit run --all-files"
+
+# ── Terraform ─────────────────────────────────────────────────────────────────
+
+[tasks."tf:init"]
+description = "Initialise Terraform providers"
+run = "terraform -chdir=terraform init"
+
+[tasks."tf:plan"]
+description = "Show Terraform execution plan"
+run = "terraform -chdir=terraform plan"
+
+[tasks."tf:apply"]
+description = "Apply Terraform changes"
+run = "terraform -chdir=terraform apply"
+
+[tasks."tf:destroy"]
+description = "Destroy all Terraform-managed resources"
+run = "terraform -chdir=terraform destroy"

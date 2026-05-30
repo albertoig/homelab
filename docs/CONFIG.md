@@ -135,7 +135,7 @@ Backup schedule and Cloudflare R2 storage target.
 | `velero.retention` | Backup TTL (how long backups are kept). | `168h` | `720h` |
 | `velero.schedule` | Cron schedule for the daily backup job. | `0 3 * * *` | `0 2 * * *` |
 
-`bucket` and `s3Url` are populated from the Terraform outputs after running `make tf-apply`. The R2 API credentials (`accessKeyId`, `secretAccessKey`) go in the SOPS secret, not here.
+`bucket` and `s3Url` are populated from the Terraform outputs after running `mise run tf:apply`. The R2 API credentials (`accessKeyId`, `secretAccessKey`) go in the SOPS secret, not here.
 
 **Used by:** `helmfile/common/values/velero.yaml.gotmpl`
 

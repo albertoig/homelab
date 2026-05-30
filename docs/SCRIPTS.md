@@ -2,25 +2,26 @@
 
 This document describes all automation scripts in the homelab repository, their purpose, usage, and how they relate to each other.
 
-## Makefile shortcuts
+## mise task shortcuts
 
-The `Makefile` at the repo root wraps the most common script operations. Run `make help` to see all available targets.
+All common operations are defined as mise tasks in `.mise.toml`. Run `mise tasks` to see all available tasks.
 
-| Make target | Underlying script | Notes |
-|-------------|-------------------|-------|
-| `make check` | `scripts/check-requirements.sh` | |
-| `make check-k8s` | `scripts/check-kubernetes.sh` | |
-| `make provision [PLAYBOOK=site]` | `metal/k3s/run.sh` | |
-| `make install [ENV=dev]` | `scripts/install-helmfiles.sh` | |
-| `make destroy [ENV=dev]` | `scripts/destroy-helmfiles.sh` | |
-| `make secrets-init [ENV=dev]` | `scripts/init-secrets.sh` | |
-| `make secrets-encrypt [ENV=dev] [CHART=]` | `scripts/sops-encrypt-secrets.sh` | |
-| `make secrets-decrypt [ENV=dev] [CHART=]` | `scripts/sops-decrypt-secrets.sh` | |
-| `make secrets-check` | `scripts/check-secrets.sh` | |
-| `make lint` | `pre-commit run --all-files` | |
-| `make helm-lint` | `helm lint` loop over `charts/*/` | |
-| `make helmfile-lint [ENV=dev]` | `helmfile lint --skip-deps` | |
-| `make pre-commit-install` | `pre-commit install` (both hooks) | Run once after cloning |
+| mise task | Underlying script | Notes |
+|-----------|-------------------|-------|
+| `mise run setup` | mise install + helm plugins + pre-commit + terraform init | Run once after cloning |
+| `mise run check` | `scripts/check-requirements.sh` + `scripts/check-kubernetes.sh` | |
+| `mise run provision [playbook]` | `metal/k3s/run.sh` | Default playbook: `site` |
+| `mise run install [env]` | terraform apply + `scripts/install-helmfiles.sh` | Default env: `dev` |
+| `mise run destroy [env]` | `scripts/destroy-helmfiles.sh` + terraform destroy | Default env: `dev` |
+| `mise run secrets:init [env]` | `scripts/init-secrets.sh` | Default env: `dev` |
+| `mise run secrets:encrypt [env] [chart]` | `scripts/sops-encrypt-secrets.sh` | |
+| `mise run secrets:decrypt [env] [chart]` | `scripts/sops-decrypt-secrets.sh` | |
+| `mise run secrets:check` | `scripts/check-secrets.sh` | |
+| `mise run lint` | `pre-commit run --all-files` | |
+| `mise run tf:init` | `terraform init` | |
+| `mise run tf:plan` | `terraform plan` | |
+| `mise run tf:apply` | `terraform apply` | |
+| `mise run tf:destroy` | `terraform destroy` | |
 
 ## Overview
 

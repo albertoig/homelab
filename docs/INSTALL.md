@@ -12,15 +12,14 @@ All required tools are declared in `.mise.toml`. Install [mise](https://mise.jdx
 # Install mise (once, globally)
 curl https://mise.run | sh
 
-# Install all project tools (kubectl, helm, helmfile, sops, terraform,
-# node, python, ansible-core, ansible-lint, pre-commit)
-make mise-install
+# Install all tools + helm plugins + git hooks + terraform providers
+mise run setup
 
 # Verify
-make check
+mise run check
 ```
 
-Pinned versions are in `.mise.toml`. To upgrade a tool, change its version there and re-run `make mise-install`.
+Pinned versions are in `.mise.toml`. To upgrade a tool, change its version there and re-run `mise install`.
 
 ### Helm plugins
 
@@ -89,7 +88,7 @@ See [CONFIG.md](./CONFIG.md) for all available options.
 ### 2. Initialize secrets
 
 ```bash
-make secrets-init ENV=<env>
+mise run secrets:init <env>
 ```
 
 This prompts interactively for each secret value (passwords, API keys, tokens) and auto-encrypts them with SOPS.
@@ -145,7 +144,7 @@ This tears down all releases in reverse dependency order and cleans up stuck res
 
 ```bash
 # Interactive re-initialization (overwrites existing)
-make secrets-init ENV=<env>
+mise run secrets:init <env>
 
 # Or manual edit workflow:
 make secrets-decrypt ENV=<env> CHART=<chart>
