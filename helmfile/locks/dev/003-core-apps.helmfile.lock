@@ -2,10 +2,10 @@ version: 1.4.1
 dependencies:
   - name: alloy
     repository: https://grafana.github.io/helm-charts
-    version: 1.6.2
+    version: 1.8.2
   - name: argo-cd
     repository: https://argoproj.github.io/argo-helm
-    version: 9.4.17
+    version: 9.5.17
   - name: authentik
     repository: https://charts.goauthentik.io
     version: 2026.5.2
@@ -20,7 +20,7 @@ dependencies:
     version: 9.3.6
   - name: longhorn
     repository: https://charts.longhorn.io
-    version: 1.11.1
+    version: 1.11.2
   - name: metallb
     repository: https://metallb.github.io/metallb
     version: 0.15.3
@@ -29,7 +29,7 @@ dependencies:
     version: 1.19.2
   - name: tempo
     repository: https://grafana-community.github.io/helm-charts
-    version: 2.0.0
+    version: 2.2.0
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 39.0.7
