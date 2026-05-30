@@ -23,7 +23,7 @@ dependencies:
     version: 1.11.2
   - name: metallb
     repository: https://metallb.github.io/metallb
-    version: 0.15.3
+    version: 0.16.1
   - name: pyroscope
     repository: https://grafana.github.io/helm-charts
     version: 1.19.2
@@ -33,5 +33,5 @@ dependencies:
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 39.0.7
-digest: sha256:a54f2d59ce4f37fb42b0d289e6457c924554ede9784a66c3a6b12e441a51935c
-generated: "2026-05-30T00:07:56.417302365-04:00"
+digest: sha256:c138503288f53917e756a1d05f80e0fcae49430562a3f1f7be3798d63c5a2186
+generated: "2026-05-30T00:23:33.421431357-04:00"

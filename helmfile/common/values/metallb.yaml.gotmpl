@@ -17,9 +17,15 @@ prometheus:
     speaker:
       additionalLabels:
         release: prometheus-stack
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
     controller:
       additionalLabels:
         release: prometheus-stack
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
 
 # Speaker configuration
 speaker:
