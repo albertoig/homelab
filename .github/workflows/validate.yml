@@ -42,18 +42,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Load versions
-        id: versions
-        run: |
-          echo "python=$(yq '.python' versions.yaml)" >> $GITHUB_OUTPUT
-          echo "ansible_core=$(yq '.ansible_core' versions.yaml)" >> $GITHUB_OUTPUT
-          echo "ansible_lint=$(yq '.ansible_lint' versions.yaml)" >> $GITHUB_OUTPUT
-          echo "ansible_posix=$(yq '.ansible_posix' versions.yaml)" >> $GITHUB_OUTPUT
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ steps.versions.outputs.python }}
+      - name: Install tools via mise
+        uses: jdx/mise-action@v2
 
       - name: Check for playbook files
         id: check-files
@@ -65,15 +55,13 @@ jobs:
             echo "No ansible playbooks found, skipping lint"
           fi
 
-      - name: Install dependencies
+      - name: Install Ansible collections
         if: steps.check-files.outputs.exists == 'true'
-        run: |
-          pip install "ansible-core==${{ steps.versions.outputs.ansible_core }}" "ansible-lint==${{ steps.versions.outputs.ansible_lint }}"
-          ansible-galaxy collection install "ansible.posix:==${{ steps.versions.outputs.ansible_posix }}"
+        run: ansible-galaxy collection install -r metal/k3s/requirements.yml
 
       - name: Run ansible-lint
         if: steps.check-files.outputs.exists == 'true'
-        run: ansible-lint --project-dir metal/k3s
+        run: mise run lint:ansible
 
   helm-lint:
     name: Helm Lint
@@ -83,20 +71,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Load versions
-        id: versions
-        run: echo "helm=$(yq '.helm' versions.yaml)" >> $GITHUB_OUTPUT
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: ${{ steps.versions.outputs.helm }}
+      - name: Install tools via mise
+        uses: jdx/mise-action@v2
 
       - name: Run helm lint
-        run: |
-          for chart in charts/*/; do
-            helm lint "$chart" || exit 1
-          done
+        run: mise run lint:helm
 
   # helmfile-lint is disabled until a self-hosted runner with the SOPS key is available.
   # Helmfile lint requires secret decryption against the real prod environment — a CI age
@@ -130,14 +109,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Load versions
-        id: versions
-        run: echo "node=$(yq '.node' versions.yaml)" >> $GITHUB_OUTPUT
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ steps.versions.outputs.node }}
+      - name: Install tools via mise
+        uses: jdx/mise-action@v2
 
       - name: Cache node_modules
         id: cache-node-modules

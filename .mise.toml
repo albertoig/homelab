@@ -92,8 +92,31 @@ run = "./scripts/check-secrets.sh"
 # ── Linting ───────────────────────────────────────────────────────────────────
 
 [tasks.lint]
-description = "Run all linters (pre-commit, helm charts, helmfile)"
-run = "pre-commit run --all-files"
+description = "Run all linters"
+depends = ["lint:ansible", "lint:helm", "lint:helmfile"]
+
+[tasks."lint:ansible"]
+description = "Lint Ansible playbooks"
+run = "ansible-lint --project-dir metal/k3s"
+
+[tasks."lint:helm"]
+description = "Lint custom Helm charts"
+run = """
+for chart in charts/*/; do
+  helm lint "$chart" || exit 1
+done
+"""
+
+[tasks."lint:helmfile"]
+description = "Lint helmfile configuration (dev + prod)"
+run = """
+helmfile --skip-deps -f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml lint
+helmfile --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values-file helmfile/environments/lint-values.yaml lint
+"""
+
+[tasks."lint:commits"]
+description = "Lint commit messages with commitlint"
+run = "npx commitlint --edit"
 
 # ── Terraform ─────────────────────────────────────────────────────────────────
 
