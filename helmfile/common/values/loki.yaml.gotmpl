@@ -23,22 +23,6 @@ loki:
     max_query_series: 5000
     split_queries_by_interval: 15m
 
-  query_range:
-    align_queries_with_step: true
-    cache_results: true
-    results_cache:
-      cache:
-        background:
-          writeback_buffer: 500000
-          writeback_goroutines: 1
-          writeback_size_limit: 500MB
-        default_validity: 12h
-        memcached_client:
-          addresses: dnssrvnoa+_memcached-client._tcp.loki-results-cache.monitoring-system.svc.cluster.local
-          consistent_hash: true
-          timeout: 500ms
-          update_interval: 1m
-
   storage:
     type: filesystem
     bucketNames:
@@ -61,10 +45,10 @@ loki:
   ruler:
     enable_api: true
 
-# Single binary deployment for home lab
-deploymentMode: SingleBinary
+# Monolithic deployment for home lab (formerly SingleBinary)
+deploymentMode: Monolithic
 
-singleBinary:   # this should be at root level, not under loki:
+singleBinary:
   replicas: 1
   persistence:
     enabled: true

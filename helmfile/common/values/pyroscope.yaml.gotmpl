@@ -1,6 +1,11 @@
 # Pyroscope Configuration
 # https://artifacthub.io/packages/helm/grafana/pyroscope?modal=values
 
+architecture:
+  storage:
+    v1: true
+    v2: true
+
 pyroscope:
   # Disable self-profile push
   disableSelfProfile: true
