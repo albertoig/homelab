@@ -5,7 +5,7 @@ CHART    ?=
 PLAYBOOK ?= site
 
 .PHONY: help \
-        check check-k8s \
+        check \
         provision \
         install destroy \
         secrets-init secrets-encrypt secrets-decrypt secrets-check \
@@ -26,10 +26,8 @@ help: ## Show available targets and variables
 
 # ── Validation ────────────────────────────────────────────────────────────────
 
-check: ## Validate all required CLI tools and Helm plugins are installed
+check: ## Validate tools, Helm plugins, and Kubernetes cluster access
 	./scripts/check-requirements.sh
-
-check-k8s: ## Verify Kubernetes cluster access and minimum version (v1.33+)
 	./scripts/check-kubernetes.sh
 
 # ── Cluster provisioning ──────────────────────────────────────────────────────
