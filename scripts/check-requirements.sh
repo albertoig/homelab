@@ -29,6 +29,10 @@ check_helm_plugin() {
 info "Checking prerequisites..."
 echo ""
 
+bold "Tool manager:"
+check_command mise
+echo ""
+
 bold "CLI tools:"
 check_command kubectl
 check_command helm
@@ -49,7 +53,8 @@ echo ""
 
 if [ "$ERRORS" -gt 0 ]; then
     error "Missing $ERRORS requirement(s). Install them before proceeding."
-    echo "  See README.md 'Prerequisites' and 'Required Helm Plugins' sections."
+    echo "  Run: make mise-install"
+    echo "  See docs/INSTALL.md for full setup instructions."
     exit 1
 fi
 

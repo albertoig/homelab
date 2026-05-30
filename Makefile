@@ -11,6 +11,7 @@ PLAYBOOK ?= site
         secrets-init secrets-encrypt secrets-decrypt secrets-check \
         lint helm-lint helmfile-lint \
         tf-init tf-plan tf-apply tf-destroy \
+        mise-install \
         pre-commit-install
 
 help: ## Show available targets and variables
@@ -87,6 +88,9 @@ tf-destroy: ## Destroy all Terraform-managed resources
 	terraform -chdir=terraform destroy
 
 # ── Setup ─────────────────────────────────────────────────────────────────────
+
+mise-install: ## Install all required tools via mise (run once after cloning)
+	mise install
 
 pre-commit-install: ## Install git hooks — run once after cloning
 	pre-commit install
