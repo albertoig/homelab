@@ -42,7 +42,7 @@
     },
     {
       "matchManagers": ["custom.regex"],
-      "matchFileNames": ["versions.yaml"],
+      "matchFileNames": [".mise.toml"],
       "matchUpdateTypes": ["patch"],
       "semanticCommitType": "fix",
       "semanticCommitScope": "helmfile",
@@ -50,7 +50,7 @@
     },
     {
       "matchManagers": ["custom.regex"],
-      "matchFileNames": ["versions.yaml"],
+      "matchFileNames": [".mise.toml"],
       "matchUpdateTypes": ["minor"],
       "semanticCommitType": "feat",
       "semanticCommitScope": "helmfile",
@@ -58,7 +58,7 @@
     },
     {
       "matchManagers": ["custom.regex"],
-      "matchFileNames": ["versions.yaml"],
+      "matchFileNames": [".mise.toml"],
       "matchUpdateTypes": ["major"],
       "semanticCommitType": "feat",
       "semanticCommitScope": "helmfile",
@@ -97,54 +97,39 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^versions\\.yaml$"],
-      "matchStrings": ["helm:\\s*\"(?<currentValue>[^\"]+)\""],
+      "fileMatch": ["^\\.mise\\.toml$"],
+      "matchStrings": ["helm\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "helm/helm",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
     },
     {
       "customType": "regex",
-      "fileMatch": ["^versions\\.yaml$"],
-      "matchStrings": ["helmkit:\\s*\"(?<currentValue>[^\"]+)\""],
-      "depNameTemplate": "docked-titan-foundation/helmkit",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.*)$"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["^versions\\.yaml$"],
-      "matchStrings": ["node:\\s*\"(?<currentValue>[^\"]+)\""],
+      "fileMatch": ["^\\.mise\\.toml$"],
+      "matchStrings": ["node\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "node",
       "datasourceTemplate": "node-version"
     },
     {
       "customType": "regex",
-      "fileMatch": ["^versions\\.yaml$"],
-      "matchStrings": ["python:\\s*\"(?<currentValue>[^\"]+)\""],
+      "fileMatch": ["^\\.mise\\.toml$"],
+      "matchStrings": ["python\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "python",
       "datasourceTemplate": "python-version"
     },
     {
       "customType": "regex",
-      "fileMatch": ["^versions\\.yaml$"],
-      "matchStrings": ["ansible_core:\\s*\"(?<currentValue>[^\"]+)\""],
+      "fileMatch": ["^\\.mise\\.toml$"],
+      "matchStrings": ["\"pipx:ansible-core\"\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "ansible-core",
       "datasourceTemplate": "pypi"
     },
     {
       "customType": "regex",
-      "fileMatch": ["^versions\\.yaml$"],
-      "matchStrings": ["ansible_lint:\\s*\"(?<currentValue>[^\"]+)\""],
+      "fileMatch": ["^\\.mise\\.toml$"],
+      "matchStrings": ["\"pipx:ansible-lint\"\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "ansible-lint",
       "datasourceTemplate": "pypi"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["^versions\\.yaml$"],
-      "matchStrings": ["ansible_posix:\\s*\"(?<currentValue>[^\"]+)\""],
-      "depNameTemplate": "ansible.posix",
-      "datasourceTemplate": "galaxy-collection"
     },
     {
       "customType": "regex",

@@ -66,9 +66,9 @@ The principle is that a release reflects a change to the **deployed infrastructu
 | `helmfile/config.template.yaml` | `docs:` | User-facing template |
 | Values file refactor (no behaviour change) | `refactor(helmfile):` | Structure change only |
 | `renovate.json` | `ci:` | Dependency automation config |
-| `versions.yaml` — CI tooling only (node, python, ansible) | `chore:` | These do not affect the cluster |
+| `.mise.toml` — runtimes only (node, python) | `chore:` | These do not affect the cluster |
 
-> **Exception — `versions.yaml` infrastructure entries:** `helm`, `helmkit`, `ansible_core`, `ansible_lint`, `ansible_posix` in `versions.yaml` are treated identically to helmfile chart versions. Renovate uses `fix(helmfile):` for patch bumps and `feat(helmfile):` for minor/major bumps on these entries, so they do trigger releases.
+> **Exception — `.mise.toml` infrastructure entries:** `helm`, `ansible-core`, and `ansible-lint` in `.mise.toml` are treated identically to helmfile chart versions. Renovate uses `fix(helmfile):` for patch bumps and `feat(helmfile):` for minor/major bumps on these entries, so they do trigger releases. `node` and `python` use `chore:` and do not trigger releases.
 
 ---
 
@@ -81,11 +81,10 @@ The principle is that a release reflects a change to the **deployed infrastructu
 | Dependency type | Source | Commit type |
 |----------------|--------|-------------|
 | Helm chart versions (`helmfile/releases/`) | Helm registries | `fix/feat(helmfile):` |
-| `versions.yaml` — `helm`, `helmkit` | GitHub Releases | `fix/feat(helmfile):` |
-| `versions.yaml` — `ansible_core`, `ansible_lint` | PyPI | `fix/feat(helmfile):` |
-| `versions.yaml` — `ansible_posix` | Ansible Galaxy | `fix/feat(helmfile):` |
-| `versions.yaml` — `node` | Node.js releases | `fix/feat(helmfile):` |
-| `versions.yaml` — `python` | Python releases | `fix/feat(helmfile):` |
+| `.mise.toml` — `helm` | GitHub Releases | `fix/feat(helmfile):` |
+| `.mise.toml` — `ansible-core`, `ansible-lint` | PyPI | `fix/feat(helmfile):` |
+| `.mise.toml` — `node` | Node.js releases | `chore:` |
+| `.mise.toml` — `python` | Python releases | `chore:` |
 | GitHub Actions (`uses:`) | GitHub Releases | `chore(ci):` |
 | npm devDependencies | npm registry | `chore:` |
 | Pre-commit hook revisions | GitHub Releases | `chore(pre-commit):` |
@@ -100,7 +99,7 @@ The principle is that a release reflects a change to the **deployed infrastructu
 
 ### Updating `helmkit` in CI
 
-`helmkit` is tracked in `versions.yaml` and Renovate will open a PR bumping that entry. However, the `uses: docked-titan-foundation/helmkit@vX.Y.Z` line in `.github/workflows/validate.yml` **must be updated manually** to match, because GitHub Actions does not support expressions in `uses:` fields. Both changes should be in the same PR.
+The `uses: docked-titan-foundation/helmkit@vX.Y.Z` line in `.github/workflows/validate.yml` is tracked directly by Renovate's github-actions manager and will be updated automatically via PR.
 
 ---
 
