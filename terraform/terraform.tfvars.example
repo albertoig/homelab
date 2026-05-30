@@ -1,0 +1,3 @@
+cloudflare_account_id  = "your-account-id-here"
+velero_bucket_name     = "homelab-velero"
+velero_bucket_location = "WEUR"
