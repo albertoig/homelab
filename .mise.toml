@@ -118,6 +118,17 @@ helmfile --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values-file helmfil
 description = "Lint commit messages with commitlint"
 run = "npx commitlint --edit"
 
+# ── Cleanup ───────────────────────────────────────────────────────────────────
+
+[tasks.clean]
+description = "Remove local build artifacts and dependency caches"
+run = """
+rm -rf node_modules
+rm -rf .venv
+rm -rf terraform/.terraform
+find . -type d -name __pycache__ -not -path './.git/*' -exec rm -rf {} + 2>/dev/null || true
+"""
+
 # ── Terraform ─────────────────────────────────────────────────────────────────
 
 [tasks."tf:init"]
