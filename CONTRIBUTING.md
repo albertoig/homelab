@@ -80,8 +80,7 @@ For the full rules on what triggers a release versus what is silent, see [docs/V
 It is recommended to install the pre-commit hooks to catch issues before committing:
 
 ```bash
-pip install pre-commit
-make pre-commit-install
+mise run setup
 ```
 
 The second command installs the `commit-msg` hook required for commitlint to enforce the conventional commit format locally.

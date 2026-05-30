@@ -37,6 +37,7 @@ keys.txt
 
 ## MISE
 .mise/
+.mise.local.toml
 
 ## TERRAFORM
 terraform/.terraform/
