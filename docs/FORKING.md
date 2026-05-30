@@ -101,8 +101,8 @@ See [CONFIG.md](./CONFIG.md) for all available options.
 Run the interactive secret initializer:
 
 ```bash
-make secrets-init ENV=dev
-make secrets-init ENV=prod
+mise run secrets:init dev
+mise run secrets:init prod
 ```
 
 This prompts for each secret value and encrypts them with your SOPS key.
@@ -113,10 +113,10 @@ See [SECRETS.md](./SECRETS.md) for the full list of required secrets.
 
 ```bash
 # Provision K3s (update metal/k3s/inventory.yml first)
-make provision
+mise run provision
 
 # Deploy
-make install ENV=dev
+mise run install dev
 ```
 
 For supplementary setup (kubecontext names, etc.), see [ADDITIONAL.md](./ADDITIONAL.md).

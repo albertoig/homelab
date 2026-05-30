@@ -11,8 +11,7 @@ This project uses [pre-commit](https://pre-commit.com/) to automate code quality
 Install pre-commit hooks:
 
 ```bash
-pip install pre-commit
-make pre-commit-install
+mise run setup
 ```
 
 ### Available Hooks
@@ -28,7 +27,7 @@ make pre-commit-install
 Run all hooks manually:
 
 ```bash
-make lint
+mise run lint
 ```
 
 Skip hooks (use with caution):
@@ -84,7 +83,7 @@ brew install helm
 Lint all charts:
 
 ```bash
-make helm-lint
+mise run lint
 ```
 
 ### Configuration
@@ -106,7 +105,7 @@ brew install helmfile
 ### Usage
 
 ```bash
-make helmfile-lint ENV=dev
+mise run lint
 ```
 
 ### Bypassing Encrypted Secrets

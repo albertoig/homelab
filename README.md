@@ -122,13 +122,13 @@ See [docs/INSTALL.md](./docs/INSTALL.md) for the full setup guide, including pre
 
 ```bash
 # Quick start
-make check                                                                   # verify tools
+mise run setup                                                               # install tools, plugins, git hooks
+mise run check                                                               # verify environment
 cp helmfile/config.template.yaml helmfile/environments/<env>/config.yaml    # configure
-make secrets-init ENV=<env>                                                  # set up secrets
-make provision                                                               # provision cluster
+mise run secrets:init <env>                                                  # set up secrets
+mise run provision                                                           # provision cluster
 cp terraform/terraform.tfvars.example terraform/terraform.tfvars            # configure Cloudflare
-make tf-init && make tf-apply                                                # provision cloud resources
-make install ENV=<env>                                                       # deploy services
+mise run install <env>                                                       # deploy services
 ```
 
 ---
@@ -177,7 +177,7 @@ Velero runs in `velero-system` and takes daily scheduled backups of all namespac
 The R2 bucket is provisioned via Terraform:
 
 ```bash
-make tf-init && make tf-apply   # creates the R2 bucket
+mise run tf:apply   # creates the R2 bucket
 ```
 
 After applying, copy the outputs (`velero_bucket_name`, `velero_s3_endpoint`) into your environment `config.yaml`, then create the R2 API token manually in the Cloudflare dashboard and add it to the Velero SOPS secret.
