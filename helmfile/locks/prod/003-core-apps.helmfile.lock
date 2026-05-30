@@ -14,7 +14,7 @@ dependencies:
     version: 11.3.6
   - name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
-    version: 82.15.1
+    version: 86.1.0
   - name: loki
     repository: https://grafana-community.github.io/helm-charts
     version: 9.3.6
@@ -33,5 +33,5 @@ dependencies:
   - name: traefik
     repository: https://traefik.github.io/charts
     version: 40.2.0
-digest: sha256:9c608ed4925a209afd4dd99fb0eee68fe6db43a44a92efb8f79e88c65fa72c88
-generated: "2026-05-30T00:46:31.907292739-04:00"
+digest: sha256:5bfc4c7a87f5402e0e49864f3db87f8748c50ce2a1e3608d917939ba7d24bb68
+generated: "2026-05-30T01:02:10.792601085-04:00"
