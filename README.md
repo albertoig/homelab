@@ -22,6 +22,7 @@ The homelab follows a layered architecture:
 2. **Platform Layer**: Core services (MetalLB, Traefik, cert-manager) for networking and certificates
 3. **Application Layer**: Applications deployed via Helmfile (ArgoCD, Authentik, Grafana, etc.)
 4. **Observability Layer**: Monitoring (Prometheus), Logging (Loki), Tracing (Tempo), and Profiling (Pyroscope)
+5. **Backup Layer**: Cluster and PVC backups via Velero to Cloudflare R2
 
 ### Services Deployed
 
@@ -45,6 +46,7 @@ The homelab follows a layered architecture:
 | authentik | Identity provider | auth-system |
 | argocd | GitOps continuous delivery | gitops-system |
 | authentik-ingress | Authentik ingress configuration | auth-system |
+| velero | Kubernetes backup and restore | velero-system |
 
 ---
 
@@ -70,6 +72,9 @@ The homelab follows a layered architecture:
 | [cert-manager](https://cert-manager.io/) | X.509 certificate management |
 | [external-dns](https://github.com/kubernetes-sigs/external-dns/) | Synchronize exposed services with DNS providers |
 | [Authentik](https://goauthentik.io/) | Identity provider |
+| [Velero](https://velero.io/) | Kubernetes backup and restore |
+| [Cloudflare R2](https://www.cloudflare.com/developer-platform/r2/) | S3-compatible object storage for backups |
+| [Terraform](https://www.terraform.io/) | Cloud infrastructure provisioning |
 | [Cloudflare](https://www.cloudflare.com/) | DNS and CDN provider |
 | [pre-commit](https://pre-commit.com/) | Git hooks for code quality |
 | [ansible-lint](https://ansible-lint.readthedocs.io/) | Ansible playbook linting |
@@ -101,6 +106,7 @@ homelab/
 ├── metal/                     # Bare metal provisioning
 │   └── k3s/                   # K3s cluster setup with Ansible
 ├── scripts/                   # Utility scripts
+├── terraform/                 # Cloud infrastructure (Cloudflare R2, etc.)
 ├── helmfile.yaml.gotmpl       # Main Helmfile entry point
 ├── ROADMAP.md                 # Project roadmap
 └── README.md                  # This file
@@ -120,6 +126,8 @@ make check                                                                   # v
 cp helmfile/config.template.yaml helmfile/environments/<env>/config.yaml    # configure
 make secrets-init ENV=<env>                                                  # set up secrets
 make provision                                                               # provision cluster
+cp terraform/terraform.tfvars.example terraform/terraform.tfvars            # configure Cloudflare
+make tf-init && make tf-apply                                                # provision cloud resources
 make install ENV=<env>                                                       # deploy services
 ```
 
@@ -162,6 +170,20 @@ Grafana is exposed via MetalLB LoadBalancer. Access it using the external IP ass
 
 ---
 
+## 💾 Backup
+
+Velero runs in `velero-system` and takes daily scheduled backups of all namespaces and PVCs (via CSI snapshots), storing them in a Cloudflare R2 bucket.
+
+The R2 bucket is provisioned via Terraform:
+
+```bash
+make tf-init && make tf-apply   # creates the R2 bucket
+```
+
+After applying, copy the outputs (`velero_bucket_name`, `velero_s3_endpoint`) into your environment `config.yaml`, then create the R2 API token manually in the Cloudflare dashboard and add it to the Velero SOPS secret.
+
+---
+
 ## 📚 Documentation
 
 - [Roadmap](./ROADMAP.md) — upcoming features and progress
@@ -201,8 +223,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Authentik](https://goauthentik.io/) for identity management
 - [SOPS](https://github.com/mozilla/sops) for secrets encryption
 - [Ansible](https://www.ansible.com/) for cluster provisioning
+- [Velero](https://velero.io/) for Kubernetes backup and restore
+- [Terraform](https://www.terraform.io/) for cloud infrastructure provisioning
 - [Let's Encrypt](https://letsencrypt.org/) for free TLS certificates
-- [Cloudflare](https://www.cloudflare.com/) for DNS and CDN services
+- [Cloudflare](https://www.cloudflare.com/) for DNS, CDN, and R2 object storage
 
 ---
 
