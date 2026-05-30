@@ -12,6 +12,13 @@ All required tools are declared in `.mise.toml`. Install [mise](https://mise.jdx
 # Install mise (once, globally)
 curl https://mise.run | sh
 
+# Activate mise in your shell — add to ~/.bashrc or ~/.zshrc
+echo 'eval "$(mise activate bash)"' >> ~/.bashrc   # bash
+echo 'eval "$(mise activate zsh)"'  >> ~/.zshrc    # zsh
+
+# Reload your shell
+source ~/.bashrc  # or ~/.zshrc
+
 # Install all tools + helm plugins + git hooks + terraform providers
 mise run setup
 
