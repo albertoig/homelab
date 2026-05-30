@@ -12,9 +12,16 @@ grafana:
 
 prometheus:
   replicas: 2
-  retention: 30d
-  storage: 20Gi
+  retention: 15d
+  storage: 40Gi
 
 alertmanager:
   replicas: 2
   storage: 2Gi
+
+velero:
+  bucket: ""
+  prefix: "velero"
+  s3Url: ""
+  retention: "720h"
+  schedule: "0 2 * * *"

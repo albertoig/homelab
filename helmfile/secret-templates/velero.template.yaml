@@ -1,0 +1,7 @@
+# --- velero ---
+velero:
+  # Cloudflare R2 API token key ID
+  # Generate at: Cloudflare Dashboard → R2 → Manage R2 API Tokens
+  accessKeyId: ""
+  # Cloudflare R2 API token secret
+  secretAccessKey: ""

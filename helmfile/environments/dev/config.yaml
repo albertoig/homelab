@@ -18,3 +18,10 @@ prometheus:
 alertmanager:
   replicas: 1
   storage: 1Gi
+
+velero:
+  bucket: ""
+  prefix: "velero"
+  s3Url: ""
+  retention: "168h"
+  schedule: "0 3 * * *"

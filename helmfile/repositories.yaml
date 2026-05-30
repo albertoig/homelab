@@ -21,3 +21,5 @@ repositories:
     url: https://traefik.github.io/charts
   - name: argocd
     url: https://argoproj.github.io/argo-helm
+  - name: vmware-tanzu
+    url: https://vmware-tanzu.github.io/helm-charts
