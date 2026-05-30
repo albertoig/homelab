@@ -9,13 +9,13 @@ repos:
     hooks:
       - id: commitlint
         name: commitlint
-        entry: npx commitlint --edit
+        entry: mise exec -- npx commitlint --edit
         language: system
         stages: [commit-msg]
         pass_filenames: false
       - id: ansible-lint
         name: ansible-lint
-        entry: ansible-lint
+        entry: mise exec -- ansible-lint
         language: system
         types: [yaml]
         files: ^metal/k3s/
@@ -23,7 +23,7 @@ repos:
         args: ["--project-dir", "metal/k3s"]
       - id: helm-lint
         name: helm-lint
-        entry: bash
+        entry: mise exec -- bash
         language: system
         types: [yaml]
         files: ^charts/
@@ -31,7 +31,7 @@ repos:
         args: ["-c", "for chart in charts/*/; do helm lint \"$chart\" || exit 1; done"]
       - id: helmfile-lint
         name: helmfile-lint
-        entry: bash
+        entry: mise exec -- bash
         language: system
         files: ^(helmfile/|helmfile\.yaml\.gotmpl)
         pass_filenames: false
