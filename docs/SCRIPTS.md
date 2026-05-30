@@ -42,7 +42,7 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
 │  - Decrypt inventory    │               │  │ scripts/                │ │
 │    (sops)               │               │  │  check-requirements.sh  │ │
 │  - ansible-galaxy       │               │  │  ┌───────────────────┐ │ │
-│  - ansible ping         │               │  │  │ kubectl, terraform │ │ │
+│  - ansible ping         │               │  │  │ kubectl            │ │ │
 │  - sysctl tuning        │               │  │  │ helm, helmfile     │ │ │
 │  - k3s orchestration    │               │  │  │ sops, ansible      │ │ │
 │    playbook             │               │  │  │ helm plugins       │ │ │
@@ -115,7 +115,7 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
 ```
 
 **Checks:**
-- CLI tools: `kubectl`, `terraform`, `helm`, `helmfile`, `sops`, `ansible`
+- CLI tools: `kubectl`, `helm`, `helmfile`, `sops`, `ansible`
 - Helm plugins: `secrets`, `secrets-getter`, `secrets-post-renderer`, `diff`
 
 **Exit codes:**

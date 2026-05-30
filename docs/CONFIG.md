@@ -123,6 +123,24 @@ Alert routing and notification.
 
 ---
 
+## Velero
+
+Backup schedule and Cloudflare R2 storage target.
+
+| Key | Description | Default (dev) | Default (prod) |
+|-----|-------------|---------------|----------------|
+| `velero.bucket` | R2 bucket name for storing backups. | `""` | `""` |
+| `velero.prefix` | Path prefix within the bucket. | `velero` | `velero` |
+| `velero.s3Url` | R2 endpoint: `https://<account_id>.r2.cloudflarestorage.com` | `""` | `""` |
+| `velero.retention` | Backup TTL (how long backups are kept). | `168h` | `720h` |
+| `velero.schedule` | Cron schedule for the daily backup job. | `0 3 * * *` | `0 2 * * *` |
+
+`bucket` and `s3Url` are populated from the Terraform outputs after running `make tf-apply`. The R2 API credentials (`accessKeyId`, `secretAccessKey`) go in the SOPS secret, not here.
+
+**Used by:** `helmfile/common/values/velero.yaml.gotmpl`
+
+---
+
 ## Environment examples
 
 ### Production
@@ -143,12 +161,19 @@ grafana:
 
 prometheus:
   replicas: 2
-  retention: 30d
-  storage: 20Gi
+  retention: 15d
+  storage: 40Gi
 
 alertmanager:
   replicas: 2
   storage: 2Gi
+
+velero:
+  bucket: "homelab-velero"
+  prefix: "velero"
+  s3Url: "https://<account_id>.r2.cloudflarestorage.com"
+  retention: "720h"
+  schedule: "0 2 * * *"
 ```
 
 ### Development
@@ -175,6 +200,13 @@ prometheus:
 alertmanager:
   replicas: 1
   storage: 1Gi
+
+velero:
+  bucket: "homelab-velero"
+  prefix: "velero"
+  s3Url: "https://<account_id>.r2.cloudflarestorage.com"
+  retention: "168h"
+  schedule: "0 3 * * *"
 ```
 
 ---
