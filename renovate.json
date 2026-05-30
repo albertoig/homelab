@@ -120,14 +120,7 @@
     {
       "customType": "regex",
       "fileMatch": ["^\\.mise\\.toml$"],
-      "matchStrings": ["\"pipx:ansible-core\"\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
-      "depNameTemplate": "ansible-core",
-      "datasourceTemplate": "pypi"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["^\\.mise\\.toml$"],
-      "matchStrings": ["\"pipx:ansible-lint\"\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
+      "matchStrings": ["\"uvx:ansible-lint\"\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "ansible-lint",
       "datasourceTemplate": "pypi"
     },
