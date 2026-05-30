@@ -5,14 +5,13 @@ CHART    ?=
 PLAYBOOK ?= site
 
 .PHONY: help \
+        setup \
         check \
         provision \
         install destroy \
         secrets-init secrets-encrypt secrets-decrypt secrets-check \
-        lint helm-lint helmfile-lint \
-        tf-init tf-plan tf-apply tf-destroy \
-        mise-install \
-        pre-commit-install
+        lint \
+        tf-init tf-plan tf-apply tf-destroy
 
 help: ## Show available targets and variables
 	@printf '\n\033[1mHomelab\033[0m\n\n'
@@ -59,17 +58,8 @@ secrets-check: ## Validate secrets are present and complete for all environments
 
 # ── Linting ───────────────────────────────────────────────────────────────────
 
-lint: ## Run all pre-commit hooks against every file
+lint: ## Run all linters (pre-commit, helm charts, helmfile)  [ENV=dev]
 	pre-commit run --all-files
-
-helm-lint: ## Lint all custom charts under charts/
-	@for chart in charts/*/; do \
-		helm lint "$$chart" || exit 1; \
-	done
-
-helmfile-lint: ## Lint helmfile configuration for ENV  [ENV=dev]
-	helmfile lint --skip-deps -f helmfile.yaml.gotmpl -e $(ENV) \
-		--state-values-file helmfile/environments/lint-values.yaml
 
 # ── Terraform ────────────────────────────────────────────────────────────────
 
@@ -87,9 +77,9 @@ tf-destroy: ## Destroy all Terraform-managed resources
 
 # ── Setup ─────────────────────────────────────────────────────────────────────
 
-mise-install: ## Install all required tools via mise (run once after cloning)
+setup: ## Bootstrap local environment (tools, helm plugins, git hooks, terraform)
 	mise install
-
-pre-commit-install: ## Install git hooks — run once after cloning
+	./scripts/install-helm-plugins.sh
 	pre-commit install
 	pre-commit install --hook-type commit-msg
+	terraform -chdir=terraform init
