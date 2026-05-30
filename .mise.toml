@@ -15,12 +15,11 @@ terraform = "1.14.5"
 # Runtimes (used by commitlint and ansible)
 node   = "24"
 python = "3.12"
-pipx   = "latest"
+uv     = "latest"
 
-# Python CLI tools (installed via pipx)
-"pipx:ansible-core" = "2.17.0"
-"pipx:ansible-lint" = "24.2.0"
-"pipx:pre-commit"   = "3.8.0"
+# Python CLI tools (installed via uv)
+"uvx:ansible-lint" = "24.2.0"
+"uvx:pre-commit"   = "3.8.0"
 
 [env]
 # Place sensitive or machine-specific vars in .mise.local.toml (gitignored).
