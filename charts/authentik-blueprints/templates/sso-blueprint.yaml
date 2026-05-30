@@ -77,6 +77,7 @@ data:
       attrs:
         name: totp-setup-stage
         friendly_name: "Set up Authenticator App"
+        digits: 6
 
     - model: authentik_stages_authenticator_validate.authenticatorvalidatestage
       state: present
