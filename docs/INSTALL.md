@@ -6,21 +6,21 @@ Step-by-step guide to set up the homelab from scratch.
 
 ### CLI tools
 
-Install the following tools:
-
-| Tool | Purpose | Install |
-|------|---------|---------|
-| [kubectl](https://kubernetes.io/docs/tasks/tools/) | Kubernetes CLI | Required |
-| [helm](https://helm.sh/docs/intro/install/) | Kubernetes package manager | Required |
-| [helmfile](https://helmfile.readthedocs.io/en/latest/#installation) | Helm releases management | Required |
-| [sops](https://github.com/mozilla/sops#installation) | Secrets encryption | Required |
-| [ansible](https://docs.ansible.com/ansible/latest/installation_guide/index.html) | Cluster provisioning | Required |
-
-Verify all tools are installed:
+All required tools are declared in `.mise.toml`. Install [mise](https://mise.jdx.dev/) once, then let it handle everything else:
 
 ```bash
+# Install mise (once, globally)
+curl https://mise.run | sh
+
+# Install all project tools (kubectl, helm, helmfile, sops, terraform,
+# node, python, ansible-core, ansible-lint, pre-commit)
+make mise-install
+
+# Verify
 make check
 ```
+
+Pinned versions are in `.mise.toml`. To upgrade a tool, change its version there and re-run `make mise-install`.
 
 ### Helm plugins
 
