@@ -65,9 +65,12 @@ resources:
     memory: "512Mi"
     cpu: "500m"
 
+deploymentStrategy:
+  type: Recreate
+
 podDisruptionBudget:
   enabled: true
-  minAvailable: 1
+  minAvailable: 0
 
 # Expose Grafana via MetalLB LoadBalancer
 service:
