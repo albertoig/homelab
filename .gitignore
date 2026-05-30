@@ -35,6 +35,13 @@ keys.txt
 *.swp
 *.swo
 
+## TERRAFORM
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/*.tfvars
+!terraform/*.tfvars.example
+
 ## SECRETS
 *.secrets.yaml
 !*.secrets.enc.yaml

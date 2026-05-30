@@ -10,6 +10,7 @@ PLAYBOOK ?= site
         install destroy \
         secrets-init secrets-encrypt secrets-decrypt secrets-check \
         lint helm-lint helmfile-lint \
+        tf-init tf-plan tf-apply tf-destroy \
         pre-commit-install
 
 help: ## Show available targets and variables
@@ -70,6 +71,20 @@ helm-lint: ## Lint all custom charts under charts/
 helmfile-lint: ## Lint helmfile configuration for ENV  [ENV=dev]
 	helmfile lint --skip-deps -f helmfile.yaml.gotmpl -e $(ENV) \
 		--state-values-file helmfile/environments/lint-values.yaml
+
+# ── Terraform ────────────────────────────────────────────────────────────────
+
+tf-init: ## Initialise Terraform (run once or after provider changes)
+	terraform -chdir=terraform init
+
+tf-plan: ## Show Terraform execution plan
+	terraform -chdir=terraform plan
+
+tf-apply: ## Apply Terraform changes
+	terraform -chdir=terraform apply
+
+tf-destroy: ## Destroy all Terraform-managed resources
+	terraform -chdir=terraform destroy
 
 # ── Setup ─────────────────────────────────────────────────────────────────────
 
