@@ -8,7 +8,7 @@ dependencies:
     version: 9.4.17
   - name: authentik
     repository: https://charts.goauthentik.io
-    version: 2026.2.1
+    version: 2026.5.2
   - name: grafana
     repository: https://grafana-community.github.io/helm-charts
     version: 11.3.6

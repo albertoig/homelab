@@ -221,12 +221,12 @@ releases:
     - template: values_gotmpl_and_secrets
 
   # Authentik - Open Source Identity Provider
-  # https://github.com/goauthentik/helm/blob/authentik-2026.2.1/charts/authentik/values.yaml
+  # https://github.com/goauthentik/helm/blob/authentik-2026.5.2/charts/authentik/values.yaml
   - name: authentik
     namespace: auth-system
     createNamespace: true
     chart: authentik/authentik
-    version: "2026.2.1"
+    version: "2026.5.2"
     wait: true
     labels:
       app: identity
