@@ -35,6 +35,9 @@ keys.txt
 *.swp
 *.swo
 
+## MISE
+.mise/
+
 ## TERRAFORM
 terraform/.terraform/
 terraform/*.tfstate
