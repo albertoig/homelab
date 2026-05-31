@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "homelab"
+version = "0.0.0"
+description = "Python tooling for homelab automation"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+ansible-core = "2.18.6"
+ansible-lint = "26.4.0"
+pre-commit = "3.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
