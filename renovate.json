@@ -89,6 +89,20 @@
       "semanticCommitType": "chore",
       "semanticCommitScope": "pre-commit",
       "addLabels": ["pre-commit"]
+    },
+    {
+      "matchManagers": ["poetry"],
+      "matchUpdateTypes": ["patch"],
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "helmfile",
+      "addLabels": ["python"]
+    },
+    {
+      "matchManagers": ["poetry"],
+      "matchUpdateTypes": ["minor", "major"],
+      "semanticCommitType": "feat",
+      "semanticCommitScope": "helmfile",
+      "addLabels": ["python"]
     }
   ],
   "helmfile": {
@@ -116,13 +130,6 @@
       "matchStrings": ["python\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "python",
       "datasourceTemplate": "python-version"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["^\\.mise\\.toml$"],
-      "matchStrings": ["\"uvx:ansible-lint\"\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
-      "depNameTemplate": "ansible-lint",
-      "datasourceTemplate": "pypi"
     },
     {
       "customType": "regex",

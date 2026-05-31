@@ -39,8 +39,7 @@ check_command helm
 check_command helmfile
 check_command sops
 check_command ansible
-check_command ansible-lint
-check_command pre-commit
+check_command poetry
 
 echo ""
 bold "Helm plugins:"
