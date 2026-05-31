@@ -9,27 +9,30 @@ repos:
     hooks:
       - id: commitlint
         name: commitlint
-        entry: mise run lint:commits
+        entry: mise exec -- npx commitlint --edit
         language: system
         stages: [commit-msg]
         pass_filenames: false
       - id: ansible-lint
         name: ansible-lint
-        entry: mise run lint:ansible
+        entry: mise exec -- poetry run ansible-lint
         language: system
         types: [yaml]
         files: ^metal/k3s/playbooks/
         pass_filenames: false
+        args: ["--project-dir", "metal/k3s"]
       - id: helm-lint
         name: helm-lint
-        entry: mise run lint:helm
+        entry: mise exec -- bash
         language: system
         types: [yaml]
         files: ^charts/
         pass_filenames: false
+        args: ["-c", "for chart in charts/*/; do helm lint \"$chart\" || exit 1; done"]
       - id: helmfile-lint
         name: helmfile-lint
-        entry: mise run lint:helmfile
+        entry: mise exec -- bash
         language: system
         files: ^(helmfile/|helmfile\.yaml\.gotmpl)
         pass_filenames: false
+        args: ["-c", "helmfile --skip-deps -f helmfile.yaml.gotmpl -e dev --state-values-file helmfile/environments/lint-values.yaml lint && helmfile --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values-file helmfile/environments/lint-values.yaml lint"]
