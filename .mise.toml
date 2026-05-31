@@ -34,6 +34,7 @@ description = "Bootstrap local environment (tools, helm plugins, git hooks, terr
 run = """
 mise install
 poetry install
+npm install
 ./scripts/install-helm-plugins.sh
 poetry run pre-commit install
 poetry run pre-commit install --hook-type commit-msg
@@ -116,7 +117,7 @@ helmfile --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values-file helmfil
 
 [tasks."lint:commits"]
 description = "Lint commit messages with commitlint"
-run = "poetry run pre-commit run --hook-stage commit-msg --commit-msg-filename $1"
+run = "npx commitlint --edit"
 
 # ── Cleanup ───────────────────────────────────────────────────────────────────
 

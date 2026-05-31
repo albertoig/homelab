@@ -1,9 +1,11 @@
 ---
 collections:
   - name: ansible.posix
-    version: "1.5.4"
+    version: "2.1.0"
   - name: kubernetes.core
+    version: "6.3.0"
   - name: ansible.utils
+    version: "6.0.1"
   - name: https://github.com/k3s-io/k3s-ansible.git
     type: git
     version: e9e0978a47fa6ecb6cde58bf30bb461e1f6eb4dc
