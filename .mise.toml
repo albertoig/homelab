@@ -15,13 +15,12 @@ terraform = "1.14.5"
 # Runtimes (used by commitlint and ansible)
 node   = "24"
 python = "3.12"
-uv     = "latest"
-
-# Python CLI tools (installed via uv)
-"uvx:ansible-lint" = "24.2.0"
-"uvx:pre-commit"   = "3.8.0"
+poetry = "latest"
 
 [env]
+# Poetry creates the venv inside the project so `mise run clean` can wipe it
+POETRY_VIRTUALENVS_IN_PROJECT = "true"
+
 # Place sensitive or machine-specific vars in .mise.local.toml (gitignored).
 # Example .mise.local.toml:
 #   [env]
@@ -34,9 +33,10 @@ uv     = "latest"
 description = "Bootstrap local environment (tools, helm plugins, git hooks, terraform)"
 run = """
 mise install
+poetry install
 ./scripts/install-helm-plugins.sh
-pre-commit install
-pre-commit install --hook-type commit-msg
+poetry run pre-commit install
+poetry run pre-commit install --hook-type commit-msg
 terraform -chdir=terraform init
 """
 
@@ -97,7 +97,7 @@ depends = ["lint:ansible", "lint:helm", "lint:helmfile"]
 
 [tasks."lint:ansible"]
 description = "Lint Ansible playbooks"
-run = "ansible-lint --project-dir metal/k3s"
+run = "poetry run ansible-lint --project-dir metal/k3s"
 
 [tasks."lint:helm"]
 description = "Lint custom Helm charts"
@@ -116,7 +116,7 @@ helmfile --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values-file helmfil
 
 [tasks."lint:commits"]
 description = "Lint commit messages with commitlint"
-run = "npx commitlint --edit"
+run = "poetry run pre-commit run --hook-stage commit-msg --commit-msg-filename $1"
 
 # ── Cleanup ───────────────────────────────────────────────────────────────────
 

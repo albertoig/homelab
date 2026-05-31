@@ -45,6 +45,9 @@ jobs:
       - name: Install tools via mise
         uses: jdx/mise-action@v2
 
+      - name: Install Python dependencies
+        run: poetry install
+
       - name: Check for playbook files
         id: check-files
         run: |
@@ -57,7 +60,7 @@ jobs:
 
       - name: Install Ansible collections
         if: steps.check-files.outputs.exists == 'true'
-        run: ansible-galaxy collection install -r metal/k3s/requirements.yml
+        run: poetry run ansible-galaxy collection install -r metal/k3s/requirements.yml
 
       - name: Run ansible-lint
         if: steps.check-files.outputs.exists == 'true'
