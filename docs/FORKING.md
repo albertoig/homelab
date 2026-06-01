@@ -96,6 +96,7 @@ alertmanager:
 velero:
   bucket: ""        # from: mise run tf:apply → velero_bucket_name
   prefix: "velero"
+  region: ""
   s3Url: ""         # from: mise run tf:apply → velero_s3_endpoint
   retention: "168h"
   schedule: "0 3 * * *"
