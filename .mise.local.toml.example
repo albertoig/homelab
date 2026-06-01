@@ -16,6 +16,20 @@
 #
 CLOUDFLARE_API_TOKEN = ""
 
+# Cloudflare account ID — visible in the dashboard URL or the Overview page
+# sidebar (format: 32-character hex string).
+TF_VAR_cloudflare_account_id = ""
+
+# R2 bucket name for Velero backups.
+# Default: "homelab-velero"
+TF_VAR_velero_bucket_name = "homelab-velero"
+
+# R2 bucket location hint.
+# Options: WEUR (Western Europe), EEUR (Eastern Europe),
+#          APAC (Asia-Pacific), WNAM (Western North America), ENAM (Eastern North America)
+# Default: "WEUR"
+TF_VAR_velero_bucket_location = "WEUR"
+
 # ── Kubernetes (optional) ─────────────────────────────────────────────────────
 #
 # Path to your kubeconfig file if it is not at the default ~/.kube/config.
