@@ -92,8 +92,13 @@ homelab/
 ├── docs/                      # Documentation
 ├── helmfile/                  # Helmfile configuration
 │   ├── common/                # Common values and templates
-│   │   ├── values/            # Service values files
-│   │   └── common.yaml.gotmpl # Main releases definition
+│   │   └── values/            # Service values files
+│   ├── releases/              # Staged Helmfile release definitions
+│   │   ├── 001-crds.helmfile.yaml.gotmpl
+│   │   ├── 002-certs.helmfile.yaml.gotmpl
+│   │   ├── 003-blueprints.helmfile.yaml.gotmpl
+│   │   ├── 004-core-apps.helmfile.yaml.gotmpl
+│   │   └── 005-ingresses.helmfile.yaml.gotmpl
 │   ├── environments/          # Environment-specific configs
 │   │   ├── dev/               # Development environment
 │   │   │   ├── secrets/       # Per-chart encrypted secrets
