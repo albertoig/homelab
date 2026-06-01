@@ -59,13 +59,93 @@ helm plugin list
 
 | Credential | Purpose | Where to obtain |
 |------------|---------|-----------------|
-| Cloudflare API token | DNS management for cert-manager and external-dns | [Cloudflare Dashboard](https://dash.cloudflare.com/) → API Tokens (needs `Zone:DNS:Edit` + `Zone:Zone:Read`) |
+| Cloudflare DNS token | DNS management for cert-manager and external-dns | See [Cloudflare tokens](#cloudflare-tokens) below |
+| Cloudflare Terraform token | R2 bucket provisioning via Terraform | See [Cloudflare tokens](#cloudflare-tokens) below |
+| Cloudflare R2 token | Velero backup read/write access | See [Cloudflare tokens](#cloudflare-tokens) below |
 | Cloudflare account email | Cloudflare API authentication | Your Cloudflare account |
 | Let's Encrypt email | ACME certificate notifications | Any email you control |
 | SMTP credentials | Authentik email delivery | Any SMTP provider (Gmail, ProtonMail, etc.) |
 | Slack webhook URL | Alertmanager notifications | [Slack Incoming Webhooks](https://api.slack.com/messaging/webhooks) |
 | PGP key | SOPS encryption/decryption | Your existing PGP key (fingerprint in `.sops.yaml`) |
 | SSH key | Ansible provisioning | `~/.ssh/homelab` |
+
+### Cloudflare tokens
+
+Three separate Cloudflare tokens are required. Each has a different permission scope and is stored in a different place.
+
+---
+
+#### Token 1 — DNS (cert-manager + external-dns)
+
+**Used by:** cert-manager (DNS-01 ACME challenges to issue TLS certificates) and external-dns (creating and updating DNS records automatically).
+
+**Type:** Cloudflare API Token — create at [Cloudflare Dashboard](https://dash.cloudflare.com/) → My Profile → API Tokens → Create Token.
+
+**Permissions:**
+
+| Resource | Permission |
+|----------|------------|
+| Zone > DNS | Edit |
+| Zone > Zone | Read |
+
+Scope both permissions to the specific zone (domain) you are using.
+
+**Where it goes:** `helmfile/environments/<env>/secrets/cert-manager-config.enc.yaml` → `secret.apiKey`
+
+Set it during `mise run secrets:init <env>` when prompted for the cert-manager-config secret.
+
+---
+
+#### Token 2 — Terraform (R2 bucket provisioning)
+
+**Used by:** Terraform to create and manage the Cloudflare R2 bucket that stores Velero backups. Only needed when running `mise run tf:apply` or `mise run tf:destroy`.
+
+**Type:** Cloudflare API Token — create at [Cloudflare Dashboard](https://dash.cloudflare.com/) → My Profile → API Tokens → Create Token.
+
+**Permissions:**
+
+| Resource | Permission |
+|----------|------------|
+| Account > R2 Storage | Edit |
+
+Scope to your account.
+
+**Where it goes:** Exported as an environment variable before running Terraform:
+
+```bash
+export CLOUDFLARE_API_TOKEN="your-token-here"
+mise run tf:apply
+```
+
+This token is never stored in the repository.
+
+---
+
+#### Token 3 — R2 API token (Velero backups)
+
+**Used by:** Velero at runtime to read and write backup data to the R2 bucket. This is an **R2-specific token**, not a standard Cloudflare API token — it is created inside the R2 section of the dashboard, not the API Tokens page.
+
+**Type:** R2 API Token — create at [Cloudflare Dashboard](https://dash.cloudflare.com/) → R2 → Manage R2 API Tokens → Create API Token.
+
+**Permissions:**
+
+| Permission | Scope |
+|------------|-------|
+| Object Read & Write | Apply to specific bucket (your Velero bucket) |
+
+**Where it goes:** `helmfile/environments/<env>/secrets/velero.enc.yaml` → `velero.accessKeyId` and `velero.secretAccessKey`
+
+Set it during `mise run secrets:init <env>` when prompted for the velero secret. The Access Key ID and Secret Access Key are shown only once at token creation time — copy them immediately.
+
+---
+
+#### Summary
+
+| Token | Type | Key permissions | Stored in |
+|-------|------|-----------------|-----------|
+| DNS | Cloudflare API Token | Zone:DNS:Edit, Zone:Zone:Read | `cert-manager-config.enc.yaml` |
+| Terraform | Cloudflare API Token | Account:R2 Storage:Edit | Environment variable only |
+| R2 (Velero) | R2 API Token | Object Read & Write | `velero.enc.yaml` |
 
 ---
 
