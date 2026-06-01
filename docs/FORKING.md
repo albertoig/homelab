@@ -92,7 +92,16 @@ prometheus:
 alertmanager:
   replicas: 1
   storage: 1Gi
+
+velero:
+  bucket: ""        # from: mise run tf:apply → velero_bucket_name
+  prefix: "velero"
+  s3Url: ""         # from: mise run tf:apply → velero_s3_endpoint
+  retention: "168h"
+  schedule: "0 3 * * *"
 ```
+
+`velero.bucket` and `velero.s3Url` are populated from the Terraform outputs after running `mise run tf:apply`. The R2 API credentials go in the SOPS secret via `mise run secrets:init <env>`.
 
 See [CONFIG.md](./CONFIG.md) for all available options.
 
