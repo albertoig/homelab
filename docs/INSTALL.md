@@ -114,15 +114,10 @@ Scope to your account.
 
 ```bash
 cp .mise.local.toml.example .mise.local.toml
-# then fill in CLOUDFLARE_API_TOKEN
+# fill in CLOUDFLARE_API_TOKEN and TF_VAR_cloudflare_account_id at minimum
 ```
 
-This is the recommended approach. Alternatively, export it manually before running Terraform:
-
-```bash
-export CLOUDFLARE_API_TOKEN="your-token-here"
-mise run tf:apply
-```
+`.mise.local.toml` also holds the Terraform input variables (`TF_VAR_*`), so no separate `terraform.tfvars` file is needed. This is the recommended approach — all local config lives in one place.
 
 This token is never stored in the repository.
 
