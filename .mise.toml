@@ -60,15 +60,12 @@ description = "Deploy all helmfile releases  [env: dev|prod]"
 run = """
 export ENV="${1:-dev}"
 if [ -n "$CLOUDFLARE_R2_ACCESS_KEY_ID" ] && [ -n "$CLOUDFLARE_R2_SECRET_ACCESS_KEY" ]; then
-  terraform -chdir=terraform init -input=false \
-    -backend-config="endpoint=https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com" \
-    -backend-config="access_key=$CLOUDFLARE_R2_ACCESS_KEY_ID" \
-    -backend-config="secret_key=$CLOUDFLARE_R2_SECRET_ACCESS_KEY"
+  source scripts/lib/terraform-env.sh
+  terraform -chdir=terraform init -input=false
   terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-  TF_VAR_cloudflare_account_id="$CLOUDFLARE_ACCOUNT_ID" TF_VAR_environment="$ENV" terraform -chdir=terraform apply
+  TF_VAR_environment="$ENV" terraform -chdir=terraform apply
 else
-  echo "Skipping Terraform: CLOUDFLARE_R2_ACCESS_KEY_ID / CLOUDFLARE_R2_SECRET_ACCESS_KEY not set."
-  echo "Configure the R2 state backend in .mise.local.toml to provision the Velero bucket."
+  echo "Skipping Terraform: R2 credentials not set in .mise.local.toml."
 fi
 ./scripts/install-helmfiles.sh "$ENV"
 """
@@ -79,14 +76,12 @@ run = """
 export ENV="${1:-dev}"
 ./scripts/destroy-helmfiles.sh "$ENV"
 if [ -n "$CLOUDFLARE_R2_ACCESS_KEY_ID" ] && [ -n "$CLOUDFLARE_R2_SECRET_ACCESS_KEY" ]; then
-  terraform -chdir=terraform init -input=false \
-    -backend-config="endpoint=https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com" \
-    -backend-config="access_key=$CLOUDFLARE_R2_ACCESS_KEY_ID" \
-    -backend-config="secret_key=$CLOUDFLARE_R2_SECRET_ACCESS_KEY"
+  source scripts/lib/terraform-env.sh
+  terraform -chdir=terraform init -input=false
   terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-  TF_VAR_cloudflare_account_id="$CLOUDFLARE_ACCOUNT_ID" TF_VAR_environment="$ENV" terraform -chdir=terraform destroy
+  TF_VAR_environment="$ENV" terraform -chdir=terraform destroy
 else
-  echo "Skipping Terraform: CLOUDFLARE_R2_ACCESS_KEY_ID / CLOUDFLARE_R2_SECRET_ACCESS_KEY not set."
+  echo "Skipping Terraform: R2 credentials not set in .mise.local.toml."
 fi
 """
 
@@ -156,34 +151,28 @@ run = "terraform -chdir=terraform init"
 description = "Show Terraform execution plan  [env: dev|prod]"
 run = """
 export ENV="${1:-dev}"
-terraform -chdir=terraform init -input=false \
-  -backend-config="endpoint=https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com" \
-  -backend-config="access_key=$CLOUDFLARE_R2_ACCESS_KEY_ID" \
-  -backend-config="secret_key=$CLOUDFLARE_R2_SECRET_ACCESS_KEY"
+source scripts/lib/terraform-env.sh
+terraform -chdir=terraform init -input=false
 terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-TF_VAR_cloudflare_account_id="$CLOUDFLARE_ACCOUNT_ID" TF_VAR_environment="$ENV" terraform -chdir=terraform plan
+TF_VAR_environment="$ENV" terraform -chdir=terraform plan
 """
 
 [tasks."tf:apply"]
 description = "Apply Terraform changes  [env: dev|prod]"
 run = """
 export ENV="${1:-dev}"
-terraform -chdir=terraform init -input=false \
-  -backend-config="endpoint=https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com" \
-  -backend-config="access_key=$CLOUDFLARE_R2_ACCESS_KEY_ID" \
-  -backend-config="secret_key=$CLOUDFLARE_R2_SECRET_ACCESS_KEY"
+source scripts/lib/terraform-env.sh
+terraform -chdir=terraform init -input=false
 terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-TF_VAR_cloudflare_account_id="$CLOUDFLARE_ACCOUNT_ID" TF_VAR_environment="$ENV" terraform -chdir=terraform apply
+TF_VAR_environment="$ENV" terraform -chdir=terraform apply
 """
 
 [tasks."tf:destroy"]
 description = "Destroy Terraform-managed resources  [env: dev|prod]"
 run = """
 export ENV="${1:-dev}"
-terraform -chdir=terraform init -input=false \
-  -backend-config="endpoint=https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com" \
-  -backend-config="access_key=$CLOUDFLARE_R2_ACCESS_KEY_ID" \
-  -backend-config="secret_key=$CLOUDFLARE_R2_SECRET_ACCESS_KEY"
+source scripts/lib/terraform-env.sh
+terraform -chdir=terraform init -input=false
 terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-TF_VAR_cloudflare_account_id="$CLOUDFLARE_ACCOUNT_ID" TF_VAR_environment="$ENV" terraform -chdir=terraform destroy
+TF_VAR_environment="$ENV" terraform -chdir=terraform destroy
 """
