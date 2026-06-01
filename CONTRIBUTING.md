@@ -83,7 +83,7 @@ It is recommended to install the pre-commit hooks to catch issues before committ
 mise run setup
 ```
 
-The second command installs the `commit-msg` hook required for commitlint to enforce the conventional commit format locally.
+This installs all tools, Helm plugins, and the `commit-msg` hook required for commitlint to enforce the conventional commit format locally.
 
 Hooks that run on commit:
 - **actionlint** — validates GitHub Actions workflow files
