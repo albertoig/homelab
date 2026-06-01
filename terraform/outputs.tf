@@ -9,6 +9,6 @@ output "velero_s3_endpoint" {
 }
 
 output "next_step" {
-  description = "How to get the R2 API credentials for the Velero secret"
-  value       = "Go to Cloudflare Dashboard → R2 → Manage R2 API Tokens → Create Token (Object Read & Write on bucket: ${cloudflare_r2_bucket.velero.name}). Use the generated Access Key ID and Secret Access Key in the Velero SOPS secret."
+  description = "Next step after applying"
+  value       = "Go to Cloudflare Dashboard → R2 → Manage R2 API Tokens → Create Token (Object Read & Write on bucket: ${cloudflare_r2_bucket.velero.name}). Add the Access Key ID and Secret Access Key to the Velero SOPS secret for the ${var.environment} environment."
 }

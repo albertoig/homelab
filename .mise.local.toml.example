@@ -20,7 +20,8 @@ CLOUDFLARE_API_TOKEN = ""
 # sidebar (format: 32-character hex string).
 TF_VAR_cloudflare_account_id = ""
 
-# R2 bucket name for Velero backups.
+# Base name for the Velero R2 bucket. The environment is appended automatically
+# by the mise task (e.g. homelab-velero-dev, homelab-velero-prod).
 # Default: "homelab-velero"
 TF_VAR_velero_bucket_name = "homelab-velero"
 
@@ -37,11 +38,12 @@ TF_VAR_velero_bucket_location = "WEUR"
 #
 # Bootstrap (one-time, before running mise run tf:init):
 #   1. Create an R2 bucket named "homelab-terraform-state" in the Cloudflare dashboard
+#      (a single shared state bucket — not per-environment)
 #   2. Create an R2 API token: Cloudflare Dashboard → R2 → Manage R2 API Tokens
 #      Permissions: Object Read & Write (scoped to homelab-terraform-state)
 #   3. Fill in the three values below, then run: mise run tf:init
 #
-# Note: this is a separate R2 token from the Velero one — different bucket, different token.
+# Note: this is a separate R2 token from the Velero ones — different bucket, different token.
 #
 # R2 S3-compatible endpoint.
 # Format: https://<ACCOUNT_ID>.r2.cloudflarestorage.com
