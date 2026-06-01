@@ -16,9 +16,9 @@
 #
 CLOUDFLARE_API_TOKEN = ""
 
-# Cloudflare account ID — visible in the dashboard URL or the Overview page
-# sidebar (format: 32-character hex string).
-TF_VAR_cloudflare_account_id = ""
+# Cloudflare account ID — visible in the dashboard URL or the Overview page sidebar.
+# Used to build the R2 endpoint URL and passed to Terraform as the account ID.
+CLOUDFLARE_ACCOUNT_ID = ""
 
 # Base name for the Velero R2 bucket. The environment is appended automatically
 # by the mise task (e.g. homelab-velero-dev, homelab-velero-prod).
@@ -34,21 +34,20 @@ TF_VAR_velero_bucket_location = "WEUR"
 # ── Terraform state backend — Cloudflare R2 ──────────────────────────────────
 #
 # Stores terraform.tfstate remotely in a Cloudflare R2 bucket instead of on disk.
-# Terraform uses the S3-compatible R2 API under the hood — no AWS account needed.
+# Terraform uses the S3-compatible R2 API — no AWS account needed.
+#
+# The account ID and R2 endpoint are derived automatically from CLOUDFLARE_API_TOKEN
+# at runtime, so you do not need to set them manually.
 #
 # Bootstrap (one-time, before running mise run install):
 #   1. Create an R2 bucket named "homelab-terraform-state" in the Cloudflare dashboard
-#      (a single shared state bucket — not per-environment)
 #   2. Create an R2 API token: Cloudflare Dashboard → R2 → Manage R2 API Tokens
 #      Permissions: Object Read & Write (scoped to homelab-terraform-state)
-#   3. Fill in the three values below
+#   3. Fill in the two values below
 #
 # Note: this is a separate R2 token from the Velero ones — different bucket, different token.
-#
-# R2 endpoint — format: https://<ACCOUNT_ID>.r2.cloudflarestorage.com
-# (same account ID as TF_VAR_cloudflare_account_id above)
-CLOUDFLARE_R2_ENDPOINT          = ""
-# R2 API token key ID and secret for the state bucket
+# Note: CLOUDFLARE_API_TOKEN (above) and these R2 credentials cannot be the same —
+#       the Cloudflare provider uses Bearer auth, R2 uses HMAC S3 credentials.
 CLOUDFLARE_R2_ACCESS_KEY_ID     = ""
 CLOUDFLARE_R2_SECRET_ACCESS_KEY = ""
 
