@@ -169,6 +169,26 @@ This is the most complex secrets file. It powers two charts: the local `cert-man
 
 ---
 
+## Velero
+
+**File:** `velero.enc.yaml`
+**Chart:** `vmware-tanzu/velero`
+**Criticality:** High — breaks all scheduled and on-demand backups
+
+| Key | Criticality | Description |
+|-----|-------------|-------------|
+| `velero.accessKeyId` | **High** | Cloudflare R2 API token key ID. Authenticates Velero to the R2 bucket used as backup storage. |
+| `velero.secretAccessKey` | **High** | Cloudflare R2 API token secret. Paired with `accessKeyId` for AWS-style credential authentication. |
+
+**If wrong:** Velero cannot connect to the R2 bucket. All backup and restore operations fail with credential errors. Check logs: `kubectl logs -n velero-system deploy/velero`.
+
+**How to obtain:**
+1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) → R2 → Manage R2 API Tokens
+2. Create an API token with Object Read & Write permissions scoped to your backup bucket
+3. Copy the Access Key ID and Secret Access Key shown at creation time (the secret is only shown once)
+
+---
+
 ## Quick reference
 
 | Chart | Secret file | Key | Criticality | Impact if wrong |
@@ -198,6 +218,8 @@ This is the most complex secrets file. It powers two charts: the local `cert-man
 | cert-manager-config | `cert-manager-config.enc.yaml` | `clusterIssuer.email` | Critical | Let's Encrypt rejects registration |
 | cert-manager-config | `cert-manager-config.enc.yaml` | `clusterIssuer.cloudflare.email` | Low | Optional Cloudflare email |
 | cert-manager-config | `cert-manager-config.enc.yaml` | `certificate.dnsNames` | High | Certificate for wrong domains |
+| velero | `velero.enc.yaml` | `velero.accessKeyId` | High | Backups fail — cannot connect to R2 |
+| velero | `velero.enc.yaml` | `velero.secretAccessKey` | High | Backups fail — cannot connect to R2 |
 
 ## Related
 
