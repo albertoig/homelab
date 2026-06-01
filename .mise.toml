@@ -61,7 +61,7 @@ run = """
 export ENV="${1:-dev}"
 if [ -n "$CLOUDFLARE_R2_ACCESS_KEY_ID" ] && [ -n "$CLOUDFLARE_R2_SECRET_ACCESS_KEY" ]; then
   . scripts/lib/terraform-env.sh
-  terraform -chdir=terraform init -input=false
+  terraform -chdir=terraform init -migrate-state
   terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
   TF_VAR_environment="$ENV" terraform -chdir=terraform apply
 else
@@ -77,7 +77,7 @@ export ENV="${1:-dev}"
 ./scripts/destroy-helmfiles.sh "$ENV"
 if [ -n "$CLOUDFLARE_R2_ACCESS_KEY_ID" ] && [ -n "$CLOUDFLARE_R2_SECRET_ACCESS_KEY" ]; then
   . scripts/lib/terraform-env.sh
-  terraform -chdir=terraform init -input=false
+  terraform -chdir=terraform init -migrate-state
   terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
   TF_VAR_environment="$ENV" terraform -chdir=terraform destroy
 else
@@ -152,7 +152,7 @@ description = "Show Terraform execution plan  [env: dev|prod]"
 run = """
 export ENV="${1:-dev}"
 . scripts/lib/terraform-env.sh
-terraform -chdir=terraform init -input=false
+terraform -chdir=terraform init -migrate-state
 terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
 TF_VAR_environment="$ENV" terraform -chdir=terraform plan
 """
@@ -162,7 +162,7 @@ description = "Apply Terraform changes  [env: dev|prod]"
 run = """
 export ENV="${1:-dev}"
 . scripts/lib/terraform-env.sh
-terraform -chdir=terraform init -input=false
+terraform -chdir=terraform init -migrate-state
 terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
 TF_VAR_environment="$ENV" terraform -chdir=terraform apply
 """
@@ -172,7 +172,7 @@ description = "Destroy Terraform-managed resources  [env: dev|prod]"
 run = """
 export ENV="${1:-dev}"
 . scripts/lib/terraform-env.sh
-terraform -chdir=terraform init -input=false
+terraform -chdir=terraform init -migrate-state
 terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
 TF_VAR_environment="$ENV" terraform -chdir=terraform destroy
 """
