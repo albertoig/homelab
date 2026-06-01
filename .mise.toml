@@ -59,9 +59,14 @@ run = "./metal/k3s/run.sh ${1:-site}"
 description = "Deploy all helmfile releases  [env: dev|prod]"
 run = """
 export ENV="${1:-dev}"
-terraform -chdir=terraform init -input=false
-terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-TF_VAR_environment="$ENV" terraform -chdir=terraform apply
+if [ -n "$AWS_ENDPOINT_URL_S3" ] && [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+  terraform -chdir=terraform init -input=false
+  terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
+  TF_VAR_environment="$ENV" terraform -chdir=terraform apply
+else
+  echo "Skipping Terraform: AWS_ENDPOINT_URL_S3 / AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY not set."
+  echo "Configure the R2 state backend in .mise.local.toml to provision the Velero bucket."
+fi
 ./scripts/install-helmfiles.sh "$ENV"
 """
 
@@ -70,9 +75,13 @@ description = "Tear down all helmfile releases  [env: dev|prod]"
 run = """
 export ENV="${1:-dev}"
 ./scripts/destroy-helmfiles.sh "$ENV"
-terraform -chdir=terraform init -input=false
-terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-TF_VAR_environment="$ENV" terraform -chdir=terraform destroy
+if [ -n "$AWS_ENDPOINT_URL_S3" ] && [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+  terraform -chdir=terraform init -input=false
+  terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
+  TF_VAR_environment="$ENV" terraform -chdir=terraform destroy
+else
+  echo "Skipping Terraform: AWS_ENDPOINT_URL_S3 / AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY not set."
+fi
 """
 
 # ── Secrets management ────────────────────────────────────────────────────────
