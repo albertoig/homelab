@@ -105,7 +105,7 @@ See [SECRETS.md](./SECRETS.md) for a full reference of required secrets.
 ### 3. Provision the cluster
 
 ```bash
-make provision
+mise run provision
 ```
 
 This runs Ansible to provision K3s on bare-metal nodes defined in the inventory.
@@ -113,7 +113,7 @@ This runs Ansible to provision K3s on bare-metal nodes defined in the inventory.
 ### 4. Deploy services
 
 ```bash
-make install ENV=<env>
+mise run install <env>
 ```
 
 This runs 4 steps in order:
@@ -135,14 +135,14 @@ kubectl get pods -A
 ### Deploy a specific environment
 
 ```bash
-make install ENV=dev
-make install ENV=prod
+mise run install dev
+mise run install prod
 ```
 
 ### Destroy an environment
 
 ```bash
-make destroy ENV=<env>
+mise run destroy <env>
 ```
 
 This tears down all releases in reverse dependency order and cleans up stuck resources.
@@ -154,9 +154,9 @@ This tears down all releases in reverse dependency order and cleans up stuck res
 mise run secrets:init <env>
 
 # Or manual edit workflow:
-make secrets-decrypt ENV=<env> CHART=<chart>
+mise run secrets:decrypt <env> <chart>
 vim helmfile/environments/<env>/secrets/<chart>.secrets.yaml
-make secrets-encrypt ENV=<env> CHART=<chart>
+mise run secrets:encrypt <env> <chart>
 ```
 
 ### Preview changes without applying
@@ -226,7 +226,7 @@ configs:
 Redeploy ArgoCD:
 
 ```bash
-make install ENV=<env>
+mise run install <env>
 ```
 
 Retrieve the admin password:
