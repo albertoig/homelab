@@ -22,10 +22,7 @@ poetry = "latest"
 POETRY_VIRTUALENVS_IN_PROJECT = "true"
 
 # Place sensitive or machine-specific vars in .mise.local.toml (gitignored).
-# Example .mise.local.toml:
-#   [env]
-#   CLOUDFLARE_API_TOKEN = "your-token"
-#   KUBECONFIG           = "~/.kube/homelab"
+# See .mise.local.toml.example for all available variables and descriptions.
 
 # ── Setup ─────────────────────────────────────────────────────────────────────
 
