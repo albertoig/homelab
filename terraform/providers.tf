@@ -11,9 +11,8 @@ terraform {
     skip_region_validation      = true
     use_path_style              = true
 
-    # endpoint, access_key, and secret_key are injected via -backend-config flags
-    # in the mise tasks. Set CLOUDFLARE_R2_ENDPOINT, CLOUDFLARE_R2_ACCESS_KEY_ID,
-    # and CLOUDFLARE_R2_SECRET_ACCESS_KEY in .mise.local.toml.
+    # Credentials and endpoint are read from environment variables set by mise tasks:
+    # AWS_ENDPOINT_URL_S3, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
   }
 
   required_providers {
