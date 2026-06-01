@@ -1,0 +1,32 @@
+# .mise.local.toml — machine-specific overrides (gitignored)
+#
+# Copy to .mise.local.toml and fill in your values:
+#   cp .mise.local.toml.example .mise.local.toml
+#
+# mise loads this file automatically alongside .mise.toml.
+# Never commit .mise.local.toml — it contains secrets.
+
+[env]
+
+# ── Terraform (required for: mise run tf:apply / tf:plan / tf:destroy) ────────
+#
+# Cloudflare API token for Terraform.
+# Permissions: Account > R2 Storage > Edit
+# Create at: https://dash.cloudflare.com/ → My Profile → API Tokens
+#
+CLOUDFLARE_API_TOKEN = ""
+
+# ── Kubernetes (optional) ─────────────────────────────────────────────────────
+#
+# Path to your kubeconfig file if it is not at the default ~/.kube/config.
+# Required if you manage multiple clusters and keep separate kubeconfig files.
+#
+# KUBECONFIG = "~/.kube/homelab"
+
+# ── SOPS / age (optional) ─────────────────────────────────────────────────────
+#
+# Only needed if you use age instead of PGP for SOPS encryption.
+# If you use PGP (default), SOPS reads from your GPG keyring automatically —
+# no env var is needed.
+#
+# SOPS_AGE_KEY_FILE = "~/.config/sops/age/keys.txt"

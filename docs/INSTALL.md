@@ -110,7 +110,14 @@ Set it during `mise run secrets:init <env>` when prompted for the cert-manager-c
 
 Scope to your account.
 
-**Where it goes:** Exported as an environment variable before running Terraform:
+**Where it goes:** `.mise.local.toml` (gitignored, loaded automatically by mise):
+
+```bash
+cp .mise.local.toml.example .mise.local.toml
+# then fill in CLOUDFLARE_API_TOKEN
+```
+
+This is the recommended approach. Alternatively, export it manually before running Terraform:
 
 ```bash
 export CLOUDFLARE_API_TOKEN="your-token-here"
