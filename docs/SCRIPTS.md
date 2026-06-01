@@ -16,7 +16,7 @@ All common operations are defined as mise tasks in `.mise.toml`. Run `mise tasks
 | `mise run secrets:init [env]` | `scripts/init-secrets.sh` | Default env: `dev` |
 | `mise run secrets:encrypt [env] [chart]` | `scripts/sops-encrypt-secrets.sh` | |
 | `mise run secrets:decrypt [env] [chart]` | `scripts/sops-decrypt-secrets.sh` | |
-| `mise run secrets:check` | `scripts/check-secrets.sh` | |
+| `mise run secrets:check` | `scripts/check-secrets.sh` | Checks all envs if no env given |
 | `mise run lint` | `pre-commit run --all-files` | |
 | `mise run tf:init` | `terraform init` | |
 | `mise run tf:plan` | `terraform plan` | |
@@ -25,7 +25,7 @@ All common operations are defined as mise tasks in `.mise.toml`. Run `mise tasks
 
 ## Overview
 
-The repository contains 8 shell scripts organized into three functional groups:
+The repository contains 9 shell scripts (plus a `scripts/lib/` directory for shared utilities) organized into four functional groups:
 
 - **Validation scripts** - Verify prerequisites and cluster health
 - **Helmfile lifecycle scripts** - Deploy and destroy Helmfile-managed services
@@ -283,6 +283,54 @@ helmfile/environments/<env>/secrets/
 ```
 
 **Standalone:** Not called by other scripts. Run once to initialize or update secrets for an environment.
+
+---
+
+### `scripts/check-secrets.sh`
+
+**Purpose:** Validates that all per-chart secret files are present and contain the same fields as their corresponding templates. Decrypts `.enc.yaml` files on the fly to compare against `helmfile/secret-templates/*.template.yaml`.
+
+**Usage:**
+```bash
+# Check all environments
+./scripts/check-secrets.sh
+
+# Check a single environment
+./scripts/check-secrets.sh <environment>
+# Example:
+./scripts/check-secrets.sh dev
+./scripts/check-secrets.sh prod
+```
+
+**Checks:**
+- Each template in `helmfile/secret-templates/` has a matching `.enc.yaml` or `.secrets.yaml` in the target environment
+- All keys in the template are present in the secret file (missing keys reported as errors)
+- Extra keys in the secret file not present in the template (reported as warnings)
+
+**Exit codes:**
+- `0` - All secrets present and up to date (warnings are non-fatal)
+- `1` - One or more secret files missing or have missing fields
+
+**Called by:** `mise run secrets:check`
+
+---
+
+### `scripts/install-helm-plugins.sh`
+
+**Purpose:** Installs all required Helm plugins idempotently. Skips plugins that are already installed. Sets up the GPG keyring for the `helm-secrets` plugin family if not already present.
+
+**Usage:**
+```bash
+./scripts/install-helm-plugins.sh
+```
+
+**Installs:**
+- `secrets` — helm-secrets v4.7.4
+- `secrets-getter` — helm-secrets-getter v4.7.4
+- `secrets-post-renderer` — helm-secrets-post-renderer v4.7.4
+- `diff` — helm-diff (no GPG verification)
+
+**Called by:** `mise run setup` (as part of the full setup task)
 
 ---
 
