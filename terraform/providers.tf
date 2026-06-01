@@ -1,6 +1,21 @@
 terraform {
   required_version = ">= 1.0"
 
+  backend "s3" {
+    bucket = "homelab-terraform-state"
+    key    = "terraform.tfstate"
+    region = "auto"
+
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    force_path_style            = true
+
+    # Endpoint and credentials are read from environment variables.
+    # Set AWS_ENDPOINT_URL_S3, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+    # in .mise.local.toml (see .mise.local.toml.example).
+  }
+
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
@@ -11,5 +26,5 @@ terraform {
 
 provider "cloudflare" {
   # Reads CLOUDFLARE_API_TOKEN from environment.
-  # The token needs Account:R2 Storage:Edit permission.
+  # The token needs Account > R2 Storage > Edit permission.
 }
