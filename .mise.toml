@@ -59,7 +59,7 @@ run = "./metal/k3s/run.sh ${1:-site}"
 description = "Deploy all helmfile releases"
 usage = '''
 arg "<environment>" help="Target environment" {
-  choices "dev" "staging" "prod"
+  choices "dev" "prod"
 }
 '''
 run = '''
@@ -70,7 +70,7 @@ run = '''
 description = "Tear down all helmfile releases"
 usage = '''
 arg "<environment>" help="Target environment" {
-  choices "dev" "staging" "prod"
+  choices "dev" "prod"
 }
 '''
 run = '''

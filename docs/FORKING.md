@@ -94,15 +94,12 @@ alertmanager:
   storage: 1Gi
 
 velero:
-  bucket: ""        # from: mise run tf:apply → velero_bucket_name
   prefix: "velero"
-  region: ""
-  s3Url: ""         # from: mise run tf:apply → velero_s3_endpoint
   retention: "168h"
   schedule: "0 3 * * *"
 ```
 
-`velero.bucket` and `velero.s3Url` are populated from the Terraform outputs after running `mise run tf:apply`. The R2 API credentials go in the SOPS secret via `mise run secrets:init <env>`.
+`velero.bucket`, `velero.s3Url`, and the R2 API credentials are all stored in the SOPS secret (`helmfile/environments/<env>/secrets/velero.enc.yaml`). They are populated automatically by `scripts/velero-secrets.sh`, which runs as part of `mise run install <env>` after `terraform apply`.
 
 See [CONFIG.md](./CONFIG.md) for all available options.
 

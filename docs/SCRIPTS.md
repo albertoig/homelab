@@ -11,21 +11,21 @@ All common operations are defined as mise tasks in `.mise.toml`. Run `mise tasks
 | `mise run setup` | mise install + helm plugins + pre-commit + terraform init | Run once after cloning |
 | `mise run check` | `scripts/check-requirements.sh` + `scripts/check-kubernetes.sh` | |
 | `mise run provision [playbook]` | `metal/k3s/run.sh` | Default playbook: `site` |
-| `mise run install [env]` | terraform apply + `scripts/install-helmfiles.sh` | Default env: `dev` |
-| `mise run destroy [env]` | `scripts/destroy-helmfiles.sh` + terraform destroy | Default env: `dev` |
-| `mise run secrets:init [env]` | `scripts/init-secrets.sh` | Default env: `dev` |
-| `mise run secrets:encrypt [env] [chart]` | `scripts/sops-encrypt-secrets.sh` | |
-| `mise run secrets:decrypt [env] [chart]` | `scripts/sops-decrypt-secrets.sh` | |
+| `mise run install <env>` | terraform apply → `scripts/velero-secrets.sh` → `scripts/install-helmfiles.sh` | |
+| `mise run destroy <env>` | `scripts/destroy-helmfiles.sh` → terraform destroy | |
+| `mise run secrets:init <env>` | `scripts/init-secrets.sh` | |
+| `mise run secrets:encrypt <env> [chart]` | `scripts/sops-encrypt-secrets.sh` | |
+| `mise run secrets:decrypt <env> [chart]` | `scripts/sops-decrypt-secrets.sh` | |
 | `mise run secrets:check` | `scripts/check-secrets.sh` | Checks all envs if no env given |
 | `mise run lint` | `pre-commit run --all-files` | |
 | `mise run tf:init` | `terraform init` | |
-| `mise run tf:plan` | `terraform plan` | |
-| `mise run tf:apply` | `terraform apply` | |
-| `mise run tf:destroy` | `terraform destroy` | |
+| `mise run tf:plan <env>` | `scripts/terraform.sh plan` | |
+| `mise run tf:apply <env>` | `scripts/terraform.sh apply` | |
+| `mise run tf:destroy <env>` | `scripts/terraform.sh destroy` | |
 
 ## Overview
 
-The repository contains 9 shell scripts (plus a `scripts/lib/` directory for shared utilities) organized into four functional groups:
+The repository contains 10 shell scripts (plus a `scripts/lib/` directory for shared utilities) organized into four functional groups:
 
 - **Validation scripts** - Verify prerequisites and cluster health
 - **Helmfile lifecycle scripts** - Deploy and destroy Helmfile-managed services
@@ -286,6 +286,24 @@ helmfile/environments/<env>/secrets/
 
 ---
 
+### `scripts/velero-secrets.sh`
+
+**Purpose:** Reads Terraform outputs for the given environment, then writes and SOPS-encrypts `helmfile/environments/<env>/secrets/velero.enc.yaml` with all four Velero values: `bucket`, `s3Url` (from Terraform), `accessKeyId`, and `secretAccessKey` (from `CLOUDFLARE_R2_ACCESS_KEY_ID` / `CLOUDFLARE_R2_SECRET_ACCESS_KEY` in the environment).
+
+**Usage:**
+```bash
+./scripts/velero-secrets.sh <environment>
+# Example:
+./scripts/velero-secrets.sh dev
+./scripts/velero-secrets.sh prod
+```
+
+**Prerequisites:** R2 credentials must be set in `.mise.local.toml` and Terraform must already be applied for the environment.
+
+**Called by:** `scripts/install.sh` (automatically, between `terraform apply` and `install-helmfiles.sh`).
+
+---
+
 ### `scripts/check-secrets.sh`
 
 **Purpose:** Validates that all per-chart secret files are present and contain the same fields as their corresponding templates. Decrypts `.enc.yaml` files on the fly to compare against `helmfile/secret-templates/*.template.yaml`.
@@ -375,10 +393,13 @@ metal/k3s/run.sh  ──>  K3s Cluster
 ### Deploy Services
 
 ```
-install-helmfiles.sh <env>
-  ├── check-requirements.sh
-  ├── check-kubernetes.sh
-  └── helmfile sync (all releases via principal helmfile)
+mise run install <env>
+  ├── terraform apply          (provisions R2 bucket)
+  ├── velero-secrets.sh        (reads outputs, writes velero.enc.yaml)
+  └── install-helmfiles.sh
+        ├── check-requirements.sh
+        ├── check-kubernetes.sh
+        └── helmfile sync (all releases via principal helmfile)
 ```
 
 ### Destroy Environment
