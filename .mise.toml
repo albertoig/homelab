@@ -127,30 +127,12 @@ run = "terraform -chdir=terraform init"
 
 [tasks."tf:plan"]
 description = "Show Terraform execution plan  [env: dev|prod]"
-run = """
-export ENV="${1:-dev}"
-. scripts/lib/terraform-env.sh
-terraform -chdir=terraform init -migrate-state
-terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-TF_VAR_environment="$ENV" terraform -chdir=terraform plan
-"""
+run = "./scripts/terraform.sh plan \"${1:-dev}\""
 
 [tasks."tf:apply"]
 description = "Apply Terraform changes  [env: dev|prod]"
-run = """
-export ENV="${1:-dev}"
-. scripts/lib/terraform-env.sh
-terraform -chdir=terraform init -migrate-state
-terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-TF_VAR_environment="$ENV" terraform -chdir=terraform apply
-"""
+run = "./scripts/terraform.sh apply \"${1:-dev}\""
 
 [tasks."tf:destroy"]
 description = "Destroy Terraform-managed resources  [env: dev|prod]"
-run = """
-export ENV="${1:-dev}"
-. scripts/lib/terraform-env.sh
-terraform -chdir=terraform init -migrate-state
-terraform -chdir=terraform workspace select "$ENV" 2>/dev/null || terraform -chdir=terraform workspace new "$ENV"
-TF_VAR_environment="$ENV" terraform -chdir=terraform destroy
-"""
+run = "./scripts/terraform.sh destroy \"${1:-dev}\""
