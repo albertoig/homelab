@@ -32,7 +32,7 @@ configs:
     resource.customizations: |
   secret:
     extra:
-      oidc.authentik.clientSecret: {{ .Values.sso.argocd.client_secret }}
+      oidc.authentik.clientSecret: {{ .Values.sso.argocd.client_secret | quote }}
   rbac:
     policy.default: role:readonly
     policy.csv: |
