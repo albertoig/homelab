@@ -1,5 +1,9 @@
 # --- velero ---
 velero:
+  # R2 bucket name (from terraform output: velero_bucket_name)
+  bucket: ""
+  # R2 endpoint URL (from terraform output: velero_s3_endpoint)
+  s3Url: ""
   # Cloudflare R2 API token key ID
   # Generate at: Cloudflare Dashboard → R2 → Manage R2 API Tokens
   accessKeyId: ""

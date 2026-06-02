@@ -15,7 +15,7 @@ configuration:
   backupStorageLocation:
     - name: default
       provider: aws
-      bucket: {{ $cfg.velero.bucket | quote }}
+      bucket: {{ dig "velero" "bucket" "" .Values | quote }}
       prefix: {{ $cfg.velero.prefix | quote }}
       credential:
         name: velero
@@ -23,7 +23,7 @@ configuration:
       config:
         region: auto
         s3ForcePathStyle: "true"
-        s3Url: {{ $cfg.velero.s3Url | quote }}
+        s3Url: {{ dig "velero" "s3Url" "" .Values | quote }}
 
   volumeSnapshotLocation:
     - name: default

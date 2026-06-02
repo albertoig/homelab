@@ -56,12 +56,26 @@ run = "./metal/k3s/run.sh ${1:-site}"
 # ── Helmfile deployment ───────────────────────────────────────────────────────
 
 [tasks.install]
-description = "Deploy all helmfile releases  [env: dev|prod]"
-run = "./scripts/install.sh \"${1:-dev}\""
+description = "Deploy all helmfile releases"
+usage = '''
+arg "<environment>" help="Target environment" {
+  choices "dev" "staging" "prod"
+}
+'''
+run = '''
+./scripts/install.sh "${usage_environment?}"
+'''
 
 [tasks.destroy]
-description = "Tear down all helmfile releases  [env: dev|prod]"
-run = "./scripts/destroy.sh \"${1:-dev}\""
+description = "Tear down all helmfile releases"
+usage = '''
+arg "<environment>" help="Target environment" {
+  choices "dev" "staging" "prod"
+}
+'''
+run = '''
+./scripts/destroy.sh "${usage_environment?}"
+'''
 
 # ── Secrets management ────────────────────────────────────────────────────────
 
