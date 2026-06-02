@@ -6,7 +6,7 @@ Supplementary configuration that may be needed depending on your environment.
 
 > **Warning**: This file is part of the upstream repository. If you modify it and upstream updates it, you will get merge conflicts on fork sync.
 
-Helmfile uses your Kubernetes context to connect to the right cluster. The environment definitions in `helmfile/environments.yaml.gotmpl` reference context names.
+Helmfile uses your Kubernetes context to connect to the right cluster. The environment definitions in `helmfile.yaml.gotmpl` reference context names.
 
 If your context names differ from `homelab-dev` and `homelab-prod`, update them:
 
