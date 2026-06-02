@@ -20,8 +20,6 @@ alertmanager:
   storage: 2Gi
 
 velero:
-  bucket: ""
   prefix: "velero"
-  s3Url: ""
   retention: "720h"
   schedule: "0 2 * * *"

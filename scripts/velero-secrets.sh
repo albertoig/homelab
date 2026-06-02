@@ -1,0 +1,57 @@
+#!/bin/bash
+set -euo pipefail
+
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
+
+HELMFILE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ENV="${1:-}"
+
+if [[ -z "$ENV" ]]; then
+    error "Usage: $0 <environment>"
+    exit 1
+fi
+
+SECRETS_DIR="$HELMFILE_DIR/helmfile/environments/$ENV/secrets"
+ENC_FILE="$SECRETS_DIR/velero.enc.yaml"
+
+if [[ ! -d "$HELMFILE_DIR/helmfile/environments/$ENV" ]]; then
+    error "Environment not found: $ENV"
+    exit 1
+fi
+
+. "$(dirname "$0")/lib/terraform-env.sh"
+
+# --- Extract Terraform outputs ---
+
+header "Extracting Terraform outputs — $ENV"
+echo ""
+
+terraform -chdir="$HELMFILE_DIR/terraform" workspace select "$ENV"
+
+TF_OUTPUT=$(terraform -chdir="$HELMFILE_DIR/terraform" output -json)
+BUCKET=$(echo "$TF_OUTPUT"   | python3 -c "import sys,json; print(json.load(sys.stdin)['velero_bucket_name']['value'])")
+ENDPOINT=$(echo "$TF_OUTPUT" | python3 -c "import sys,json; print(json.load(sys.stdin)['velero_s3_endpoint']['value'])")
+
+success "velero_bucket_name: $BUCKET"
+success "velero_s3_endpoint: $ENDPOINT"
+echo ""
+
+# --- Write and encrypt ---
+
+mkdir -p "$SECRETS_DIR"
+SECRETS_FILE=$(mktemp --suffix=.yaml)
+
+cat > "$SECRETS_FILE" <<EOF
+# --- velero ---
+velero:
+  bucket: "$BUCKET"
+  s3Url: "$ENDPOINT"
+  accessKeyId: "$CLOUDFLARE_R2_ACCESS_KEY_ID"
+  secretAccessKey: "$CLOUDFLARE_R2_SECRET_ACCESS_KEY"
+EOF
+
+sops --encrypt "$SECRETS_FILE" > "$ENC_FILE"
+rm "$SECRETS_FILE"
+
+echo ""
+success "Created $ENC_FILE"
