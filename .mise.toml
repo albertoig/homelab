@@ -17,6 +17,11 @@ node   = "24"
 python = "3.12"
 poetry = "latest"
 
+# CLI scripting
+gum              = "0.17.0"
+fzf              = "0.73.1"
+"github:atanunq/viu" = "latest"
+
 [env]
 # Poetry creates the venv inside the project so `mise run clean` can wipe it
 POETRY_VIRTUALENVS_IN_PROJECT = "true"
@@ -42,10 +47,7 @@ terraform -chdir=terraform init
 
 [tasks.check]
 description = "Validate tools, Helm plugins, and Kubernetes cluster access"
-run = """
-./scripts/check-requirements.sh
-./scripts/check-kubernetes.sh
-"""
+run = "./scripts/check.sh"
 
 # ── Cluster provisioning ──────────────────────────────────────────────────────
 
@@ -57,14 +59,7 @@ run = "./metal/k3s/run.sh ${1:-site}"
 
 [tasks.install]
 description = "Deploy all helmfile releases"
-usage = '''
-arg "<environment>" help="Target environment" {
-  choices "dev" "prod"
-}
-'''
-run = '''
-./scripts/install.sh "${usage_environment?}"
-'''
+run = "./scripts/install.sh"
 
 [tasks.destroy]
 description = "Tear down all helmfile releases"
