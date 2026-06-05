@@ -1,3 +1,5 @@
+![Header](docs/images/5b1cd5f9-c146-49b0-9a14-91eb4c03e14c.png)
+
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 
 # 🏠 Homelab
