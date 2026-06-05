@@ -2,11 +2,6 @@
 
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 
-# 🏠 Homelab
-
-A personal homelab setup using Kubernetes (K3s), Helmfile, and GitOps practices for automated infrastructure management.
-
----
 
 ## 📋 Overview
 
