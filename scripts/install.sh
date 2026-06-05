@@ -31,8 +31,6 @@ echo ""
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
 
-header "Prerequisites"
-echo ""
 "$SCRIPT_DIR/check.sh"
 echo ""
 

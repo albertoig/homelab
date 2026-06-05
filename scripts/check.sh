@@ -15,105 +15,66 @@ fi
 
 show_header
 
+gum style \
+    --foreground 99 \
+    --bold \
+    --padding "1 2" \
+    --margin "0 1" \
+    "Requisites"
+echo ""
+
 ERRORS=0
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-section() {
-    gum style --foreground 99 --bold "  $*"
-    echo ""
-}
-
-check_cmd() {
-    local cmd="$1"
-    local path
-    if path=$(command -v "$cmd" 2>/dev/null); then
-        gum log --level info "$cmd" path="$path"
+section_result() {
+    local label="$1"
+    local missing=("${@:2}")
+    if [ ${#missing[@]} -eq 0 ]; then
+        printf "  %s  %s\n" "$(gum style --foreground 2 --bold '✓')" "$label"
     else
-        gum log --level error "$cmd — not found"
-        ERRORS=$((ERRORS + 1))
+        printf "  %s  %s — missing: %s\n" \
+            "$(gum style --foreground 1 --bold '✗')" \
+            "$label" \
+            "$(gum style --foreground 1 "${missing[*]}")"
+        ERRORS=$(( ERRORS + ${#missing[@]} ))
     fi
 }
 
 # ── Tool manager ──────────────────────────────────────────────────────────────
 
-section "Tool manager"
-check_cmd mise
-echo ""
+MISSING=()
+gum spin --spinner pulse --title "  mise" -- sleep 1
+command -v mise &>/dev/null || MISSING+=("mise")
+section_result "Tool manager" "${MISSING[@]}"
 
 # ── CLI tools ─────────────────────────────────────────────────────────────────
 
-section "CLI tools"
+MISSING=()
 for cmd in kubectl helm helmfile sops ansible poetry gum fzf; do
-    check_cmd "$cmd"
+    gum spin --spinner pulse --title "  $cmd" -- sleep 1
+    command -v "$cmd" &>/dev/null || MISSING+=("$cmd")
 done
-echo ""
+section_result "CLI tools" "${MISSING[@]}"
 
 # ── Helm plugins ──────────────────────────────────────────────────────────────
 
-section "Helm plugins"
-
-TMP_PLUGINS=$(mktemp)
-gum spin \
-    --spinner pulse \
-    --title "  Loading Helm plugins..." \
-    -- bash -c "helm plugin list > '$TMP_PLUGINS' 2>/dev/null" || true
-HELM_PLUGINS=$(cat "$TMP_PLUGINS")
-rm -f "$TMP_PLUGINS"
-
+MISSING=()
+HELM_PLUGINS=$(helm plugin list 2>/dev/null || true)
 for plugin in secrets secrets-getter secrets-post-renderer diff; do
-    if echo "$HELM_PLUGINS" | grep -q "^$plugin"; then
-        gum log --level info "helm plugin: $plugin"
-    else
-        gum log --level error "helm plugin: $plugin — not installed"
-        ERRORS=$((ERRORS + 1))
-    fi
+    gum spin --spinner pulse --title "  helm-$plugin" -- sleep 1
+    echo "$HELM_PLUGINS" | grep -q "^$plugin" || MISSING+=("helm-$plugin")
 done
-echo ""
+section_result "Helm plugins" "${MISSING[@]}"
 
 # ── Kubernetes ────────────────────────────────────────────────────────────────
 
-section "Kubernetes"
-
-if ! command -v kubectl &>/dev/null; then
-    gum log --level error "kubectl not found — skipping cluster checks"
-    ERRORS=$((ERRORS + 1))
+MISSING=()
+if command -v kubectl &>/dev/null; then
+    gum spin --spinner pulse --title "  kubernetes" \
+        -- bash -c "kubectl cluster-info &>/dev/null" || MISSING+=("kubernetes")
 else
-    if gum spin \
-        --spinner pulse \
-        --title "  Checking cluster access..." \
-        -- bash -c "kubectl cluster-info &>/dev/null"; then
-        gum log --level info "Cluster is reachable"
-    else
-        gum log --level error "Cannot reach Kubernetes cluster"
-        ERRORS=$((ERRORS + 1))
-    fi
-
-    TMP_VER=$(mktemp)
-    gum spin \
-        --spinner pulse \
-        --title "  Fetching server version..." \
-        -- bash -c "kubectl version -o json > '$TMP_VER' 2>/dev/null" || true
-    KUBE_JSON=$(cat "$TMP_VER")
-    rm -f "$TMP_VER"
-
-    MAJOR=$(echo "$KUBE_JSON" | awk '/"serverVersion"/,/\}/' | grep '"major"' | head -1 | tr -dc '0-9')
-    MINOR=$(echo "$KUBE_JSON" | awk '/"serverVersion"/,/\}/' | grep '"minor"' | head -1 | tr -dc '0-9')
-
-    REQUIRED_MAJOR=1
-    REQUIRED_MINOR=33
-
-    if [ -z "$MAJOR" ] || [ -z "$MINOR" ]; then
-        gum log --level error "Could not determine Kubernetes server version"
-        ERRORS=$((ERRORS + 1))
-    elif [ "$MAJOR" -gt "$REQUIRED_MAJOR" ] || \
-         { [ "$MAJOR" -eq "$REQUIRED_MAJOR" ] && [ "$MINOR" -ge "$REQUIRED_MINOR" ]; }; then
-        gum log --level info "Kubernetes v${MAJOR}.${MINOR}" required=">=${REQUIRED_MAJOR}.${REQUIRED_MINOR}"
-    else
-        gum log --level error "Kubernetes v${MAJOR}.${MINOR} — requires >= ${REQUIRED_MAJOR}.${REQUIRED_MINOR}"
-        ERRORS=$((ERRORS + 1))
-    fi
+    MISSING+=("kubectl")
 fi
+section_result "Kubernetes" "${MISSING[@]}"
 
 echo ""
 
@@ -128,8 +89,10 @@ if [ "$ERRORS" -gt 0 ]; then
     exit 1
 else
     gum style \
-        --border rounded \
+        --border double \
         --border-foreground 2 \
-        --padding "0 2" \
-        "$(gum style --foreground 2 --bold "All checks passed.")"
+        --padding "1 4" \
+        --margin "0 1" \
+        --bold \
+        "$(gum style --foreground 2 --bold "✓  All checks passed. 🎉")"
 fi
