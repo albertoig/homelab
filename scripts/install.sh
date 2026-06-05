@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 source "$SCRIPT_DIR/lib/colors.sh"
+source "$SCRIPT_DIR/lib/header.sh"
 
 if ! command -v gum &>/dev/null; then
     error "gum not found. Run: mise install"
@@ -24,17 +25,7 @@ ENV=$(gum choose \
 # ── Banner ────────────────────────────────────────────────────────────────────
 
 clear
-
-gum style --foreground 212 --bold \
-" ██╗  ██╗ ██████╗ ███╗   ███╗███████╗██╗      █████╗ ██████╗
- ██║  ██║██╔═══██╗████╗ ████║██╔════╝██║     ██╔══██╗██╔══██╗
- ███████║██║   ██║██╔████╔██║█████╗  ██║     ███████║██████╔╝
- ██╔══██║██║   ██║██║╚██╔╝██║██╔══╝  ██║     ██╔══██║██╔══██╗
- ██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗███████╗██║  ██║██████╔╝
- ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝"
-
-gum style --foreground 240 --faint "  kubernetes infrastructure automation"
-echo ""
+show_header
 gum style --foreground 99 "  environment → $(gum style --foreground 212 --bold "$ENV")"
 echo ""
 
