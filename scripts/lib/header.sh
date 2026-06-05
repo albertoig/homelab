@@ -6,6 +6,8 @@ _HEADER_IMAGE="$_HEADER_REPO_ROOT/docs/images/5b1cd5f9-c146-49b0-9a14-91eb4c03e1
 show_header() {
     [[ ! -t 1 ]] && return
     [[ -n "${NO_COLOR:-}" ]] && return
+    [[ -n "${HOMELAB_HEADER_SHOWN:-}" ]] && return
+    export HOMELAB_HEADER_SHOWN=1
 
     if command -v viu &>/dev/null && [[ -f "$_HEADER_IMAGE" ]]; then
         local width
