@@ -40,6 +40,7 @@ echo ""
 
 mkdir -p "$SECRETS_DIR"
 SECRETS_FILE=$(mktemp --suffix=.yaml)
+chmod 600 "$SECRETS_FILE"
 
 cat > "$SECRETS_FILE" <<EOF
 # --- velero ---

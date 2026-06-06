@@ -36,6 +36,7 @@ if [ ! -d "$TEMPLATES_DIR" ] || [ -z "$(ls "$TEMPLATES_DIR"/*.template.yaml 2>/d
 fi
 
 mkdir -p "$SECRETS_DIR"
+TMPDIR="${TMPDIR:-/tmp}"
 
 # --- Helpers ---
 
@@ -137,10 +138,12 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     # --- Check existing secrets ---
     existing_source=""
     if [ -f "$enc_file" ]; then
-        existing_source=$(mktemp "${TMPDIR:-/tmp}/${chart_name}.existing.XXXXXX")
-        if ! sops --decrypt "$enc_file" > "$existing_source" 2>/dev/null; then
-            existing_source=""
-            rm -f "$existing_source" 2>/dev/null
+        _tmp=$(mktemp "$TMPDIR/${chart_name}.existing.XXXXXX")
+        chmod 600 "$_tmp"
+        if sops --decrypt "$enc_file" > "$_tmp" 2>/dev/null; then
+            existing_source="$_tmp"
+        else
+            rm -f "$_tmp"
         fi
     elif [ -f "$secrets_file" ]; then
         existing_source="$secrets_file"
@@ -154,7 +157,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             info "[$chart_name] Skipping."
             echo ""
             # Clean up temp file
-            [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source"
+            [[ "$existing_source" == "$TMPDIR/"* ]] && rm -f "$existing_source"
             continue
         fi
         echo ""
@@ -368,7 +371,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     success "[$chart_name] Created $(basename "$secrets_file")"
 
     # Clean up temporary decrypted file
-    if [[ "$existing_source" == /tmp/* ]] || [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]]; then
+    if [[ "$existing_source" == "$TMPDIR/"* ]]; then
         rm -f "$existing_source"
     fi
 
