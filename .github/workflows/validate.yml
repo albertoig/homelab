@@ -134,4 +134,7 @@ jobs:
           if [ -z "$FROM" ] || [ "$FROM" = "0000000000000000000000000000000000000000" ]; then
             FROM="HEAD~1"
           fi
+          if ! git merge-base --is-ancestor "$FROM" HEAD 2>/dev/null; then
+            FROM="HEAD~1"
+          fi
           npx commitlint --from "$FROM" --to "${{ github.sha }}" --verbose
