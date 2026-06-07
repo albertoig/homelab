@@ -159,7 +159,9 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
 
     # --- Check existing secrets ---
     existing_source=""
+    has_existing=false
     if [ -f "$enc_file" ]; then
+        has_existing=true
         _tmp=$(mktemp "${TMPDIR:-/tmp}/${chart_name}.existing.XXXXXX")
         if sops --decrypt "$enc_file" > "$_tmp" 2>/dev/null; then
             existing_source="$_tmp"
@@ -167,19 +169,26 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             rm -f "$_tmp"
         fi
     elif [ -f "$secrets_file" ]; then
+        has_existing=true
         existing_source="$secrets_file"
     fi
 
-    # --- Ask to overwrite ---
-    if [ -n "$existing_source" ]; then
+    # --- Ask before proceeding — always, for every chart ---
+    if $has_existing; then
         if ! gum confirm --default=false "Secrets already exist for '$chart_name'. Overwrite?"; then
             gum log --level info "Skipped $chart_name."
             echo ""
             [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source" || true
             continue
         fi
-        echo ""
+    else
+        if ! gum confirm "Configure secrets for '$chart_name'?"; then
+            gum log --level info "Skipped $chart_name."
+            echo ""
+            continue
+        fi
     fi
+    echo ""
 
     # --- Phase 1: Parse template into entries ---
     entries=0
