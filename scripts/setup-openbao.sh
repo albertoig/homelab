@@ -1,0 +1,263 @@
+#!/usr/bin/env bash
+# Configure OpenBao after initial helmfile deployment.
+# Idempotent: skips if OpenBao is already initialised and unsealed.
+#
+# Steps performed:
+#   1. Wait for OpenBao pod to be ready
+#   2. Init OpenBao (generates unseal keys + root token)
+#   3. Unseal (3 of 5 keys)
+#   4. Enable KV v2 secrets engine at "secret/"
+#   5. Create read-only ESO policy
+#   6. Create ESO service token
+#   7. Create Kubernetes secret for ESO authentication
+#   8. Apply ClusterSecretStore pointing at OpenBao
+#
+# Usage: ./scripts/setup-openbao.sh
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/colors.sh"
+source "$SCRIPT_DIR/lib/header.sh"
+
+NAMESPACE="openbao-system"
+ESO_NAMESPACE="external-secrets-system"
+POD="openbao-0"
+BAO_ADDR="http://127.0.0.1:8200"
+KV_PATH="secret"
+ESO_POLICY="eso-read"
+ESO_SECRET="openbao-eso-token"
+CSS_NAME="openbao"
+
+# ── Prerequisites ─────────────────────────────────────────────────────────────
+
+if ! command -v gum &>/dev/null; then
+    error "gum not found. Run: mise install"
+    exit 1
+fi
+
+clear
+show_header
+gum style --foreground 99 "  OpenBao post-deploy setup"
+echo ""
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+# Run a bao command inside the pod (unauthenticated)
+kbao() {
+    kubectl exec -n "$NAMESPACE" "$POD" -- env BAO_ADDR="$BAO_ADDR" bao "$@"
+}
+
+# Run a bao command inside the pod authenticated with the root token
+kbao_root() {
+    kubectl exec -n "$NAMESPACE" "$POD" -- env BAO_ADDR="$BAO_ADDR" BAO_TOKEN="$ROOT_TOKEN" bao "$@"
+}
+
+# Extract a field from a JSON string using python
+json_get() {
+    local json="$1" key="$2"
+    echo "$json" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+v = d.get('$key')
+print(str(v).lower() if isinstance(v, bool) else (v if v is not None else ''))
+"
+}
+
+# Extract nested auth.client_token from bao token create JSON
+json_token() {
+    echo "$1" | python3 -c "import sys,json; print(json.load(sys.stdin)['auth']['client_token'])"
+}
+
+# Extract item from a JSON list field
+json_list() {
+    local json="$1" key="$2" idx="$3"
+    echo "$json" | python3 -c "import sys,json; print(json.load(sys.stdin)['$key'][$idx])"
+}
+
+ROOT_TOKEN=""
+
+# ── Step 1: Wait for pod ──────────────────────────────────────────────────────
+
+gum spin --spinner pulse --show-error \
+    --title "  Waiting for $POD to be ready..." \
+    -- kubectl wait pod "$POD" -n "$NAMESPACE" \
+        --for=condition=Ready --timeout=120s
+
+gum log --level info "$POD is ready."
+echo ""
+
+# ── Step 2: Check current state ───────────────────────────────────────────────
+
+STATUS=$(kbao status -format=json 2>/dev/null || true)
+
+if [ -z "$STATUS" ]; then
+    gum log --level error "Could not reach OpenBao inside $POD at $BAO_ADDR."
+    exit 1
+fi
+
+INITIALIZED=$(json_get "$STATUS" initialized)
+SEALED=$(json_get "$STATUS" sealed)
+
+if [ "$INITIALIZED" = "true" ] && [ "$SEALED" = "false" ]; then
+    gum log --level info "OpenBao is already initialised and unsealed — nothing to do."
+    echo ""
+    exit 0
+fi
+
+if [ "$INITIALIZED" = "true" ] && [ "$SEALED" = "true" ]; then
+    gum style \
+        --border rounded --border-foreground 214 --padding "0 2" \
+        "$(gum style --foreground 214 --bold "OpenBao is initialised but sealed.")" \
+        "" \
+        "Unseal manually: kubectl exec -n $NAMESPACE $POD -- bao operator unseal"
+    exit 1
+fi
+
+# ── Step 3: Init ──────────────────────────────────────────────────────────────
+
+gum style --foreground 99 --bold "  Initialising OpenBao (5 shares, threshold 3)..."
+echo ""
+
+INIT_JSON=$(kbao operator init -key-shares=5 -key-threshold=3 -format=json)
+ROOT_TOKEN=$(json_get "$INIT_JSON" root_token)
+
+UNSEAL_KEYS=()
+for i in 0 1 2 3 4; do
+    k=$(json_list "$INIT_JSON" unseal_keys_b64 "$i" 2>/dev/null || true)
+    [ -n "$k" ] && UNSEAL_KEYS+=("$k")
+done
+
+KEY_DISPLAY=""
+for i in "${!UNSEAL_KEYS[@]}"; do
+    KEY_DISPLAY+="Unseal Key $((i+1)): ${UNSEAL_KEYS[$i]}"$'\n'
+done
+
+gum style \
+    --border rounded --border-foreground 1 --padding "1 2" \
+    "$(gum style --foreground 1 --bold "⚠  SAVE THESE NOW — they cannot be recovered")" \
+    "" \
+    "${KEY_DISPLAY}Root Token:  $ROOT_TOKEN"
+
+echo ""
+gum confirm "I have saved the unseal keys and root token securely." || {
+    warn "Aborted. OpenBao is initialised but not unsealed — save the output above and re-run."
+    exit 1
+}
+echo ""
+
+# ── Step 4: Unseal (3 of 5 keys) ─────────────────────────────────────────────
+
+for i in 0 1 2; do
+    gum spin --spinner pulse \
+        --title "  Applying unseal key $((i+1))/3..." \
+        -- kubectl exec -n "$NAMESPACE" "$POD" -- \
+            env BAO_ADDR="$BAO_ADDR" bao operator unseal "${UNSEAL_KEYS[$i]}"
+    gum log --level info "Unseal key $((i+1))/3 accepted."
+done
+
+echo ""
+gum log --level info "OpenBao unsealed."
+echo ""
+
+# ── Step 5: Enable KV v2 ─────────────────────────────────────────────────────
+
+gum spin --spinner pulse --show-error \
+    --title "  Enabling KV v2 at '$KV_PATH/'..." \
+    -- kubectl exec -n "$NAMESPACE" "$POD" -- \
+        env BAO_ADDR="$BAO_ADDR" BAO_TOKEN="$ROOT_TOKEN" \
+        bao secrets enable -path="$KV_PATH" -version=2 kv
+
+gum log --level info "KV v2 enabled at $KV_PATH/."
+echo ""
+
+# ── Step 6: Create ESO read-only policy ──────────────────────────────────────
+
+_policy=$(mktemp /tmp/bao-policy.XXXXXX.hcl)
+chmod 600 "$_policy"
+cat > "$_policy" <<'HCL'
+path "secret/data/*" {
+  capabilities = ["read", "list"]
+}
+path "secret/metadata/*" {
+  capabilities = ["read", "list"]
+}
+HCL
+
+gum spin --spinner pulse --show-error \
+    --title "  Writing policy '$ESO_POLICY'..." \
+    -- bash -c "kubectl exec -i -n '$NAMESPACE' '$POD' -- \
+        env BAO_ADDR='$BAO_ADDR' BAO_TOKEN='$ROOT_TOKEN' \
+        bao policy write '$ESO_POLICY' - < '$_policy'"
+
+rm -f "$_policy"
+gum log --level info "Policy '$ESO_POLICY' created."
+echo ""
+
+# ── Step 7: Create ESO service token ─────────────────────────────────────────
+
+TOKEN_JSON=$(kubectl exec -n "$NAMESPACE" "$POD" -- \
+    env BAO_ADDR="$BAO_ADDR" BAO_TOKEN="$ROOT_TOKEN" \
+    bao token create \
+        -policy="$ESO_POLICY" \
+        -display-name="external-secrets-operator" \
+        -no-default-policy \
+        -orphan \
+        -format=json)
+
+ESO_TOKEN=$(json_token "$TOKEN_JSON")
+gum log --level info "ESO service token created."
+echo ""
+
+# ── Step 8: Kubernetes secret ─────────────────────────────────────────────────
+
+gum spin --spinner pulse --show-error \
+    --title "  Applying secret '$ESO_SECRET' in $ESO_NAMESPACE..." \
+    -- bash -c "kubectl create secret generic '$ESO_SECRET' \
+        --from-literal=token='$ESO_TOKEN' \
+        --namespace '$ESO_NAMESPACE' \
+        --dry-run=client -o yaml | kubectl apply -f -"
+
+gum log --level info "Secret '$ESO_SECRET' applied."
+echo ""
+
+# ── Step 9: ClusterSecretStore ────────────────────────────────────────────────
+
+_css=$(mktemp /tmp/cluster-secret-store.XXXXXX.yaml)
+chmod 600 "$_css"
+cat > "$_css" <<EOF
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: $CSS_NAME
+spec:
+  provider:
+    vault:
+      server: "http://openbao-internal.${NAMESPACE}.svc.cluster.local:8200"
+      path: "$KV_PATH"
+      version: "v2"
+      auth:
+        tokenSecretRef:
+          name: $ESO_SECRET
+          namespace: $ESO_NAMESPACE
+          key: token
+EOF
+
+gum spin --spinner pulse --show-error \
+    --title "  Applying ClusterSecretStore '$CSS_NAME'..." \
+    -- kubectl apply -f "$_css"
+
+rm -f "$_css"
+gum log --level info "ClusterSecretStore '$CSS_NAME' applied."
+echo ""
+
+# ── Done ──────────────────────────────────────────────────────────────────────
+
+gum style \
+    --border rounded --border-foreground 212 \
+    --align center --padding "1 4" --margin "1 2" \
+    "$(gum style --foreground 212 --bold "✓  OpenBao is configured and ready.")" \
+    "" \
+    "KV engine:          $KV_PATH/ (v2)" \
+    "ESO policy:         $ESO_POLICY" \
+    "ClusterSecretStore: $CSS_NAME"

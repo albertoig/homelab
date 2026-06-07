@@ -78,6 +78,10 @@ run = '''
 
 # ── Secrets management ────────────────────────────────────────────────────────
 
+[tasks."openbao:setup"]
+description = "Initialise and configure OpenBao after helmfile deploy"
+run = "./scripts/setup-openbao.sh"
+
 [tasks."secrets:init"]
 description = "Initialise secrets from templates"
 run = "./scripts/init-secrets.sh \"${1:-}\""
