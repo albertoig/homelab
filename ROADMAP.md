@@ -55,7 +55,8 @@ GitOps-driven environment.
 - [ ] Remove empty `dev.yaml` and `prod.yaml` environment stubs — referenced in release files but contain no content
 
 ### P3 — Platform (build on top of this infra)
-- [ ] OpenBao — runtime secret manager with External Secrets Operator to bridge OpenBao → Kubernetes Secrets
+- [x] OpenBao — runtime secret manager with External Secrets Operator to bridge OpenBao → Kubernetes Secrets
+  - Manual steps post-deploy: `bao operator init`, `bao operator unseal` (3×), create ESO policy + token, apply ClusterSecretStore
 - [ ] CloudNativePG — PostgreSQL operator; replaces embedded per-chart Postgres with a managed, reusable database layer
 - [ ] Kyverno — admission policy enforcement; baseline: require resource limits, block root containers, enforce label schemas
 - [ ] Zot or Harbor — container registry for CI-built images

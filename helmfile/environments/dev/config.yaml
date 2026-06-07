@@ -23,3 +23,6 @@ velero:
   prefix: "velero"
   retention: "168h"
   schedule: "0 3 * * *"
+
+openbao:
+  storageSize: 2Gi

@@ -23,3 +23,7 @@ repositories:
     url: https://argoproj.github.io/argo-helm
   - name: vmware-tanzu
     url: https://vmware-tanzu.github.io/helm-charts
+  - name: openbao
+    url: https://openbao.github.io/openbao-helm
+  - name: external-secrets
+    url: https://charts.external-secrets.io

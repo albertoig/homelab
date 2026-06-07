@@ -266,3 +266,35 @@ releases:
       - monitoring-system/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
+
+  # OpenBao - open-source secrets manager (Vault fork)
+  # https://artifacthub.io/packages/helm/openbao/openbao
+  # NOTE: after deploy run: bao operator init && bao operator unseal (3×)
+  - name: openbao
+    namespace: openbao-system
+    createNamespace: true
+    chart: openbao/openbao
+    version: "0.28.3"
+    wait: true
+    labels:
+      app: secrets
+    needs:
+      - longhorn-system/longhorn
+    inherit:
+    - template: values_gotmpl_and_secrets
+
+  # External Secrets Operator - sync secrets from OpenBao → Kubernetes Secrets
+  # https://artifacthub.io/packages/helm/external-secrets-operator/external-secrets
+  # NOTE: create ClusterSecretStore after OpenBao is initialized and unsealed
+  - name: external-secrets
+    namespace: external-secrets-system
+    createNamespace: true
+    chart: external-secrets/external-secrets
+    version: "2.5.0"
+    wait: true
+    labels:
+      app: secrets
+    needs:
+      - openbao-system/openbao
+    inherit:
+    - template: common_values_only

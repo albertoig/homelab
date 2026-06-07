@@ -9,6 +9,9 @@ dependencies:
   - name: authentik
     repository: https://charts.goauthentik.io
     version: 2026.5.2
+  - name: external-secrets
+    repository: https://charts.external-secrets.io
+    version: 2.5.0
   - name: grafana
     repository: https://grafana-community.github.io/helm-charts
     version: 12.4.1
@@ -24,6 +27,9 @@ dependencies:
   - name: metallb
     repository: https://metallb.github.io/metallb
     version: 0.16.1
+  - name: openbao
+    repository: https://openbao.github.io/openbao-helm
+    version: 0.28.3
   - name: pyroscope
     repository: https://grafana.github.io/helm-charts
     version: 2.0.2
@@ -36,5 +42,5 @@ dependencies:
   - name: velero
     repository: https://vmware-tanzu.github.io/helm-charts
     version: 12.0.1
-digest: sha256:be988d8ce3aa280debe5e821054bd9cf498551364bad3cda541e728fc51dabd9
-generated: "2026-05-30T02:39:34.91428533-04:00"
+digest: sha256:55d063eb75898c5938adbaaf5b57714d24d72b15c49a63f3daadc2a0052eec5c
+generated: "2026-06-07T01:25:33.982440941-04:00"

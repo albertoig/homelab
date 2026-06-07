@@ -1,0 +1,59 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+{{- $host := printf "openbao.internal.%s" $cfg.general.root_dns -}}
+# OpenBao configuration
+# https://openbao.github.io/openbao-helm/
+
+server:
+  ha:
+    enabled: false
+
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+
+      listener "tcp" {
+        address     = "[::]:8200"
+        cluster_address = "[::]:8201"
+        tls_disable = 1
+      }
+
+      storage "file" {
+        path = "/vault/data"
+      }
+
+      api_addr     = "http://openbao-internal.openbao-system.svc.cluster.local:8200"
+      cluster_addr = "https://openbao-internal.openbao-system.svc.cluster.local:8201"
+
+  dataStorage:
+    enabled: true
+    size: {{ $cfg.openbao.storageSize }}
+    storageClass: longhorn
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    additionalLabels:
+      release: prometheus-stack
+
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-{{ .Environment.Name }}"
+      external-dns.alpha.kubernetes.io/hostname: "{{ $host }}"
+      external-dns.alpha.kubernetes.io/ttl: "300"
+      external-dns.alpha.kubernetes.io/action: sync
+      external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+      traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    hosts:
+      - host: {{ $host }}
+        paths: []
+    tls:
+      - secretName: openbao-tls
+        hosts:
+          - {{ $host }}
+
+ui:
+  enabled: true
+  serviceType: ClusterIP

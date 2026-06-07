@@ -1,0 +1,8 @@
+# --- openbao ---
+# Populate after: bao operator init
+# Then run: bao operator unseal (3× with distinct keys)
+openbao:
+  # Root token from: bao operator init
+  rootToken: ""
+  # ESO policy token — create after init with read-only policy for ESO
+  esoToken: ""
