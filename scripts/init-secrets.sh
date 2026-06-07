@@ -6,7 +6,7 @@
 # Usage: ./scripts/init-secrets.sh <environment>
 # Example: ./scripts/init-secrets.sh prod
 
-set -e
+set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
 
@@ -100,12 +100,12 @@ find_colon() {
 yaml_lookup() {
     local file="$1"
     local path="$2"
-    python3 -c "
-import yaml, sys
+    YAML_FILE="$file" YAML_PATH="$path" python3 -c "
+import yaml, sys, os
 try:
-    with open('$file') as f:
+    with open(os.environ['YAML_FILE']) as f:
         data = yaml.safe_load(f)
-    keys = '$path'.split('.')
+    keys = os.environ['YAML_PATH'].split('.')
     for k in keys:
         if isinstance(data, dict) and k in data:
             data = data[k]
@@ -137,10 +137,11 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     # --- Check existing secrets ---
     existing_source=""
     if [ -f "$enc_file" ]; then
-        existing_source=$(mktemp "${TMPDIR:-/tmp}/${chart_name}.existing.XXXXXX")
-        if ! sops --decrypt "$enc_file" > "$existing_source" 2>/dev/null; then
-            existing_source=""
-            rm -f "$existing_source" 2>/dev/null
+        _tmp=$(mktemp "${TMPDIR:-/tmp}/${chart_name}.existing.XXXXXX")
+        if sops --decrypt "$enc_file" > "$_tmp" 2>/dev/null; then
+            existing_source="$_tmp"
+        else
+            rm -f "$_tmp"
         fi
     elif [ -f "$secrets_file" ]; then
         existing_source="$secrets_file"
@@ -154,7 +155,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             info "[$chart_name] Skipping."
             echo ""
             # Clean up temp file
-            [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source"
+            [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source" || true
             continue
         fi
         echo ""
@@ -272,7 +273,8 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             printf "    ${_C_YELLOW}%s${_C_RESET}: " "$kp"
         fi
 
-        read -r response
+        read -rs response
+        echo ""
 
         # Use existing value if no new input
         if [ -z "$response" ] && [ -n "$existing" ]; then
@@ -368,9 +370,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     success "[$chart_name] Created $(basename "$secrets_file")"
 
     # Clean up temporary decrypted file
-    if [[ "$existing_source" == /tmp/* ]] || [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]]; then
-        rm -f "$existing_source"
-    fi
+    [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source" || true
 
     unset entry_path entry_desc entry_type entry_indent path_parts responses_key responses_val
 done
@@ -387,6 +387,7 @@ for secrets_file in "$SECRETS_DIR"/*.secrets.yaml; do
 
     info "Encrypting: $(basename "$secrets_file") -> $(basename "$enc_file")"
     if sops --encrypt "$secrets_file" > "$enc_file" 2>/dev/null; then
+        rm -f "$secrets_file"
         success "Created $(basename "$enc_file")"
         TOTAL_ENCRYPTED=$((TOTAL_ENCRYPTED + 1))
     else
