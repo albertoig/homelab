@@ -61,6 +61,10 @@ run = "./metal/k3s/run.sh ${1:-site}"
 description = "Deploy all helmfile releases"
 run = "./scripts/install.sh"
 
+[tasks."helmfile:update-locks"]
+description = "Update helmfile lock files for all environments"
+run = "./scripts/update-locks.sh"
+
 [tasks.destroy]
 description = "Tear down all helmfile releases"
 usage = '''
