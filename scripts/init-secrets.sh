@@ -24,24 +24,9 @@ fi
 
 # --- Environment ---
 
-ENVIRONMENT="${1:-}"
+source "$SCRIPT_DIR/lib/select-env.sh" "${1:-}"
 
-if [ -z "$ENVIRONMENT" ]; then
-    ENVIRONMENT=$(gum choose \
-        --header "Select target environment:" \
-        --cursor "> " \
-        --cursor.foreground 212 \
-        --selected.foreground 212 \
-        --header.foreground 99 \
-        "dev" "prod") || { warn "Aborted."; exit 0; }
-fi
-
-if [ "$ENVIRONMENT" != "dev" ] && [ "$ENVIRONMENT" != "prod" ]; then
-    gum log --level error "Invalid environment '$ENVIRONMENT'. Available: dev, prod"
-    exit 1
-fi
-
-SECRETS_DIR="$HELMFILE_DIR/helmfile/environments/$ENVIRONMENT/secrets"
+SECRETS_DIR="$HELMFILE_DIR/helmfile/environments/$ENV/secrets"
 
 if [ ! -d "$TEMPLATES_DIR" ] || [ -z "$(ls "$TEMPLATES_DIR"/*.template.yaml 2>/dev/null)" ]; then
     gum log --level error "No template files found in $TEMPLATES_DIR"
@@ -54,7 +39,7 @@ mkdir -p "$SECRETS_DIR"
 
 clear
 show_header
-gum style --foreground 99 "  environment → $(gum style --foreground 212 --bold "$ENVIRONMENT")"
+gum style --foreground 99 "  environment → $(gum style --foreground 212 --bold "$ENV")"
 echo ""
 
 # --- Helpers ---
@@ -387,7 +372,7 @@ done
 # --- Encrypt ---
 
 echo ""
-gum style --foreground 99 --bold "  Encrypting secrets for $ENVIRONMENT..."
+gum style --foreground 99 --bold "  Encrypting secrets for $ENV..."
 echo ""
 
 for secrets_file in "$SECRETS_DIR"/*.secrets.yaml; do
@@ -419,5 +404,5 @@ else
         --align center \
         --padding "1 4" \
         --margin "1 2" \
-        "$(gum style --foreground 212 --bold "✓  $TOTAL_ENCRYPTED secret(s) encrypted for $ENVIRONMENT.")"
+        "$(gum style --foreground 212 --bold "✓  $TOTAL_ENCRYPTED secret(s) encrypted for $ENV.")"
 fi

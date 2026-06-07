@@ -14,13 +14,7 @@ fi
 
 # ── Environment selector ──────────────────────────────────────────────────────
 
-ENV=$(gum choose \
-    --header "Select target environment:" \
-    --cursor "> " \
-    --cursor.foreground 212 \
-    --selected.foreground 212 \
-    --header.foreground 99 \
-    "dev" "prod") || { warn "Aborted."; exit 0; }
+source "$SCRIPT_DIR/lib/select-env.sh" "${1:-}"
 
 # ── Banner ────────────────────────────────────────────────────────────────────
 
