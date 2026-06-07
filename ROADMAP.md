@@ -50,6 +50,7 @@ GitOps-driven environment.
 ### P2 — Reliability and completeness
 - [ ] Self-hosted GitHub Actions runner — deploy `actions-runner-controller` to re-enable helmfile lint against real environments without exposing the SOPS key to GitHub
 - [ ] Disaster recovery plan — document how to rebuild the cluster and restore data from scratch
+- [ ] Velero manual backup test — trigger a backup, verify it completes without errors, restore a namespace and confirm data integrity; fix the 10 partial errors seen in initial run
 - [ ] Add preflight validation for empty `root_dns` — helmfile silently generates ingresses with empty hostnames if unset
 - [ ] Remove empty `dev.yaml` and `prod.yaml` environment stubs — referenced in release files but contain no content
 

@@ -46,6 +46,11 @@ terraform/*.tfstate.backup
 terraform/*.tfvars
 !terraform/*.tfvars.example
 
+## TESTS
+reports/
+**/__pycache__/
+**/*.pyc
+
 ## SECRETS
 *.secrets.yaml
 !*.secrets.enc.yaml

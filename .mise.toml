@@ -117,6 +117,35 @@ mise exec -- helmfile --skip-deps -f helmfile.yaml.gotmpl -e prod --state-values
 description = "Lint commit messages with commitlint"
 run = "mise exec -- npx commitlint --edit"
 
+# ── Testing ───────────────────────────────────────────────────────────────────
+
+[tasks.test]
+description = "Run all integration tests"
+usage = '''
+arg "[environment]" help="Target environment" default="dev" {
+  choices "dev" "prod"
+}
+'''
+run = 'ENV="${usage_environment}" poetry run pytest'
+
+[tasks."test:smoke"]
+description = "Run smoke tests (HTTP endpoint checks)"
+usage = '''
+arg "[environment]" help="Target environment" default="dev" {
+  choices "dev" "prod"
+}
+'''
+run = 'ENV="${usage_environment}" poetry run pytest tests/smoke'
+
+[tasks."test:k8s"]
+description = "Run Kubernetes integration tests"
+usage = '''
+arg "[environment]" help="Target environment" default="dev" {
+  choices "dev" "prod"
+}
+'''
+run = 'ENV="${usage_environment}" poetry run pytest tests/k8s'
+
 # ── Cleanup ───────────────────────────────────────────────────────────────────
 
 [tasks.clean]

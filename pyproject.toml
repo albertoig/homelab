@@ -10,6 +10,18 @@ ansible-core = "2.18.6"
 ansible-lint = "26.4.0"
 pre-commit = "3.8.0"
 
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0"
+pytest-html = "^4.0"
+pytest-check = "^2.3"
+requests = "^2.32"
+kubernetes = "^32.0"
+pyyaml = "^6.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--html=reports/test-report.html --self-contained-html -v"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
