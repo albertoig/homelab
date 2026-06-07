@@ -79,8 +79,8 @@ run = '''
 # ── Secrets management ────────────────────────────────────────────────────────
 
 [tasks."secrets:init"]
-description = "Initialise secrets from templates  [env: dev|prod]"
-run = "./scripts/init-secrets.sh \"${1:-dev}\""
+description = "Initialise secrets from templates"
+run = "./scripts/init-secrets.sh \"${1:-}\""
 
 [tasks."secrets:encrypt"]
 description = "Encrypt secrets  [env: dev|prod]  [chart?]"
