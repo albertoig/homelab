@@ -1,48 +1,67 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Initialize secrets for an environment from per-chart template files.
-# Iterates over each secret template, prompts for values, generates .secrets.yaml
-# files, and encrypts them with sops.
+# Iterates over each secret template, prompts for values, generates encrypted
+# secrets files with sops.
 #
-# Usage: ./scripts/init-secrets.sh <environment>
+# Usage: ./scripts/init-secrets.sh [environment]
 # Example: ./scripts/init-secrets.sh prod
 
 set -euo pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/colors.sh"
+source "$SCRIPT_DIR/lib/header.sh"
 
-HELMFILE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+HELMFILE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEMPLATES_DIR="$HELMFILE_DIR/helmfile/secret-templates"
-ENVIRONMENT="${1:-}"
 
-# --- Validation ---
+# --- Gum check ---
 
-if [ -z "$ENVIRONMENT" ]; then
-    error "Usage: $0 <environment>"
-    info "Available environments: dev, prod"
+if ! command -v gum &>/dev/null; then
+    error "gum not found. Run: mise install"
     exit 1
 fi
 
+# --- Environment ---
+
+ENVIRONMENT="${1:-}"
+
+if [ -z "$ENVIRONMENT" ]; then
+    ENVIRONMENT=$(gum choose \
+        --header "Select target environment:" \
+        --cursor "> " \
+        --cursor.foreground 212 \
+        --selected.foreground 212 \
+        --header.foreground 99 \
+        "dev" "prod") || { warn "Aborted."; exit 0; }
+fi
+
 if [ "$ENVIRONMENT" != "dev" ] && [ "$ENVIRONMENT" != "prod" ]; then
-    error "Invalid environment '$ENVIRONMENT'."
-    info "Available environments: dev, prod"
+    gum log --level error "Invalid environment '$ENVIRONMENT'. Available: dev, prod"
     exit 1
 fi
 
 SECRETS_DIR="$HELMFILE_DIR/helmfile/environments/$ENVIRONMENT/secrets"
 
 if [ ! -d "$TEMPLATES_DIR" ] || [ -z "$(ls "$TEMPLATES_DIR"/*.template.yaml 2>/dev/null)" ]; then
-    error "No template files found in $TEMPLATES_DIR"
+    gum log --level error "No template files found in $TEMPLATES_DIR"
     exit 1
 fi
 
 mkdir -p "$SECRETS_DIR"
+
+# --- Header ---
+
+clear
+show_header
+gum style --foreground 99 "  environment → $(gum style --foreground 212 --bold "$ENVIRONMENT")"
+echo ""
 
 # --- Helpers ---
 
 # Escape a value for YAML output: wrap in quotes if it contains special chars
 yaml_value() {
     local val="$1"
-    # Always quote if value matches any YAML special character or whitespace
     local special=':*#{}&!|>%@`[]-?'
     local needs_quote=false
     if [[ "$val" =~ [[:space:]] ]]; then
@@ -81,8 +100,8 @@ build_path() {
 find_colon() {
     local s="$1"
     local in_quote=0
-    local dq=$'\x22'  # double quote
-    local sq=$'\x27'  # single quote
+    local dq=$'\x22'
+    local sq=$'\x27'
     for ((j = 0; j < ${#s}; j++)); do
         local c="${s:$j:1}"
         if [[ "$c" == "$dq" ]] || [[ "$c" == "$sq" ]]; then
@@ -96,7 +115,6 @@ find_colon() {
 }
 
 # Look up a value in a YAML file by dot-separated path (e.g., "authentik.email.from")
-# Uses Python for reliable YAML parsing
 yaml_lookup() {
     local file="$1"
     local path="$2"
@@ -123,9 +141,6 @@ except Exception:
 
 # --- Main ---
 
-header "Initializing secrets for environment: $ENVIRONMENT"
-echo ""
-
 TOTAL_ENCRYPTED=0
 TOTAL_FAILED=0
 
@@ -133,6 +148,14 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     chart_name=$(basename "$template" .template.yaml)
     secrets_file="$SECRETS_DIR/${chart_name}.secrets.yaml"
     enc_file="$SECRETS_DIR/${chart_name}.enc.yaml"
+
+    # Section header
+    gum style \
+        --border normal \
+        --border-foreground 99 \
+        --padding "0 1" \
+        "$(gum style --foreground 212 --bold "$chart_name")"
+    echo ""
 
     # --- Check existing secrets ---
     existing_source=""
@@ -147,14 +170,11 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         existing_source="$secrets_file"
     fi
 
-    # --- Ask to overwrite or proceed ---
+    # --- Ask to overwrite ---
     if [ -n "$existing_source" ]; then
-        echo -e "${_C_CYAN}  [$chart_name]${_C_RESET} Secrets already exist."
-        read -rp "$(echo -e "  ${_C_YELLOW}Overwrite? [y/N] ${_C_RESET}")" confirm
-        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-            info "[$chart_name] Skipping."
+        if ! gum confirm --default=false "Secrets already exist for '$chart_name'. Overwrite?"; then
+            gum log --level info "Skipped $chart_name."
             echo ""
-            # Clean up temp file
             [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source" || true
             continue
         fi
@@ -173,16 +193,13 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     indent_level=0
 
     while IFS= read -r line || [ -n "$line" ]; do
-        # Skip blank lines
         [[ "$line" =~ ^[[:space:]]*$ ]] && { current_desc=""; continue; }
 
-        # Skip section header comments (# --- name ---)
         if [[ "$line" =~ ^[[:space:]]*#[[:space:]]*--- ]]; then
             current_desc=""
             continue
         fi
 
-        # Accumulate comment lines
         if [[ "$line" =~ ^[[:space:]]*# ]]; then
             comment="${line#"${line%%[![:space:]]*}"}"
             comment="${comment#\#}"
@@ -195,15 +212,12 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             continue
         fi
 
-        # Calculate indentation (2 spaces per level)
         leading="${line%%[![:space:]]*}"
         indent_level=$(( ${#leading} / 2 ))
-
         trimmed="${line#"${line%%[![:space:]]*}"}"
         trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
 
         if [[ "$trimmed" == "- \"\"" ]]; then
-            # List item placeholder
             path_parts[$indent_level]="_item"
             p=$(build_path "$indent_level")
             entry_path[$entries]="$p"
@@ -213,7 +227,6 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             entries=$((entries + 1))
             current_desc=""
         else
-            # Key: value line
             colon_pos=$(find_colon "$trimmed")
             if [ "$colon_pos" -gt 0 ]; then
                 key="${trimmed:0:$((colon_pos - 1))}"
@@ -238,10 +251,8 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
 
     # --- Phase 2: Prompt for values ---
 
-    echo -e "${_C_BOLD}${_C_CYAN}  === $chart_name ===${_C_RESET}"
-
     if [ "$entries" -eq 0 ]; then
-        warn "[$chart_name] No secret values found in template."
+        gum log --level warn "No secret fields found in template for $chart_name."
         echo ""
         continue
     fi
@@ -254,29 +265,24 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         desc="${entry_desc[$i]}"
         kp="${entry_path[$i]}"
 
-        # Look up existing value using Python YAML parser
         existing=""
         if [ -n "$existing_source" ]; then
             existing=$(yaml_lookup "$existing_source" "$kp")
         fi
 
-        # Display description and example
         if [ -n "$desc" ]; then
-            echo ""
-            echo -e "    ${_C_BLUE}${desc}${_C_RESET}"
+            gum style --foreground 240 --faint "  $desc"
         fi
 
-        # Prompt
-        if [ -n "$existing" ]; then
-            printf "    ${_C_YELLOW}%s${_C_RESET} [%s]: " "$kp" "$existing"
-        else
-            printf "    ${_C_YELLOW}%s${_C_RESET}: " "$kp"
-        fi
+        placeholder=""
+        [ -n "$existing" ] && placeholder="(press enter to keep existing)"
 
-        read -rs response
-        echo ""
+        response=$(gum input \
+            --password \
+            --prompt "  $(gum style --foreground 214 "$kp"): " \
+            --placeholder "$placeholder" \
+            --width 60) || { warn "Aborted."; exit 0; }
 
-        # Use existing value if no new input
         if [ -z "$response" ] && [ -n "$existing" ]; then
             response="$existing"
         fi
@@ -297,34 +303,29 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         indent_level=0
 
         while IFS= read -r line || [ -n "$line" ]; do
-            # Blank lines
             if [[ "$line" =~ ^[[:space:]]*$ ]]; then
                 echo ""
                 current_desc=""
                 continue
             fi
 
-            # Pass through section header comments
             if [[ "$line" =~ ^[[:space:]]*#[[:space:]]*--- ]]; then
                 echo "$line"
                 current_desc=""
                 continue
             fi
 
-            # Pass through comments (strip trailing spaces only)
             if [[ "$line" =~ ^[[:space:]]*# ]]; then
                 echo "$line"
                 continue
             fi
 
-            # YAML content line
             leading="${line%%[![:space:]]*}"
             indent_level=$(( ${#leading} / 2 ))
             trimmed="${line#"${line%%[![:space:]]*}"}"
             trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
 
             if [[ "$trimmed" == "- \"\"" ]]; then
-                # List item — look up response by path
                 p=$(build_path "$indent_level")
                 found=false
                 for ((r = 0; r < rcount; r++)); do
@@ -336,7 +337,6 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
                 done
                 if ! $found; then echo "$line"; fi
             else
-                # Key: value line
                 colon_pos=$(find_colon "$trimmed")
                 if [ "$colon_pos" -gt 0 ]; then
                     key="${trimmed:0:$((colon_pos - 1))}"
@@ -367,7 +367,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         done < "$template"
     } > "$secrets_file"
 
-    success "[$chart_name] Created $(basename "$secrets_file")"
+    gum log --level info "Generated $(basename "$secrets_file")"
 
     # Clean up temporary decrypted file
     [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source" || true
@@ -375,30 +375,40 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     unset entry_path entry_desc entry_type entry_indent path_parts responses_key responses_val
 done
 
-# --- Encrypt all .secrets.yaml files ---
+# --- Encrypt ---
 
 echo ""
-header "Encrypting secrets for $ENVIRONMENT"
+gum style --foreground 99 --bold "  Encrypting secrets for $ENVIRONMENT..."
+echo ""
 
 for secrets_file in "$SECRETS_DIR"/*.secrets.yaml; do
     [ -f "$secrets_file" ] || continue
     chart_name=$(basename "$secrets_file" .secrets.yaml)
     enc_file="$SECRETS_DIR/${chart_name}.enc.yaml"
 
-    info "Encrypting: $(basename "$secrets_file") -> $(basename "$enc_file")"
-    if sops --encrypt "$secrets_file" > "$enc_file" 2>/dev/null; then
+    if SOPS_IN="$secrets_file" SOPS_OUT="$enc_file" gum spin \
+        --spinner pulse \
+        --show-error \
+        --title "  $(basename "$secrets_file") → $(basename "$enc_file")" \
+        -- bash -c 'sops --encrypt "$SOPS_IN" > "$SOPS_OUT"'; then
         rm -f "$secrets_file"
-        success "Created $(basename "$enc_file")"
+        gum log --level info "Created $(basename "$enc_file")"
         TOTAL_ENCRYPTED=$((TOTAL_ENCRYPTED + 1))
     else
-        error "Failed to encrypt $(basename "$secrets_file")"
+        gum log --level error "Failed to encrypt $(basename "$secrets_file")"
         TOTAL_FAILED=$((TOTAL_FAILED + 1))
     fi
 done
 
 echo ""
 if [ "$TOTAL_FAILED" -gt 0 ]; then
-    warn "Encrypted $TOTAL_ENCRYPTED file(s), $TOTAL_FAILED failed."
+    gum log --level warn "Encrypted $TOTAL_ENCRYPTED file(s), $TOTAL_FAILED failed."
 else
-    success "All $TOTAL_ENCRYPTED secret file(s) encrypted for $ENVIRONMENT."
+    gum style \
+        --border rounded \
+        --border-foreground 212 \
+        --align center \
+        --padding "1 4" \
+        --margin "1 2" \
+        "$(gum style --foreground 212 --bold "✓  $TOTAL_ENCRYPTED secret(s) encrypted for $ENVIRONMENT.")"
 fi
