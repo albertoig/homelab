@@ -1,13 +1,16 @@
 # --- authentik ---
 authentik:
-  # Bootstrap API token for initial setup (generate with: openssl rand -hex 32)
+  # Bootstrap API token for initial setup
+  # @autogen: openssl rand -hex 32
   bootstrap_token: ""
   # Initial admin password for bootstrapping the instance
+  # @autogen: openssl rand -base64 24 | tr -d '=+/'
   bootstrap_password: ""
   # Initial admin email for bootstrapping the instance
   bootstrap_email: ""
 
-  # Secret key for cryptographic operations (generate with: openssl rand -hex 32)
+  # Secret key for cryptographic operations
+  # @autogen: openssl rand -hex 32
   secret_key: ""
   email:
     # Sender address (e.g., "Homelab <homelab@example.com>")
@@ -21,8 +24,10 @@ authentik:
   # PostgreSQL credentials for Authentik's internal database
   postgresql:
     # Database user password
+    # @autogen: openssl rand -base64 24 | tr -d '=+/'
     password: ""
 postgresql:
   auth:
     # PostgreSQL superuser password
+    # @autogen: openssl rand -base64 24 | tr -d '=+/'
     password: ""

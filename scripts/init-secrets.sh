@@ -181,16 +181,23 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     declare -a entry_desc=()
     declare -a entry_type=()
     declare -a entry_indent=()
+    declare -a entry_autogen=()
     declare -a path_parts=()
 
     current_desc=""
+    current_autogen=""
     indent_level=0
 
     while IFS= read -r line || [ -n "$line" ]; do
-        [[ "$line" =~ ^[[:space:]]*$ ]] && { current_desc=""; continue; }
+        if [[ "$line" =~ ^[[:space:]]*$ ]]; then
+            current_desc=""
+            current_autogen=""
+            continue
+        fi
 
         if [[ "$line" =~ ^[[:space:]]*#[[:space:]]*--- ]]; then
             current_desc=""
+            current_autogen=""
             continue
         fi
 
@@ -198,10 +205,15 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             comment="${line#"${line%%[![:space:]]*}"}"
             comment="${comment#\#}"
             comment="${comment#"${comment%%[![:space:]]*}"}"
-            if [ -n "$current_desc" ]; then
-                current_desc="$current_desc $comment"
+            if [[ "$comment" == @autogen:* ]]; then
+                current_autogen="${comment#@autogen:}"
+                current_autogen="${current_autogen#"${current_autogen%%[![:space:]]*}"}"
             else
-                current_desc="$comment"
+                if [ -n "$current_desc" ]; then
+                    current_desc="$current_desc $comment"
+                else
+                    current_desc="$comment"
+                fi
             fi
             continue
         fi
@@ -218,8 +230,10 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             entry_desc[$entries]="$current_desc"
             entry_type[$entries]="list_item"
             entry_indent[$entries]=$indent_level
+            entry_autogen[$entries]="$current_autogen"
             entries=$((entries + 1))
             current_desc=""
+            current_autogen=""
         else
             colon_pos=$(find_colon "$trimmed")
             if [ "$colon_pos" -gt 0 ]; then
@@ -236,9 +250,11 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
                     entry_desc[$entries]="$current_desc"
                     entry_type[$entries]="value"
                     entry_indent[$entries]=$indent_level
+                    entry_autogen[$entries]="$current_autogen"
                     entries=$((entries + 1))
                 fi
                 current_desc=""
+                current_autogen=""
             fi
         fi
     done < "$template"
@@ -258,6 +274,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     for ((i = 0; i < entries; i++)); do
         desc="${entry_desc[$i]}"
         kp="${entry_path[$i]}"
+        autogen="${entry_autogen[$i]:-}"
 
         existing=""
         if [ -n "$existing_source" ]; then
@@ -268,14 +285,30 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             gum style --foreground 240 --faint "  $desc"
         fi
 
-        placeholder=""
-        [ -n "$existing" ] && placeholder="(press enter to keep existing)"
+        response=""
 
-        response=$(gum input \
-            --password \
-            --prompt "  $(gum style --foreground 214 "$kp"): " \
-            --placeholder "$placeholder" \
-            --width 60) || { warn "Aborted."; exit 0; }
+        if [ -n "$autogen" ]; then
+            if gum confirm --default=true "  Auto-generate $(gum style --foreground 214 "$kp")?"; then
+                response=$(eval "$autogen")
+                gum log --level info "Auto-generated $kp"
+            else
+                placeholder=""
+                [ -n "$existing" ] && placeholder="(press enter to keep existing)"
+                response=$(gum input \
+                    --password \
+                    --prompt "  $(gum style --foreground 214 "$kp"): " \
+                    --placeholder "$placeholder" \
+                    --width 60) || { warn "Aborted."; exit 0; }
+            fi
+        else
+            placeholder=""
+            [ -n "$existing" ] && placeholder="(press enter to keep existing)"
+            response=$(gum input \
+                --password \
+                --prompt "  $(gum style --foreground 214 "$kp"): " \
+                --placeholder "$placeholder" \
+                --width 60) || { warn "Aborted."; exit 0; }
+        fi
 
         if [ -z "$response" ] && [ -n "$existing" ]; then
             response="$existing"
@@ -366,7 +399,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     # Clean up temporary decrypted file
     [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source" || true
 
-    unset entry_path entry_desc entry_type entry_indent path_parts responses_key responses_val
+    unset entry_path entry_desc entry_type entry_indent entry_autogen path_parts responses_key responses_val
 done
 
 # --- Encrypt ---
