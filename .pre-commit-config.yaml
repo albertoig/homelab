@@ -29,6 +29,12 @@ repos:
         files: ^charts/
         pass_filenames: false
         args: ["-c", "for chart in charts/*/; do helm lint \"$chart\" || exit 1; done"]
+      - id: shellspec
+        name: Shell BDD Tests
+        entry: mise exec -- shellspec
+        language: system
+        files: ^(scripts/|spec/)
+        pass_filenames: false
       - id: helmfile-lint
         name: helmfile-lint
         entry: mise exec -- bash
