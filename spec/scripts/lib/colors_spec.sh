@@ -120,90 +120,75 @@ Describe 'scripts/lib/colors.sh'
     End
   End
 
-  # ── No-color detection ───────────────────────────────────────────────────────
-
-  Describe 'no-color detection'
-    Describe 'when stdout is not a terminal'
-      It 'sets _NO_COLOR to 1'
-        When call get_var _NO_COLOR
-        The output should eq "1"
-      End
-
-      It 'sets all ANSI color variables to empty strings'
-        check_ansi_empty() {
-          source "scripts/lib/colors.sh"
-          printf '%s' "${_C_RED}${_C_GREEN}${_C_BLUE}${_C_YELLOW}${_C_MAGENTA}${_C_CYAN}${_C_BOLD}${_C_RESET}"
-        }
-        When call check_ansi_empty
-        The output should eq ""
-      End
-    End
-
-    Describe 'when NO_COLOR env var is set'
-      It 'sets _NO_COLOR to 1'
-        check_no_color_env() {
-          NO_COLOR=1
-          source "scripts/lib/colors.sh"
-          printf '%s' "$_NO_COLOR"
-        }
-        When call check_no_color_env
-        The output should eq "1"
-      End
-
-      It 'sets ANSI color variables to empty strings'
-        check_ansi_no_color() {
-          NO_COLOR=1
-          source "scripts/lib/colors.sh"
-          printf '%s' "${_C_RED}${_C_BOLD}${_C_RESET}"
-        }
-        When call check_ansi_no_color
-        The output should eq ""
-      End
-    End
-  End
-
   # ── Log functions ────────────────────────────────────────────────────────────
-  # Tests run in non-TTY context so ANSI vars are always empty — output is plain text.
 
   Describe 'log functions'
-    It 'info outputs [INFO] and the message'
+    It 'info calls gum log with level info'
+      Mock gum
+        echo "$@"
+      End
       When call call_log info "something happened"
-      The output should eq "  [INFO] something happened"
+      The output should include "--level info"
+      The output should include "something happened"
     End
 
-    It 'success outputs [OK] and the message'
-      When call call_log success "all good"
-      The output should eq "  [OK] all good"
-    End
-
-    It 'error outputs [ERROR] and the message'
-      When call call_log error "something broke"
-      The output should eq "  [ERROR] something broke"
-    End
-
-    It 'warn outputs [WARN] and the message'
+    It 'warn calls gum log with level warn'
+      Mock gum
+        echo "$@"
+      End
       When call call_log warn "be careful"
-      The output should eq "  [WARN] be careful"
+      The output should include "--level warn"
+      The output should include "be careful"
     End
 
-    It 'step outputs [N/M] and the message'
+    It 'error calls gum log with level error'
+      Mock gum
+        echo "$@"
+      End
+      When call call_log error "something broke"
+      The output should include "--level error"
+      The output should include "something broke"
+    End
+
+    It 'success calls gum log with level info and a check prefix'
+      Mock gum
+        echo "$@"
+      End
+      When call call_log success "all good"
+      The output should include "--level info"
+      The output should include "all good"
+    End
+
+    It 'step renders [N/M] label via gum style'
+      Mock gum
+        echo "$@"
+      End
       When call call_log step 2 5 "running step"
-      The output should eq "  [2/5] running step"
+      The output should include "[2/5]"
+      The output should include "running step"
     End
 
-    It 'header wraps the message with === markers'
+    It 'header wraps text in === markers via gum style'
+      Mock gum
+        echo "$@"
+      End
       When call call_log header "My Section"
-      The output should eq "=== My Section ==="
+      The output should include "=== My Section ==="
+      The output should include "--bold"
     End
 
-    It 'msg outputs text as-is'
+    It 'msg outputs text as-is without gum'
       When call call_log msg "plain text"
       The output should eq "plain text"
     End
 
-    It 'bold outputs text'
+    It 'bold calls gum_primary with --bold flag'
+      Mock gum
+        echo "$@"
+      End
       When call call_log bold "bold text"
-      The output should eq "bold text"
+      The output should include "--bold"
+      The output should include "bold text"
     End
   End
 End

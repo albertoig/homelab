@@ -36,8 +36,7 @@ warn "⚠️  WARNING: This will delete ALL PersistentVolumes and permanent stor
 echo ""
 
 # Confirm destruction
-read -rp "$(echo -e "${_C_YELLOW}  Are you sure you want to destroy the '${ENVIRONMENT}' environment? This is irreversible and will delete all data. [y/N] ${_C_RESET}")" confirm
-if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+if ! gum confirm --default=false "Destroy the '$ENVIRONMENT' environment? This is irreversible and will delete all data."; then
     warn "Aborted."
     exit 0
 fi
