@@ -16,9 +16,9 @@ else
     ENV=$(gum choose \
         --header "Select target environment:" \
         --cursor "> " \
-        --cursor.foreground 212 \
-        --selected.foreground 212 \
-        --header.foreground 99 \
+        --cursor.foreground "$GUM_PRIMARY" \
+        --selected.foreground "$GUM_PRIMARY" \
+        --header.foreground "$GUM_SECONDARY" \
         "dev" "prod") || { warn "Aborted."; exit 0; }
 fi
 

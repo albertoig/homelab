@@ -39,7 +39,7 @@ mkdir -p "$SECRETS_DIR"
 
 clear
 show_header
-gum style --foreground 99 "  environment → $(gum style --foreground 212 --bold "$ENV")"
+gum_secondary "  environment → $(gum_primary --bold "$ENV")"
 echo ""
 
 # --- Helpers ---
@@ -59,9 +59,9 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     # Section header
     gum style \
         --border normal \
-        --border-foreground 99 \
+        --border-foreground "$GUM_SECONDARY" \
         --padding "0 1" \
-        "$(gum style --foreground 212 --bold "$chart_name")"
+        "$(gum_primary --bold "$chart_name")"
     echo ""
 
     # --- Check existing secrets ---
@@ -204,13 +204,13 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         fi
 
         if [ -n "$desc" ]; then
-            gum style --foreground 240 --faint "  $desc"
+            gum_muted "  $desc"
         fi
 
         response=""
 
         if [ -n "$autogen" ]; then
-            if gum confirm --default=true "  Auto-generate $(gum style --foreground 214 "$kp")?"; then
+            if gum confirm --default=true "  Auto-generate $(gum_accent "$kp")?"; then
                 response=$(eval "$autogen")
                 gum log --level info "Auto-generated $kp"
             else
@@ -218,7 +218,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
                 [ -n "$existing" ] && placeholder="(press enter to keep existing)"
                 response=$(gum input \
                     --password \
-                    --prompt "  $(gum style --foreground 214 "$kp"): " \
+                    --prompt "  $(gum_accent "$kp"): " \
                     --placeholder "$placeholder" \
                     --width 60) || { warn "Aborted."; exit 0; }
             fi
@@ -227,7 +227,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             [ -n "$existing" ] && placeholder="(press enter to keep existing)"
             response=$(gum input \
                 --password \
-                --prompt "  $(gum style --foreground 214 "$kp"): " \
+                --prompt "  $(gum_accent "$kp"): " \
                 --placeholder "$placeholder" \
                 --width 60) || { warn "Aborted."; exit 0; }
         fi
@@ -327,7 +327,7 @@ done
 # --- Encrypt ---
 
 echo ""
-gum style --foreground 99 --bold "  Encrypting secrets for $ENV..."
+gum_secondary --bold "  Encrypting secrets for $ENV..."
 echo ""
 
 for secrets_file in "$SECRETS_DIR"/*.secrets.yaml; do
@@ -355,9 +355,9 @@ if [ "$TOTAL_FAILED" -gt 0 ]; then
 else
     gum style \
         --border rounded \
-        --border-foreground 212 \
+        --border-foreground "$GUM_PRIMARY" \
         --align center \
         --padding "1 4" \
         --margin "1 2" \
-        "$(gum style --foreground 212 --bold "✓  $TOTAL_ENCRYPTED secret(s) encrypted for $ENV.")"
+        "$(gum_primary --bold "✓  $TOTAL_ENCRYPTED secret(s) encrypted for $ENV.")"
 fi

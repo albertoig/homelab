@@ -38,7 +38,7 @@ fi
 
 clear
 show_header
-gum style --foreground 99 "  OpenBao post-deploy setup"
+gum_secondary "  OpenBao post-deploy setup"
 echo ""
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -107,8 +107,8 @@ fi
 
 if [ "$INITIALIZED" = "true" ] && [ "$SEALED" = "true" ]; then
     gum style \
-        --border rounded --border-foreground 214 --padding "0 2" \
-        "$(gum style --foreground 214 --bold "OpenBao is initialised but sealed.")" \
+        --border rounded --border-foreground "$GUM_ACCENT" --padding "0 2" \
+        "$(gum_accent --bold "OpenBao is initialised but sealed.")" \
         "" \
         "Unseal manually: kubectl exec -n $NAMESPACE $POD -- bao operator unseal"
     exit 1
@@ -116,7 +116,7 @@ fi
 
 # ── Step 3: Init ──────────────────────────────────────────────────────────────
 
-gum style --foreground 99 --bold "  Initialising OpenBao (5 shares, threshold 3)..."
+gum_secondary --bold "  Initialising OpenBao (5 shares, threshold 3)..."
 echo ""
 
 INIT_JSON=$(kbao operator init -key-shares=5 -key-threshold=3 -format=json)
@@ -134,8 +134,8 @@ for i in "${!UNSEAL_KEYS[@]}"; do
 done
 
 gum style \
-    --border rounded --border-foreground 1 --padding "1 2" \
-    "$(gum style --foreground 1 --bold "⚠  SAVE THESE NOW — they cannot be recovered")" \
+    --border rounded --border-foreground "$GUM_ERROR" --padding "1 2" \
+    "$(gum_error --bold "⚠  SAVE THESE NOW — they cannot be recovered")" \
     "" \
     "${KEY_DISPLAY}Root Token:  $ROOT_TOKEN"
 
@@ -254,9 +254,9 @@ echo ""
 # ── Done ──────────────────────────────────────────────────────────────────────
 
 gum style \
-    --border rounded --border-foreground 212 \
+    --border rounded --border-foreground "$GUM_PRIMARY" \
     --align center --padding "1 4" --margin "1 2" \
-    "$(gum style --foreground 212 --bold "✓  OpenBao is configured and ready.")" \
+    "$(gum_primary --bold "✓  OpenBao is configured and ready.")" \
     "" \
     "KV engine:          $KV_PATH/ (v2)" \
     "ESO policy:         $ESO_POLICY" \

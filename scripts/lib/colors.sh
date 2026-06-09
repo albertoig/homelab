@@ -1,18 +1,19 @@
 #!/bin/bash
 # Shared color library for homelab scripts
-# Source this file from other scripts: source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
+# Source this file from other scripts: source "$(dirname "${BASH_SOURCE[0]}")/../lib/colors.sh"
 
-# Disable colors if stdout is not a terminal
+# ── No-color detection ────────────────────────────────────────────────────────
+
 if [[ ! -t 1 ]]; then
     _NO_COLOR=1
 fi
 
-# Disable colors if NO_COLOR env var is set (https://no-color.org/)
 if [[ -n "${NO_COLOR:-}" ]]; then
     _NO_COLOR=1
 fi
 
-# Color variables
+# ── ANSI palette (used by info/warn/error/etc.) ───────────────────────────────
+
 if [[ -z "${_NO_COLOR:-}" ]]; then
     _C_RESET='\033[0m'
     _C_BOLD='\033[1m'
@@ -32,6 +33,28 @@ else
     _C_MAGENTA=''
     _C_CYAN=''
 fi
+
+# ── Gum palette (256-color codes for --foreground / --border-foreground) ──────
+
+GUM_PRIMARY=212     # pink   — main accent, env labels, success boxes
+GUM_SECONDARY=99    # purple — section headers, box borders
+GUM_ACCENT=214      # orange — prompts, highlighted keys, warnings
+GUM_SUCCESS=2       # green  — success borders and checkmarks
+GUM_ERROR=1         # red    — error borders, failure marks
+GUM_MUTED=240       # gray   — faint descriptions, subtitles
+
+# ── Gum inline-text helpers ───────────────────────────────────────────────────
+# Usage: gum_primary --bold "some text"
+#        gum_secondary "Environment: $ENV"
+
+gum_primary()   { gum style --foreground "$GUM_PRIMARY"   "$@"; }
+gum_secondary() { gum style --foreground "$GUM_SECONDARY" "$@"; }
+gum_accent()    { gum style --foreground "$GUM_ACCENT"    "$@"; }
+gum_muted()     { gum style --foreground "$GUM_MUTED" --faint "$@"; }
+gum_success()   { gum style --foreground "$GUM_SUCCESS"   "$@"; }
+gum_error()     { gum style --foreground "$GUM_ERROR"     "$@"; }
+
+# ── Shell log functions ───────────────────────────────────────────────────────
 
 info() {
     echo -e "  ${_C_BLUE}[INFO]${_C_RESET} $*"

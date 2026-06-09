@@ -25,7 +25,7 @@ fi
 show_header
 
 gum style \
-    --foreground 99 \
+    --foreground "$GUM_SECONDARY" \
     --bold \
     --padding "1 2" \
     --margin "0 1" \
@@ -42,14 +42,14 @@ section_result() {
     local missing=("${@:2}")
     local line
     if [ ${#missing[@]} -eq 0 ]; then
-        printf "  %s  %s\n" "$(gum style --foreground 2 --bold '✓')" "$label"
-        line="$(printf "  %s  %s" "$(gum style --foreground 2 --bold '✓')" "$label")"
+        printf "  %s  %s\n" "$(gum_success --bold '✓')" "$label"
+        line="$(printf "  %s  %s" "$(gum_success --bold '✓')" "$label")"
     else
         printf "  %s  %s — missing: %s\n" \
-            "$(gum style --foreground 1 --bold '✗')" \
+            "$(gum_error --bold '✗')" \
             "$label" \
-            "$(gum style --foreground 1 "${missing[*]}")"
-        line="$(printf "  %s  %s" "$(gum style --foreground 1 --bold '✗')" "$label")"
+            "$(gum_error "${missing[*]}")"
+        line="$(printf "  %s  %s" "$(gum_error --bold '✗')" "$label")"
         ERRORS=$(( ERRORS + ${#missing[@]} ))
     fi
     TOOLS_BOX_LINES="${TOOLS_BOX_LINES:+${TOOLS_BOX_LINES}$'\n'}${line}"
@@ -105,9 +105,9 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         enc="$ROOT_DIR/helmfile/environments/$env/secrets/${chart}.enc.yaml"
         gum spin --spinner pulse --padding="0 0 0 2" --title "  $env / $chart" -- sleep 0.5
         if [ -f "$enc" ]; then
-            line="$(printf "  %s  %s" "$(gum style --foreground 2 --bold '✓')" "$env / $chart")"
+            line="$(printf "  %s  %s" "$(gum_success --bold '✓')" "$env / $chart")"
         else
-            line="$(printf "  %s  %s" "$(gum style --foreground 1 --bold '✗')" "$env / $chart")"
+            line="$(printf "  %s  %s" "$(gum_error --bold '✗')" "$env / $chart")"
             ERRORS=$((ERRORS + 1))
         fi
         SECRETS_BOX_LINES="${SECRETS_BOX_LINES:+${SECRETS_BOX_LINES}$'\n'}${line}"
@@ -120,17 +120,17 @@ echo ""
 
 TOOLS_BOX=$(gum style \
     --border rounded \
-    --border-foreground 99 \
+    --border-foreground "$GUM_SECONDARY" \
     --padding "1 2" \
-    "$(gum style --foreground 99 --bold 'Tools')" \
+    "$(gum_secondary --bold 'Tools')" \
     "" \
     "$TOOLS_BOX_LINES")
 
 SECRETS_BOX=$(gum style \
     --border rounded \
-    --border-foreground 99 \
+    --border-foreground "$GUM_SECONDARY" \
     --padding "1 2" \
-    "$(gum style --foreground 99 --bold 'Secrets')" \
+    "$(gum_secondary --bold 'Secrets')" \
     "" \
     "$SECRETS_BOX_LINES")
 
@@ -142,16 +142,16 @@ echo ""
 if [ "$ERRORS" -gt 0 ]; then
     gum style \
         --border rounded \
-        --border-foreground 1 \
+        --border-foreground "$GUM_ERROR" \
         --padding "0 2" \
-        "$(gum style --foreground 1 --bold "$ERRORS check(s) failed.") Run: mise install"
+        "$(gum_error --bold "$ERRORS check(s) failed.") Run: mise install"
     exit 1
 else
     gum style \
         --border double \
-        --border-foreground 2 \
+        --border-foreground "$GUM_SUCCESS" \
         --padding "1 4" \
         --margin "0 1" \
         --bold \
-        "$(gum style --foreground 2 --bold "✓  All checks passed. 🎉")"
+        "$(gum_success --bold "✓  All checks passed. 🎉")"
 fi
