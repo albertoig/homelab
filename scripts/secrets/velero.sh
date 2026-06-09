@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/colors.sh"
 
-HELMFILE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+HELMFILE_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 ENV="${1:-}"
 
 if [[ -z "$ENV" ]]; then
@@ -19,7 +19,7 @@ if [[ ! -d "$HELMFILE_DIR/helmfile/environments/$ENV" ]]; then
     exit 1
 fi
 
-. "$(dirname "$0")/lib/terraform-env.sh"
+. "$(dirname "$0")/../lib/terraform-env.sh"
 
 # --- Extract Terraform outputs ---
 

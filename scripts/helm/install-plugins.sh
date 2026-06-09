@@ -1,10 +1,10 @@
 #!/bin/bash
 # Install required Helm plugins (idempotent — skips already-installed plugins)
-# Usage: ./scripts/install-helm-plugins.sh
+# Usage: ./scripts/helm/install-plugins.sh
 
 set -e
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/colors.sh"
 
 install_plugin() {
     local name="$1"

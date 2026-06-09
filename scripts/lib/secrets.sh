@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# YAML helper functions for init-secrets.sh.
+# YAML helper functions for secrets scripts.
 # Source this file; do not execute directly.
 
 # Escape a value for YAML output: wrap in quotes if it contains special chars

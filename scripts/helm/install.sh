@@ -2,10 +2,10 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-source "$SCRIPT_DIR/lib/colors.sh"
-source "$SCRIPT_DIR/lib/header.sh"
+source "$SCRIPT_DIR/../lib/colors.sh"
+source "$SCRIPT_DIR/../lib/header.sh"
 
 if ! command -v gum &>/dev/null; then
     error "gum not found. Run: mise install"
@@ -14,7 +14,7 @@ fi
 
 # ── Environment selector ──────────────────────────────────────────────────────
 
-source "$SCRIPT_DIR/lib/select-env.sh" "${1:-}"
+source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
 
 # ── Banner ────────────────────────────────────────────────────────────────────
 
@@ -25,7 +25,7 @@ echo ""
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
 
-"$SCRIPT_DIR/check.sh" "$ENV"
+"$SCRIPT_DIR/../infra/check.sh" "$ENV"
 echo ""
 
 # ── Confirm ───────────────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
     step 1 2 "Infrastructure (Terraform)"
     echo ""
 
-    . "$SCRIPT_DIR/lib/terraform-env.sh"
+    . "$SCRIPT_DIR/../lib/terraform-env.sh"
 
     TF_PLAN=$(mktemp --suffix=.tfplan)
     trap "rm -f $TF_PLAN" EXIT
@@ -142,7 +142,7 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
         --spinner pulse \
         --show-error \
         --title "  Writing Velero secrets..." \
-        -- "$SCRIPT_DIR/velero-secrets.sh" "$ENV"
+        -- "$SCRIPT_DIR/../secrets/velero.sh" "$ENV"
 
     gum log --level info "Velero secrets updated."
     echo ""

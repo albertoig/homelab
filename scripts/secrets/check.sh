@@ -3,9 +3,9 @@
 # Usage: ./scripts/check-secrets.sh [environment]
 # If no environment is given, checks all environments.
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/colors.sh"
 
-HELMFILE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+HELMFILE_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 TEMPLATES_DIR="$HELMFILE_DIR/helmfile/secret-templates"
 ENVS_DIR="$HELMFILE_DIR/helmfile/environments"
 

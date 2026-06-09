@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Unified prerequisites + Kubernetes check
-# Usage: ./scripts/check.sh
+# Usage: ./scripts/infra/check.sh
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 TARGET_ENV="${1:-}"
 ENVS=()
@@ -14,8 +14,8 @@ else
     ENVS=("dev" "prod")
 fi
 
-source "$SCRIPT_DIR/lib/colors.sh"
-source "$SCRIPT_DIR/lib/header.sh"
+source "$SCRIPT_DIR/../lib/colors.sh"
+source "$SCRIPT_DIR/../lib/header.sh"
 
 if ! command -v gum &>/dev/null; then
     error "gum not found. Run: mise install"

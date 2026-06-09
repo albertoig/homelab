@@ -3,16 +3,16 @@
 # Iterates over each secret template, prompts for values, generates encrypted
 # secrets files with sops.
 #
-# Usage: ./scripts/init-secrets.sh [environment]
-# Example: ./scripts/init-secrets.sh prod
+# Usage: ./scripts/secrets/init.sh [environment]
+# Example: ./scripts/secrets/init.sh prod
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/lib/colors.sh"
-source "$SCRIPT_DIR/lib/header.sh"
+source "$SCRIPT_DIR/../lib/colors.sh"
+source "$SCRIPT_DIR/../lib/header.sh"
 
-HELMFILE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+HELMFILE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 TEMPLATES_DIR="$HELMFILE_DIR/helmfile/secret-templates"
 
 # --- Gum check ---
@@ -24,7 +24,7 @@ fi
 
 # --- Environment ---
 
-source "$SCRIPT_DIR/lib/select-env.sh" "${1:-}"
+source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
 
 SECRETS_DIR="$HELMFILE_DIR/helmfile/environments/$ENV/secrets"
 
@@ -44,7 +44,7 @@ echo ""
 
 # --- Helpers ---
 
-source "$SCRIPT_DIR/lib/secrets-helpers.sh"
+source "$SCRIPT_DIR/../lib/secrets.sh"
 
 # --- Main ---
 

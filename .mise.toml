@@ -40,7 +40,7 @@ run = """
 mise install
 poetry install
 npm install
-./scripts/install-helm-plugins.sh
+./scripts/helm/install-plugins.sh
 poetry run pre-commit install
 poetry run pre-commit install --hook-type commit-msg
 terraform -chdir=terraform init
@@ -50,7 +50,7 @@ terraform -chdir=terraform init
 
 [tasks.check]
 description = "Validate tools, Helm plugins, and Kubernetes cluster access"
-run = "./scripts/check.sh"
+run = "./scripts/infra/check.sh"
 
 # ── Cluster provisioning ──────────────────────────────────────────────────────
 
@@ -62,11 +62,11 @@ run = "./metal/k3s/run.sh ${1:-site}"
 
 [tasks.install]
 description = "Deploy all helmfile releases"
-run = "./scripts/install.sh"
+run = "./scripts/helm/install.sh"
 
 [tasks."helmfile:update-locks"]
 description = "Update helmfile lock files for all environments"
-run = "./scripts/update-locks.sh"
+run = "./scripts/helm/update-locks.sh"
 
 [tasks.destroy]
 description = "Tear down all helmfile releases"
@@ -76,30 +76,30 @@ arg "<environment>" help="Target environment" {
 }
 '''
 run = '''
-./scripts/destroy.sh "${usage_environment?}"
+./scripts/helm/destroy.sh "${usage_environment?}"
 '''
 
 # ── Secrets management ────────────────────────────────────────────────────────
 
 [tasks."openbao:setup"]
 description = "Initialise and configure OpenBao after helmfile deploy"
-run = "./scripts/setup-openbao.sh"
+run = "./scripts/apps/setup-openbao.sh"
 
 [tasks."secrets:init"]
 description = "Initialise secrets from templates"
-run = "./scripts/init-secrets.sh \"${1:-}\""
+run = "./scripts/secrets/init.sh \"${1:-}\""
 
 [tasks."secrets:encrypt"]
 description = "Encrypt secrets  [env: dev|prod]  [chart?]"
-run = "./scripts/sops-encrypt-secrets.sh \"${1:-dev}\" \"${2:-}\""
+run = "./scripts/secrets/encrypt.sh \"${1:-dev}\" \"${2:-}\""
 
 [tasks."secrets:decrypt"]
 description = "Decrypt secrets  [env: dev|prod]  [chart?]"
-run = "./scripts/sops-decrypt-secrets.sh \"${1:-dev}\" \"${2:-}\""
+run = "./scripts/secrets/decrypt.sh \"${1:-dev}\" \"${2:-}\""
 
 [tasks."secrets:check"]
 description = "Validate secrets are present and complete for all environments"
-run = "./scripts/check-secrets.sh"
+run = "./scripts/secrets/check.sh"
 
 # ── Linting ───────────────────────────────────────────────────────────────────
 
@@ -177,12 +177,12 @@ run = "terraform -chdir=terraform init"
 
 [tasks."tf:plan"]
 description = "Show Terraform execution plan  [env: dev|prod]"
-run = "./scripts/terraform.sh plan \"${1:-dev}\""
+run = "./scripts/infra/terraform.sh plan \"${1:-dev}\""
 
 [tasks."tf:apply"]
 description = "Apply Terraform changes  [env: dev|prod]"
-run = "./scripts/terraform.sh apply \"${1:-dev}\""
+run = "./scripts/infra/terraform.sh apply \"${1:-dev}\""
 
 [tasks."tf:destroy"]
 description = "Destroy Terraform-managed resources  [env: dev|prod]"
-run = "./scripts/terraform.sh destroy \"${1:-dev}\""
+run = "./scripts/infra/terraform.sh destroy \"${1:-dev}\""

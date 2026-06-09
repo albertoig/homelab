@@ -2,9 +2,9 @@
 # Update helmfile lock files for all environments
 set -euo pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/colors.sh"
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 HELMFILE="$REPO_ROOT/helmfile.yaml.gotmpl"
 ENVIRONMENTS=("dev" "prod")
 

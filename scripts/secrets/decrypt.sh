@@ -1,12 +1,13 @@
 #!/bin/bash
 # Decrypt per-chart secrets files for the specified environment.
-# Usage: ./scripts/sops-decrypt-secrets.sh <environment> [chart-name]
-# Example: ./scripts/sops-decrypt-secrets.sh prod
-#          ./scripts/sops-decrypt-secrets.sh prod grafana
+# Usage: ./scripts/secrets/decrypt.sh <environment> [chart-name]
+# Example: ./scripts/secrets/decrypt.sh prod
+#          ./scripts/secrets/decrypt.sh prod grafana
 
 set -e
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/colors.sh"
 
 ENVIRONMENT="${1:-}"
 CHART="${2:-}"
@@ -23,7 +24,8 @@ if [ "$ENVIRONMENT" != "dev" ] && [ "$ENVIRONMENT" != "prod" ]; then
     exit 1
 fi
 
-SECRETS_DIR="helmfile/environments/$ENVIRONMENT/secrets"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+SECRETS_DIR="$REPO_ROOT/helmfile/environments/$ENVIRONMENT/secrets"
 
 if [ ! -d "$SECRETS_DIR" ]; then
     error "Secrets directory not found: $SECRETS_DIR"

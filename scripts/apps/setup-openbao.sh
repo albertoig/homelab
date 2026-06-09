@@ -12,13 +12,13 @@
 #   7. Create Kubernetes secret for ESO authentication
 #   8. Apply ClusterSecretStore pointing at OpenBao
 #
-# Usage: ./scripts/setup-openbao.sh
+# Usage: ./scripts/apps/setup-openbao.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/lib/colors.sh"
-source "$SCRIPT_DIR/lib/header.sh"
+source "$SCRIPT_DIR/../lib/colors.sh"
+source "$SCRIPT_DIR/../lib/header.sh"
 
 NAMESPACE="openbao-system"
 ESO_NAMESPACE="external-secrets-system"
