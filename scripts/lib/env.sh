@@ -2,7 +2,7 @@
 # Reusable environment selector.
 # Source this file to set the ENV variable.
 #
-# Usage: source "$SCRIPT_DIR/lib/select-env.sh" [environment]
+# Usage: source "$SCRIPT_DIR/../lib/env.sh" [environment]
 # Sets:  ENV  ("dev" | "prod")
 #
 # If an argument is provided it is validated and used directly.

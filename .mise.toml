@@ -130,6 +130,10 @@ run = "mise exec -- npx commitlint --edit"
 
 # ── Testing ───────────────────────────────────────────────────────────────────
 
+[tasks."test:shell"]
+description = "Run shellspec BDD tests for shell scripts"
+run = "shellspec"
+
 [tasks.test]
 description = "Run all integration tests"
 usage = '''
