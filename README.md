@@ -1,7 +1,7 @@
 ![Header](docs/images/5b1cd5f9-c146-49b0-9a14-91eb4c03e14c.png)
 
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
-[![codecov](https://codecov.io/gh/albertoig/homelab/branch/main/graph/badge.svg)](https://codecov.io/gh/albertoig/homelab)
+[![Shell BDD Tests](https://github.com/albertoig/homelab/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/albertoig/homelab/actions/workflows/validate.yml)
 
 
 ## 📋 Overview

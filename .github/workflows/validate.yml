@@ -120,17 +120,8 @@ jobs:
       - name: Install tools via mise
         uses: jdx/mise-action@v2
 
-      - name: Install kcov
-        run: sudo apt-get install -y kcov
-
-      - name: Run shellspec BDD tests with coverage
-        run: mise run test:shell -- --kcov
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          directory: coverage/
-          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Run shellspec BDD tests
+        run: mise run test:shell
 
   commitlint:
     name: Commitlint
