@@ -22,6 +22,9 @@ gum              = "0.17.0"
 fzf              = "0.73.1"
 "github:atanunq/viu" = "latest"
 
+# Testing
+"asdf:poikilotherm/asdf-shellspec" = "0.28.1"
+
 [env]
 # Poetry creates the venv inside the project so `mise run clean` can wipe it
 POETRY_VIRTUALENVS_IN_PROJECT = "true"
@@ -153,6 +156,7 @@ arg "[environment]" help="Target environment" default="dev" {
 }
 '''
 run = 'ENV="${usage_environment}" poetry run pytest tests/k8s'
+
 
 # ── Cleanup ───────────────────────────────────────────────────────────────────
 
