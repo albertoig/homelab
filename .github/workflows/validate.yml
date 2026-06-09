@@ -124,7 +124,7 @@ jobs:
         run: sudo apt-get install -y kcov
 
       - name: Run shellspec BDD tests with coverage
-        run: shellspec --kcov
+        run: mise run test:shell -- --kcov
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
