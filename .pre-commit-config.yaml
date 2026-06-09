@@ -31,9 +31,9 @@ repos:
         args: ["-c", "for chart in charts/*/; do helm lint \"$chart\" || exit 1; done"]
       - id: shellspec
         name: Shell BDD Tests
-        entry: mise exec -- shellspec
+        entry: mise exec -- shellspec tests
         language: system
-        files: ^(scripts/|spec/)
+        files: ^(scripts/|tests/)
         pass_filenames: false
       - id: helmfile-lint
         name: helmfile-lint
