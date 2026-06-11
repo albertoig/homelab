@@ -57,27 +57,10 @@ find_colon() {
     echo 0
 }
 
-# Look up a value in a YAML file by dot-separated path (e.g., "authentik.email.from")
+# Look up a value in a YAML file by dot-separated path (e.g., "authentik.email.from").
+# Lists resolve to their first element; missing paths return empty.
 yaml_lookup() {
     local file="$1"
     local path="$2"
-    YAML_FILE="$file" YAML_PATH="$path" python3 -c "
-import yaml, sys, os
-try:
-    with open(os.environ['YAML_FILE']) as f:
-        data = yaml.safe_load(f)
-    keys = os.environ['YAML_PATH'].split('.')
-    for k in keys:
-        if isinstance(data, dict) and k in data:
-            data = data[k]
-        elif isinstance(data, list) and data:
-            print(data[0])
-            sys.exit(0)
-        else:
-            sys.exit(0)
-    if data is not None:
-        print(data)
-except Exception:
-    sys.exit(0)
-" 2>/dev/null || true
+    yq eval ".${path} | ((select(tag == \"!!seq\") | .[0]) // .) // \"\"" "$file" 2>/dev/null || true
 }

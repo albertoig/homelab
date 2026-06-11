@@ -78,6 +78,7 @@ GitOps-driven environment.
 - [ ] Remove scripts hard-limit to `dev`/`prod` — `install-helmfiles.sh`, `destroy-helmfiles.sh`, `init-secrets.sh` reject any other environment name
 - [ ] Fix lock file numbering — `005-ingresses.helmfile.yaml.gotmpl` references `004-ingresses.helmfile.lock` (cosmetic inconsistency)
 - [ ] Simplify config with scripts — `root_dns` is set in `config.yaml` but DNS-related values are also prompted separately in `secrets-init`; reduce duplication
+- [ ] Extract secrets template parsing from `init.sh`/`lib/secrets.sh` into a small Python CLI — the hand-rolled YAML parser in bash (`find_colon`, `yaml_value`, `build_path`) should become a pytest-tested `scripts/secrets/template.py` that emits the field list, leaving the gum prompting loop in bash
 - [ ] Split `004-core-apps` by architecture layer — it currently mixes storage, networking, monitoring, logging, identity, and GitOps in one stage; splitting (e.g. storage/network, observability, identity/gitops) would match the layers described in the README and shrink blast radius per change
 - [ ] Clarify ArgoCD/OpenBao role in README — this repo is the platform foundation deployed by helmfile; ArgoCD and OpenBao are services it provides for downstream application repos built on top, they do not manage this repo's own releases. Reword "ArgoCD handles GitOps delivery" so forks don't expect Applications here
 

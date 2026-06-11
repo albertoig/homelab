@@ -36,42 +36,15 @@ if [ ! -d "$TEMPLATES_DIR" ] || [ -z "$(ls "$TEMPLATES_DIR"/*.template.yaml 2>/d
     exit 1
 fi
 
-# --- Python helper for YAML key extraction ---
+# --- YAML key extraction ---
 
-extract_keys_py() {
-    python3 -c "
-import yaml, sys
-
-def leaf_paths(data, prefix=''):
-    paths = []
-    if isinstance(data, dict):
-        for k, v in data.items():
-            new_prefix = f'{prefix}.{k}' if prefix else k
-            if isinstance(v, (dict, list)):
-                paths.extend(leaf_paths(v, new_prefix))
-            else:
-                paths.append(new_prefix)
-    elif isinstance(data, list):
-        for item in data:
-            new_prefix = f'{prefix}[]'
-            if isinstance(item, (dict, list)):
-                paths.extend(leaf_paths(item, new_prefix))
-            else:
-                paths.append(new_prefix)
-    return paths
-
-try:
-    with open(sys.argv[1]) as f:
-        data = yaml.safe_load(f)
-    if data is None:
-        sys.exit(1)
-    keys = sorted(set(leaf_paths(data)))
-    for k in keys:
-        print(k)
-except Exception as e:
-    print(f'ERROR: {e}', file=sys.stderr)
-    sys.exit(1)
-" "$1" 2>/dev/null
+# Print sorted unique dot-separated leaf paths; list indices collapse to []
+# so template and secret arrays compare regardless of length.
+extract_keys() {
+    yq eval '.. | select(tag != "!!map" and tag != "!!seq") | path | join(".")' "$1" 2>/dev/null \
+        | sed -E 's/\.[0-9]+/[]/g; s/^[0-9]+/[]/' \
+        | grep -v '^$' \
+        | sort -u
 }
 
 # --- Main ---
@@ -119,8 +92,8 @@ for env in "${ENVIRONMENTS[@]}"; do
         fi
 
         # --- Extract and compare keys ---
-        template_keys=$(extract_keys_py "$template")
-        secret_keys=$(extract_keys_py "$secret_source")
+        template_keys=$(extract_keys "$template")
+        secret_keys=$(extract_keys "$secret_source")
 
         # Clean up temp file
         [ -n "$temp_file" ] && rm -f "$temp_file"

@@ -48,33 +48,6 @@ kbao() {
     kubectl exec -n "$NAMESPACE" "$POD" -- env BAO_ADDR="$BAO_ADDR" bao "$@"
 }
 
-# Run a bao command inside the pod authenticated with the root token
-kbao_root() {
-    kubectl exec -n "$NAMESPACE" "$POD" -- env BAO_ADDR="$BAO_ADDR" BAO_TOKEN="$ROOT_TOKEN" bao "$@"
-}
-
-# Extract a field from a JSON string using python
-json_get() {
-    local json="$1" key="$2"
-    echo "$json" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-v = d.get('$key')
-print(str(v).lower() if isinstance(v, bool) else (v if v is not None else ''))
-"
-}
-
-# Extract nested auth.client_token from bao token create JSON
-json_token() {
-    echo "$1" | python3 -c "import sys,json; print(json.load(sys.stdin)['auth']['client_token'])"
-}
-
-# Extract item from a JSON list field
-json_list() {
-    local json="$1" key="$2" idx="$3"
-    echo "$json" | python3 -c "import sys,json; print(json.load(sys.stdin)['$key'][$idx])"
-}
-
 ROOT_TOKEN=""
 
 # ── Step 1: Wait for pod ──────────────────────────────────────────────────────
@@ -96,8 +69,8 @@ if [ -z "$STATUS" ]; then
     exit 1
 fi
 
-INITIALIZED=$(json_get "$STATUS" initialized)
-SEALED=$(json_get "$STATUS" sealed)
+INITIALIZED=$(jq -r '.initialized' <<<"$STATUS")
+SEALED=$(jq -r '.sealed' <<<"$STATUS")
 
 if [ "$INITIALIZED" = "true" ] && [ "$SEALED" = "false" ]; then
     gum log --level info "OpenBao is already initialised and unsealed — nothing to do."
@@ -120,13 +93,9 @@ gum_secondary --bold "  Initialising OpenBao (5 shares, threshold 3)..."
 echo ""
 
 INIT_JSON=$(kbao operator init -key-shares=5 -key-threshold=3 -format=json)
-ROOT_TOKEN=$(json_get "$INIT_JSON" root_token)
+ROOT_TOKEN=$(jq -r '.root_token' <<<"$INIT_JSON")
 
-UNSEAL_KEYS=()
-for i in 0 1 2 3 4; do
-    k=$(json_list "$INIT_JSON" unseal_keys_b64 "$i" 2>/dev/null || true)
-    [ -n "$k" ] && UNSEAL_KEYS+=("$k")
-done
+mapfile -t UNSEAL_KEYS < <(jq -r '.unseal_keys_b64[]' <<<"$INIT_JSON")
 
 KEY_DISPLAY=""
 for i in "${!UNSEAL_KEYS[@]}"; do
@@ -196,16 +165,14 @@ echo ""
 
 # ── Step 7: Create ESO service token ─────────────────────────────────────────
 
-TOKEN_JSON=$(kubectl exec -n "$NAMESPACE" "$POD" -- \
+ESO_TOKEN=$(kubectl exec -n "$NAMESPACE" "$POD" -- \
     env BAO_ADDR="$BAO_ADDR" BAO_TOKEN="$ROOT_TOKEN" \
     bao token create \
         -policy="$ESO_POLICY" \
         -display-name="external-secrets-operator" \
         -no-default-policy \
         -orphan \
-        -format=json)
-
-ESO_TOKEN=$(json_token "$TOKEN_JSON")
+        -field=token)
 gum log --level info "ESO service token created."
 echo ""
 
