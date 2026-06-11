@@ -10,6 +10,8 @@ GUM_ACCENT=214      # orange — prompts, highlighted keys, warnings
 GUM_SUCCESS=2       # green  — success borders and checkmarks
 GUM_ERROR=1         # red    — error borders, failure marks
 GUM_MUTED=240       # gray   — faint descriptions, subtitles
+GUM_HEADER=45       # cyan   — banner block letters (retro CRT)
+GUM_HEADER_SUB=214  # amber  — banner tagline and byline
 
 # ── Gum inline-text helpers ───────────────────────────────────────────────────
 # Usage: gum_primary --bold "some text"

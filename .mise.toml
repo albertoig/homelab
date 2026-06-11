@@ -22,7 +22,6 @@ gum              = "0.17.0"
 fzf              = "0.73.1"
 jq               = "1.8.1"
 yq               = "4.47.1"
-"github:atanunq/viu" = "latest"
 
 # Testing
 "asdf:poikilotherm/asdf-shellspec" = "0.28.1"
