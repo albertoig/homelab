@@ -58,15 +58,13 @@ section_result() {
 # ── Tool manager ──────────────────────────────────────────────────────────────
 
 MISSING=()
-gum spin --spinner pulse --padding="0 0 0 2" --title "  mise" -- sleep 0.9
 command -v mise &>/dev/null || MISSING+=("mise")
 section_result "Tool manager" "${MISSING[@]}"
 
 # ── CLI tools ─────────────────────────────────────────────────────────────────
 
 MISSING=()
-for cmd in kubectl helm helmfile sops ansible poetry gum fzf; do
-    gum spin --spinner pulse --padding="0 0 0 2" --title "  $cmd" -- sleep 0.9
+for cmd in kubectl helm helmfile sops ansible poetry gum fzf jq yq; do
     command -v "$cmd" &>/dev/null || MISSING+=("$cmd")
 done
 section_result "CLI tools" "${MISSING[@]}"
@@ -76,7 +74,6 @@ section_result "CLI tools" "${MISSING[@]}"
 MISSING=()
 HELM_PLUGINS=$(helm plugin list 2>/dev/null || true)
 for plugin in secrets secrets-getter secrets-post-renderer diff; do
-    gum spin --spinner pulse --padding="0 0 0 2" --title "  helm-$plugin" -- sleep 0.9
     echo "$HELM_PLUGINS" | grep -q "^$plugin" || MISSING+=("helm-$plugin")
 done
 section_result "Helm plugins" "${MISSING[@]}"
@@ -103,7 +100,6 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     chart=$(basename "$template" .template.yaml)
     for env in "${ENVS[@]}"; do
         enc="$ROOT_DIR/helmfile/environments/$env/secrets/${chart}.enc.yaml"
-        gum spin --spinner pulse --padding="0 0 0 2" --title "  $env / $chart" -- sleep 0.5
         if [ -f "$enc" ]; then
             line="$(printf "  %s  %s" "$(gum_success --bold '✓')" "$env / $chart")"
         else
