@@ -24,74 +24,53 @@ fi
 
 show_header
 
-gum style \
-    --foreground "$GUM_SECONDARY" \
-    --bold \
-    --padding "1 2" \
-    --margin "0 1" \
-    "Requisites"
-echo ""
-
 ERRORS=0
 
-# Print a persistent tick/cross line and store the result for box rendering
+# One "group / name" line per check, mirroring the secrets "env / chart" style
 TOOLS_BOX_LINES=""
 
-section_result() {
-    local label="$1"
-    local missing=("${@:2}")
+tool_line() {
+    local group="$1" name="$2" ok="$3"
     local line
-    if [ ${#missing[@]} -eq 0 ]; then
-        printf "  %s  %s\n" "$(gum_success --bold '✓')" "$label"
-        line="$(printf "  %s  %s" "$(gum_success --bold '✓')" "$label")"
+    if [ "$ok" -eq 0 ]; then
+        line="$(printf "  %s  %s" "$(gum_success --bold '✓')" "$group / $name")"
     else
-        printf "  %s  %s — missing: %s\n" \
-            "$(gum_error --bold '✗')" \
-            "$label" \
-            "$(gum_error "${missing[*]}")"
-        line="$(printf "  %s  %s" "$(gum_error --bold '✗')" "$label")"
-        ERRORS=$(( ERRORS + ${#missing[@]} ))
+        line="$(printf "  %s  %s" "$(gum_error --bold '✗')" "$group / $name")"
+        ERRORS=$((ERRORS + 1))
     fi
     TOOLS_BOX_LINES="${TOOLS_BOX_LINES:+${TOOLS_BOX_LINES}$'\n'}${line}"
 }
 
-# ── Tool manager ──────────────────────────────────────────────────────────────
-
-MISSING=()
-command -v mise &>/dev/null || MISSING+=("mise")
-section_result "Tool manager" "${MISSING[@]}"
-
 # ── CLI tools ─────────────────────────────────────────────────────────────────
 
-MISSING=()
-for cmd in kubectl helm helmfile sops ansible poetry gum fzf jq yq; do
-    command -v "$cmd" &>/dev/null || MISSING+=("$cmd")
+for cmd in mise kubectl helm helmfile sops ansible poetry gum fzf jq yq; do
+    command -v "$cmd" &>/dev/null && ok=0 || ok=1
+    tool_line "cli" "$cmd" "$ok"
 done
-section_result "CLI tools" "${MISSING[@]}"
 
 # ── Helm plugins ──────────────────────────────────────────────────────────────
 
-MISSING=()
 HELM_PLUGINS=$(helm plugin list 2>/dev/null || true)
 for plugin in secrets secrets-getter secrets-post-renderer diff; do
-    echo "$HELM_PLUGINS" | grep -q "^$plugin" || MISSING+=("helm-$plugin")
+    echo "$HELM_PLUGINS" | grep -q "^$plugin" && ok=0 || ok=1
+    tool_line "helm" "$plugin" "$ok"
 done
-section_result "Helm plugins" "${MISSING[@]}"
 
 # ── Kubernetes ────────────────────────────────────────────────────────────────
 
-MISSING=()
+# Label the connection check with the active context (homelab-prod → prod)
+ok=1
+CTX_LABEL="cluster"
 if command -v kubectl &>/dev/null; then
-    gum spin --spinner pulse --padding="0 0 0 2" --title "  kubernetes" \
-        -- bash -c "kubectl cluster-info &>/dev/null" || MISSING+=("kubernetes")
-else
-    MISSING+=("kubectl")
+    ctx=$(kubectl config current-context 2>/dev/null || true)
+    [ -n "$ctx" ] && CTX_LABEL="${ctx#homelab-}"
+    gum spin --spinner pulse --padding="0 0 0 2" --title "  $CTX_LABEL cluster" \
+        -- bash -c "kubectl cluster-info &>/dev/null" && ok=0 || ok=1
 fi
-section_result "Kubernetes" "${MISSING[@]}"
+tool_line "$CTX_LABEL" "Kubernetes connection" "$ok"
 
-# ── Secrets spinners ──────────────────────────────────────────────────────────
+# ── Secrets ───────────────────────────────────────────────────────────────────
 
-echo ""
 TEMPLATES_DIR="$ROOT_DIR/helmfile/secret-templates"
 SECRETS_BOX_LINES=""
 
@@ -113,6 +92,18 @@ done
 # ── Boxes ─────────────────────────────────────────────────────────────────────
 
 echo ""
+
+# Pad the shorter column so both boxes render at the same height
+tools_n=$(awk 'END { print NR }' <<<"$TOOLS_BOX_LINES")
+secrets_n=$(awk 'END { print NR }' <<<"$SECRETS_BOX_LINES")
+while [ "$tools_n" -lt "$secrets_n" ]; do
+    TOOLS_BOX_LINES+=$'\n'
+    tools_n=$((tools_n + 1))
+done
+while [ "$secrets_n" -lt "$tools_n" ]; do
+    SECRETS_BOX_LINES+=$'\n'
+    secrets_n=$((secrets_n + 1))
+done
 
 TOOLS_BOX=$(gum style \
     --border rounded \
