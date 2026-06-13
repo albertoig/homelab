@@ -25,7 +25,7 @@ echo ""
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
 
-"$SCRIPT_DIR/../infra/check.sh" "$ENV"
+"$SCRIPT_DIR/../infra/preflight.sh" "$ENV"
 echo ""
 
 # ── Confirm ───────────────────────────────────────────────────────────────────

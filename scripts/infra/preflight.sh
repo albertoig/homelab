@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Unified prerequisites + Kubernetes check
-# Usage: ./scripts/infra/check.sh
+# Usage: ./scripts/infra/preflight.sh
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

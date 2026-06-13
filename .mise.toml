@@ -51,7 +51,11 @@ terraform -chdir=terraform init
 
 [tasks.check]
 description = "Validate tools, Helm plugins, and Kubernetes cluster access"
-run = "./scripts/infra/check.sh"
+run = "./scripts/infra/preflight.sh"
+
+[tasks.doctor]
+description = "Diagnose common cluster failure patterns  [env: dev|prod]  [--fix to remediate, --yes non-interactive]"
+run = "./scripts/infra/doctor.sh"
 
 # ── Cluster provisioning ──────────────────────────────────────────────────────
 
@@ -100,7 +104,7 @@ run = "./scripts/secrets/decrypt.sh \"${1:-dev}\" \"${2:-}\""
 
 [tasks."secrets:check"]
 description = "Validate secrets are present and complete for all environments"
-run = "./scripts/secrets/check.sh"
+run = "./scripts/secrets/validate.sh"
 
 # ── Linting ───────────────────────────────────────────────────────────────────
 

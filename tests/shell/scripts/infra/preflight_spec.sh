@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-Describe 'scripts/infra/check.sh'
+Describe 'scripts/infra/preflight.sh'
 
-  # check.sh discovers tools with `command -v`, so shellspec Mock (which only
+  # preflight.sh discovers tools with `command -v`, so shellspec Mock (which only
   # prepends to PATH) cannot simulate a *missing* tool. Instead each run gets a
   # sandbox bin dir as its entire PATH: stubs for every tool the script checks,
   # symlinks for the real utilities it needs (bash, awk, grep, basename), and
@@ -86,7 +86,7 @@ EOF
     for tool in ${CHECKSPEC_REMOVE:-}; do
       rm -f "$bin/$tool"
     done
-    PATH="$bin" bash scripts/infra/check.sh "$@"
+    PATH="$bin" bash scripts/infra/preflight.sh "$@"
     status=$?
     rm -rf "$bin"
     return "$status"

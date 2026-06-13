@@ -1,6 +1,6 @@
 #!/bin/bash
 # Check that all secret files are present and have the same fields as their templates.
-# Usage: ./scripts/check-secrets.sh [environment]
+# Usage: ./scripts/secrets/validate.sh [environment]
 # If no environment is given, checks all environments.
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/colors.sh"

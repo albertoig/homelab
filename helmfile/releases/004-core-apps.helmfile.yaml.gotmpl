@@ -86,16 +86,6 @@ releases:
       - lb-system/metallb-config
     inherit:
     - template: values_gotmpl_secrets_and_shared
-    # Hook to clean up stuck MetalLB services before grafana installation
-    hooks:
-      - events: ["prepare"]
-        command: /bin/sh
-        args:
-          - "-c"
-          - |
-            for svc in $(kubectl get svc -n monitoring-system -l app.kubernetes.io/name=grafana -o name 2>/dev/null); do
-              kubectl patch "$svc" -n monitoring-system -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
-            done
 
   # Loki - Log aggregation system
   # https://artifacthub.io/packages/helm/grafana/loki?modal=values
@@ -112,25 +102,6 @@ releases:
       - monitoring-system/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
-    # Hook to clean up stuck pods with Longhorn volume mount issues
-    hooks:
-      - events: ["prepare"]
-        command: /bin/sh
-        args:
-          - "-c"
-          - |
-            for pod in $(kubectl get pods -n monitoring-system -o name 2>/dev/null); do
-              case $pod in
-                *loki*)
-                  status=$(kubectl get $pod -n monitoring-system -o jsonpath='{.status.phase}' 2>/dev/null)
-                  if [ "$status" = "Pending" ] || [ "$status" = "ContainerCreating" ]; then
-                    echo "Force deleting stuck pod: $pod"
-                    kubectl delete $pod -n monitoring-system --force --grace-period=0 2>/dev/null || true
-                  fi
-                  ;;
-              esac
-            done
-            sleep 5
 
   # Alloy - OpenTelemetry collector (log and profile collection)
   # https://artifacthub.io/packages/helm/grafana/alloy?modal=values
@@ -165,25 +136,6 @@ releases:
       - monitoring-system/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
-    # Hook to clean up stuck pods with Longhorn volume mount issues
-    hooks:
-      - events: ["prepare"]
-        command: /bin/sh
-        args:
-          - "-c"
-          - |
-            for pod in $(kubectl get pods -n monitoring-system -o name 2>/dev/null); do
-              case $pod in
-                *tempo*)
-                  status=$(kubectl get $pod -n monitoring-system -o jsonpath='{.status.phase}' 2>/dev/null)
-                  if [ "$status" = "Pending" ] || [ "$status" = "ContainerCreating" ]; then
-                    echo "Force deleting stuck pod: $pod"
-                    kubectl delete $pod -n monitoring-system --force --grace-period=0 2>/dev/null || true
-                  fi
-                  ;;
-              esac
-            done
-            sleep 5
 
   # Pyroscope - Continuous profiling system
   # https://artifacthub.io/packages/helm/grafana/pyroscope?modal=values
