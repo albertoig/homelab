@@ -5,17 +5,22 @@ sso:
     username: ""
     # Shared SSO admin display name
     name: ""
-    # Shared SSO admin email (another admin account)
+    # Shared SSO admin email
     email: ""
     # Shared SSO admin password
+    # @autogen: openssl rand -base64 24 | tr -d '=+/'
     password: ""
   grafana:
-    # OAuth2 client ID for Grafana SSO (generate with: openssl rand -hex 16)
+    # OAuth2 client ID for Grafana SSO
+    # @autogen: openssl rand -hex 16
     client_id: ""
-    # OAuth2 client secret for Grafana SSO (generate with: openssl rand -hex 32)
+    # OAuth2 client secret for Grafana SSO
+    # @autogen: openssl rand -hex 32
     client_secret: ""
   argocd:
-    # OAuth2 client ID for ArgoCD SSO (generate with: openssl rand -hex 16)
+    # OAuth2 client ID for ArgoCD SSO
+    # @autogen: openssl rand -hex 16
     client_id: ""
-    # OAuth2 client secret for ArgoCD SSO (generate with: openssl rand -hex 32)
+    # OAuth2 client secret for ArgoCD SSO
+    # @autogen: openssl rand -hex 32
     client_secret: ""

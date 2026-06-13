@@ -53,9 +53,19 @@ GitOps-driven environment.
 - [ ] Velero manual backup test — trigger a backup, verify it completes without errors, restore a namespace and confirm data integrity; fix the 10 partial errors seen in initial run
 - [ ] Add preflight validation for empty `root_dns` — helmfile silently generates ingresses with empty hostnames if unset
 - [ ] Remove empty `dev.yaml` and `prod.yaml` environment stubs — referenced in release files but contain no content
+- [x] Move imperative remediation hooks out of helmfile — replaced by `scripts/infra/doctor.sh` (`mise run doctor`), diagnose-only by default with confirmed fixes via `--fix`
+- [ ] Investigate root causes the doctor only treats — MetalLB/Grafana service finalizer ordering on delete, and the Longhorn volume mount race that leaves Loki/Tempo pods stuck in Pending after node restarts
+- [ ] Re-enable helmfile lint in CI via a `ci` environment — a third environment with no `secrets:` entries and dummy SSO values would let `helmfile lint` run on GitHub today, without waiting for the self-hosted runner (which remains the path for linting against real environments)
+- [ ] Add `kubeconform` validation of rendered manifests in CI — `helm lint` does not catch Kubernetes schema errors; validate `helmfile template` output
+- [ ] Add `shellcheck` to pre-commit — shellspec tests behavior but does not catch quoting/word-splitting bugs across the ~1,800 lines of bash in `scripts/`
+- [ ] Add non-interactive mode to `install.sh` — `gum confirm` and spinners block any future CI/cron/self-hosted-runner usage; add a `--yes` flag before retrofitting becomes painful
+- [ ] Extend shellspec coverage to the largest scripts — `secrets/init.sh` (363 lines), `apps/setup-openbao.sh` (263), `helm/install.sh` (206) are untested while the covered libs total ~170 lines
 
 ### P3 — Platform (build on top of this infra)
-- [ ] OpenBao — runtime secret manager with External Secrets Operator to bridge OpenBao → Kubernetes Secrets
+- [x] OpenBao — runtime secret manager with External Secrets Operator to bridge OpenBao → Kubernetes Secrets
+  - Manual steps post-deploy: `bao operator init`, `bao operator unseal` (3×), create ESO policy + token, apply ClusterSecretStore
+- [ ] OpenBao hardening — document where unseal keys and the root token must be stored, revoke the root token after the ESO token is created, evaluate auto-unseal (static or transit) so a node reboot doesn't leave dependent workloads down, and replace the static ESO token with Kubernetes auth (no token to expire or leak)
+- [ ] Secrets end-state ADR — write down the boundary between the two systems: SOPS for bootstrap-time secrets this repo's helmfile needs at render time (SSO client secrets, OpenBao deployment itself), OpenBao + ESO for runtime secrets consumed by downstream projects built on top of this platform
 - [ ] CloudNativePG — PostgreSQL operator; replaces embedded per-chart Postgres with a managed, reusable database layer
 - [ ] Kyverno — admission policy enforcement; baseline: require resource limits, block root containers, enforce label schemas
 - [ ] Zot or Harbor — container registry for CI-built images
@@ -67,8 +77,13 @@ GitOps-driven environment.
 - [ ] ADR integration into merge request workflow — automate the ADR requirement check on PRs
 - [ ] Track helm-secrets plugin version — `docs/INSTALL.md` pins v4.7.4 with a direct URL, not tracked by Renovate
 - [ ] Remove scripts hard-limit to `dev`/`prod` — `install-helmfiles.sh`, `destroy-helmfiles.sh`, `init-secrets.sh` reject any other environment name
+- [ ] Centralize environment → kube-context resolution — the `kubeContext` per environment is defined in `helmfile.yaml.gotmpl` (`homelab-dev`, `homelab-prod`) but `scripts/lib/env.sh` hardcodes the env list and `doctor.sh`/`preflight.sh` re-derive the `homelab-` prefix independently; add a small lib helper (or script) that reads the environments and their contexts from the helmfile (e.g. via `yq`) so scripts stop duplicating the mapping — pairs with removing the dev/prod hard-limit above
 - [ ] Fix lock file numbering — `005-ingresses.helmfile.yaml.gotmpl` references `004-ingresses.helmfile.lock` (cosmetic inconsistency)
 - [ ] Simplify config with scripts — `root_dns` is set in `config.yaml` but DNS-related values are also prompted separately in `secrets-init`; reduce duplication
+- [ ] Refresh `docs/SCRIPTS.md` — large parts still document the pre-reorg flat `scripts/` layout (`install-helmfiles.sh`, `init-secrets.sh`, `sops-*-secrets.sh`, the architecture diagram, and the directory tree); only the preflight/validate sections are current
+- [ ] Extract secrets template parsing from `init.sh`/`lib/secrets.sh` into a small Python CLI — the hand-rolled YAML parser in bash (`find_colon`, `yaml_value`, `build_path`) should become a pytest-tested `scripts/secrets/template.py` that emits the field list, leaving the gum prompting loop in bash
+- [ ] Split `004-core-apps` by architecture layer — it currently mixes storage, networking, monitoring, logging, identity, and GitOps in one stage; splitting (e.g. storage/network, observability, identity/gitops) would match the layers described in the README and shrink blast radius per change
+- [ ] Clarify ArgoCD/OpenBao role in README — this repo is the platform foundation deployed by helmfile; ArgoCD and OpenBao are services it provides for downstream application repos built on top, they do not manage this repo's own releases. Reword "ArgoCD handles GitOps delivery" so forks don't expect Applications here
 
 ### P5 — Nice to have
 - [ ] Grafana Dashboards

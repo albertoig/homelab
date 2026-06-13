@@ -2,10 +2,10 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-source "$SCRIPT_DIR/lib/colors.sh"
-source "$SCRIPT_DIR/lib/header.sh"
+source "$SCRIPT_DIR/../lib/colors.sh"
+source "$SCRIPT_DIR/../lib/header.sh"
 
 if ! command -v gum &>/dev/null; then
     error "gum not found. Run: mise install"
@@ -14,24 +14,18 @@ fi
 
 # ── Environment selector ──────────────────────────────────────────────────────
 
-ENV=$(gum choose \
-    --header "Select target environment:" \
-    --cursor "> " \
-    --cursor.foreground 212 \
-    --selected.foreground 212 \
-    --header.foreground 99 \
-    "dev" "prod") || { warn "Aborted."; exit 0; }
+source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
 
 # ── Banner ────────────────────────────────────────────────────────────────────
 
 clear
 show_header
-gum style --foreground 99 "  environment → $(gum style --foreground 212 --bold "$ENV")"
+gum_secondary "  environment → $(gum_primary --bold "$ENV")"
 echo ""
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
 
-"$SCRIPT_DIR/check.sh" "$ENV"
+"$SCRIPT_DIR/../infra/preflight.sh" "$ENV"
 echo ""
 
 # ── Confirm ───────────────────────────────────────────────────────────────────
@@ -49,7 +43,7 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
     step 1 2 "Infrastructure (Terraform)"
     echo ""
 
-    . "$SCRIPT_DIR/lib/terraform-env.sh"
+    . "$SCRIPT_DIR/../lib/terraform-env.sh"
 
     TF_PLAN=$(mktemp --suffix=.tfplan)
     trap "rm -f $TF_PLAN" EXIT
@@ -105,17 +99,17 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
     [ "$BOX_W" -lt 24 ] && BOX_W=24
 
     ADD_BOX=$(gum style \
-        --border rounded --border-foreground 2 \
+        --border rounded --border-foreground "$GUM_SUCCESS" \
         --padding "1 2" --width "$BOX_W" \
         -- "+ to add ($ADDED)" "" "${ADD_ARGS[@]}")
 
     CHANGE_BOX=$(gum style \
-        --border rounded --border-foreground 214 \
+        --border rounded --border-foreground "$GUM_ACCENT" \
         --padding "1 2" --width "$BOX_W" \
         -- "~ to change ($CHANGED)" "" "${CHANGE_ARGS[@]}")
 
     DESTROY_BOX=$(gum style \
-        --border rounded --border-foreground 1 \
+        --border rounded --border-foreground "$GUM_ERROR" \
         --padding "1 2" --width "$BOX_W" \
         -- "- to destroy ($DESTROYED)" "" "${DESTROY_ARGS[@]}")
 
@@ -148,7 +142,7 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
         --spinner pulse \
         --show-error \
         --title "  Writing Velero secrets..." \
-        -- "$SCRIPT_DIR/velero-secrets.sh" "$ENV"
+        -- "$SCRIPT_DIR/../secrets/velero.sh" "$ENV"
 
     gum log --level info "Velero secrets updated."
     echo ""
@@ -205,8 +199,8 @@ echo ""
 
 gum style \
     --border rounded \
-    --border-foreground 212 \
+    --border-foreground "$GUM_PRIMARY" \
     --align center \
     --padding "1 4" \
     --margin "1 2" \
-    "$(gum style --foreground 212 --bold "Environment '$ENV' installed.")"
+    "$(gum_primary --bold "Environment '$ENV' installed.")"

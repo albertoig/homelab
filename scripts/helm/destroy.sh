@@ -1,11 +1,11 @@
 #!/bin/bash
 # Destroy helmfiles for a given environment
-# Usage: ./scripts/destroy-helmfiles.sh <environment>
-# Example: ./scripts/destroy-helmfiles.sh dev
+# Usage: ./scripts/helm/destroy.sh <environment>
+# Example: ./scripts/helm/destroy.sh dev
 
 set -e
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/colors.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/colors.sh"
 
 ENVIRONMENT="${1:-}"
 
@@ -21,7 +21,7 @@ if [ "$ENVIRONMENT" != "dev" ] && [ "$ENVIRONMENT" != "prod" ]; then
     exit 1
 fi
 
-HELMFILE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+HELMFILE_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 # Validate environment directory exists
 if [ ! -d "$HELMFILE_DIR/helmfile/environments/$ENVIRONMENT" ]; then
@@ -36,8 +36,7 @@ warn "⚠️  WARNING: This will delete ALL PersistentVolumes and permanent stor
 echo ""
 
 # Confirm destruction
-read -rp "$(echo -e "${_C_YELLOW}  Are you sure you want to destroy the '${ENVIRONMENT}' environment? This is irreversible and will delete all data. [y/N] ${_C_RESET}")" confirm
-if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+if ! gum confirm --default=false "Destroy the '$ENVIRONMENT' environment? This is irreversible and will delete all data."; then
     warn "Aborted."
     exit 0
 fi
@@ -91,6 +90,20 @@ info "Removing Longhorn CRDs..."
 for crd in $(kubectl get crd -o name 2>/dev/null | grep longhorn.io); do
     kubectl delete "$crd" --ignore-not-found 2>/dev/null || true
 done
+
+echo ""
+step 4 4 "Destroying Terraform infrastructure..."
+echo ""
+
+if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACCESS_KEY:-}" ]; then
+    source "$(dirname "${BASH_SOURCE[0]}")/../lib/terraform-env.sh"
+    terraform -chdir="$HELMFILE_DIR/terraform" init -reconfigure
+    terraform -chdir="$HELMFILE_DIR/terraform" workspace select "$ENVIRONMENT" 2>/dev/null \
+        || terraform -chdir="$HELMFILE_DIR/terraform" workspace new "$ENVIRONMENT"
+    TF_VAR_environment="$ENVIRONMENT" terraform -chdir="$HELMFILE_DIR/terraform" destroy
+else
+    warn "Skipping Terraform: R2 credentials not set in .mise.local.toml."
+fi
 
 echo ""
 header "Environment '$ENVIRONMENT' destroyed."

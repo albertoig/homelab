@@ -86,16 +86,6 @@ releases:
       - lb-system/metallb-config
     inherit:
     - template: values_gotmpl_secrets_and_shared
-    # Hook to clean up stuck MetalLB services before grafana installation
-    hooks:
-      - events: ["prepare"]
-        command: /bin/sh
-        args:
-          - "-c"
-          - |
-            for svc in $(kubectl get svc -n monitoring-system -l app.kubernetes.io/name=grafana -o name 2>/dev/null); do
-              kubectl patch "$svc" -n monitoring-system -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
-            done
 
   # Loki - Log aggregation system
   # https://artifacthub.io/packages/helm/grafana/loki?modal=values
@@ -112,25 +102,6 @@ releases:
       - monitoring-system/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
-    # Hook to clean up stuck pods with Longhorn volume mount issues
-    hooks:
-      - events: ["prepare"]
-        command: /bin/sh
-        args:
-          - "-c"
-          - |
-            for pod in $(kubectl get pods -n monitoring-system -o name 2>/dev/null); do
-              case $pod in
-                *loki*)
-                  status=$(kubectl get $pod -n monitoring-system -o jsonpath='{.status.phase}' 2>/dev/null)
-                  if [ "$status" = "Pending" ] || [ "$status" = "ContainerCreating" ]; then
-                    echo "Force deleting stuck pod: $pod"
-                    kubectl delete $pod -n monitoring-system --force --grace-period=0 2>/dev/null || true
-                  fi
-                  ;;
-              esac
-            done
-            sleep 5
 
   # Alloy - OpenTelemetry collector (log and profile collection)
   # https://artifacthub.io/packages/helm/grafana/alloy?modal=values
@@ -165,25 +136,6 @@ releases:
       - monitoring-system/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
-    # Hook to clean up stuck pods with Longhorn volume mount issues
-    hooks:
-      - events: ["prepare"]
-        command: /bin/sh
-        args:
-          - "-c"
-          - |
-            for pod in $(kubectl get pods -n monitoring-system -o name 2>/dev/null); do
-              case $pod in
-                *tempo*)
-                  status=$(kubectl get $pod -n monitoring-system -o jsonpath='{.status.phase}' 2>/dev/null)
-                  if [ "$status" = "Pending" ] || [ "$status" = "ContainerCreating" ]; then
-                    echo "Force deleting stuck pod: $pod"
-                    kubectl delete $pod -n monitoring-system --force --grace-period=0 2>/dev/null || true
-                  fi
-                  ;;
-              esac
-            done
-            sleep 5
 
   # Pyroscope - Continuous profiling system
   # https://artifacthub.io/packages/helm/grafana/pyroscope?modal=values
@@ -266,3 +218,35 @@ releases:
       - monitoring-system/prometheus-stack
     inherit:
     - template: values_gotmpl_and_secrets
+
+  # OpenBao - open-source secrets manager (Vault fork)
+  # https://artifacthub.io/packages/helm/openbao/openbao
+  # NOTE: after deploy run: bao operator init && bao operator unseal (3×)
+  - name: openbao
+    namespace: openbao-system
+    createNamespace: true
+    chart: openbao/openbao
+    version: "0.28.3"
+    wait: true
+    labels:
+      app: secrets
+    needs:
+      - longhorn-system/longhorn
+    inherit:
+    - template: values_gotmpl_and_secrets
+
+  # External Secrets Operator - sync secrets from OpenBao → Kubernetes Secrets
+  # https://artifacthub.io/packages/helm/external-secrets-operator/external-secrets
+  # NOTE: create ClusterSecretStore after OpenBao is initialized and unsealed
+  - name: external-secrets
+    namespace: external-secrets-system
+    createNamespace: true
+    chart: external-secrets/external-secrets
+    version: "2.5.0"
+    wait: true
+    labels:
+      app: secrets
+    needs:
+      - openbao-system/openbao
+    inherit:
+    - template: common_values_only

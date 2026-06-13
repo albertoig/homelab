@@ -9,14 +9,15 @@ All common operations are defined as mise tasks in `.mise.toml`. Run `mise tasks
 | mise task | Underlying script | Notes |
 |-----------|-------------------|-------|
 | `mise run setup` | mise install + helm plugins + pre-commit + terraform init | Run once after cloning |
-| `mise run check` | `scripts/check-requirements.sh` + `scripts/check-kubernetes.sh` | |
+| `mise run check` | `scripts/infra/preflight.sh` | |
+| `mise run doctor` | `scripts/infra/doctor.sh` | `-- --fix` to remediate |
 | `mise run provision [playbook]` | `metal/k3s/run.sh` | Default playbook: `site` |
 | `mise run install <env>` | terraform apply → `scripts/velero-secrets.sh` → `scripts/install-helmfiles.sh` | |
 | `mise run destroy <env>` | `scripts/destroy-helmfiles.sh` → terraform destroy | |
 | `mise run secrets:init <env>` | `scripts/init-secrets.sh` | |
 | `mise run secrets:encrypt <env> [chart]` | `scripts/sops-encrypt-secrets.sh` | |
 | `mise run secrets:decrypt <env> [chart]` | `scripts/sops-decrypt-secrets.sh` | |
-| `mise run secrets:check` | `scripts/check-secrets.sh` | Checks all envs if no env given |
+| `mise run secrets:check` | `scripts/secrets/validate.sh` | Checks all envs if no env given |
 | `mise run lint` | `pre-commit run --all-files` | |
 | `mise run tf:init` | `terraform init` | |
 | `mise run tf:plan <env>` | `scripts/terraform.sh plan` | |
@@ -106,46 +107,56 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
 
 ## Scripts
 
-### `scripts/check-requirements.sh`
+### `scripts/infra/preflight.sh`
 
-**Purpose:** Validates that all required CLI tools and Helm plugins are installed before running Helmfile operations.
+**Purpose:** Unified preflight check before deploying. Validates CLI tools, Helm plugins, cluster connectivity, and the presence of encrypted secret files, rendered as side-by-side Tools and Secrets boxes.
 
 **Usage:**
 ```bash
-./scripts/check-requirements.sh
+./scripts/infra/preflight.sh [environment]
 ```
 
 **Checks:**
-- CLI tools: `kubectl`, `helm`, `helmfile`, `sops`, `ansible`
+- CLI tools: `mise`, `kubectl`, `helm`, `helmfile`, `sops`, `ansible`, `poetry`, `gum`, `fzf`, `jq`, `yq`
 - Helm plugins: `secrets`, `secrets-getter`, `secrets-post-renderer`, `diff`
+- Cluster is reachable (`kubectl cluster-info`), labelled with the active kube context
+- Each secret template has a matching `.enc.yaml` per environment (existence only — see `scripts/secrets/validate.sh` for content validation)
 
 **Exit codes:**
-- `0` - All requirements met
-- `1` - One or more requirements missing
+- `0` - All checks passed
+- `1` - One or more checks failed
 
-**Called by:** `install-helmfiles.sh`
+**Called by:** `scripts/helm/install.sh`
 
 ---
 
-### `scripts/check-kubernetes.sh`
+### `scripts/infra/doctor.sh`
 
-**Purpose:** Verifies that `kubectl` can access the cluster and the server version is >= 1.33.
+**Purpose:** Diagnoses common cluster failure patterns against the selected environment's kube context (`homelab-<env>`). Read-only by default; `--fix` applies remediations, each behind a confirmation prompt (`--yes` skips prompts).
 
 **Usage:**
 ```bash
-./scripts/check-kubernetes.sh
+mise run doctor                    # prompts for environment, diagnose only
+mise run doctor prod               # diagnose prod
+mise run doctor -- prod --fix      # diagnose prod and offer fixes
+mise run doctor -- prod --fix --yes
 ```
 
 **Checks:**
-- `kubectl` binary exists
-- Cluster is reachable (`kubectl cluster-info`)
-- Server version >= 1.33
+- Services stuck Terminating with finalizers (fix: strip finalizers)
+- Pods stuck Pending past threshold, with their recent events (fix: force delete)
+- VolumeAttachments stuck detaching (fix: delete)
+- Failed/Evicted pods (fix: delete)
+- Helm releases in pending/failed state (report only)
+- Nodes NotReady or under resource pressure (report only)
+- PVCs stuck Pending (report only)
+- OpenBao sealed (report only, prints the unseal command)
 
 **Exit codes:**
-- `0` - Kubernetes check passed
-- `1` - Cluster unreachable or version too low
+- `0` - No issues found
+- `1` - One or more issues found (even if fixed in the same run)
 
-**Called by:** `install-helmfiles.sh`
+**Notes:** Replaces the `prepare` hooks that previously ran these remediations blindly on every deploy from `helmfile/releases/004-core-apps.helmfile.yaml.gotmpl`. Threshold for "stuck" is 180s, override with `DOCTOR_STUCK_SECONDS`.
 
 ---
 
@@ -304,20 +315,20 @@ helmfile/environments/<env>/secrets/
 
 ---
 
-### `scripts/check-secrets.sh`
+### `scripts/secrets/validate.sh`
 
 **Purpose:** Validates that all per-chart secret files are present and contain the same fields as their corresponding templates. Decrypts `.enc.yaml` files on the fly to compare against `helmfile/secret-templates/*.template.yaml`.
 
 **Usage:**
 ```bash
 # Check all environments
-./scripts/check-secrets.sh
+./scripts/secrets/validate.sh
 
 # Check a single environment
-./scripts/check-secrets.sh <environment>
+./scripts/secrets/validate.sh <environment>
 # Example:
-./scripts/check-secrets.sh dev
-./scripts/check-secrets.sh prod
+./scripts/secrets/validate.sh dev
+./scripts/secrets/validate.sh prod
 ```
 
 **Checks:**

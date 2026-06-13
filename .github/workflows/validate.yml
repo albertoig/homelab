@@ -20,6 +20,7 @@ jobs:
       ansible: ${{ steps.filter.outputs.ansible }}
       helm: ${{ steps.filter.outputs.helm }}
       helmfile: ${{ steps.filter.outputs.helmfile }}
+      shell: ${{ steps.filter.outputs.shell }}
     steps:
       - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
@@ -33,6 +34,9 @@ jobs:
             helmfile:
               - 'helmfile/**'
               - 'helmfile.yaml.gotmpl'
+            shell:
+              - 'scripts/**'
+              - 'tests/**'
 
   ansible-lint:
     name: Ansible Lint
@@ -104,6 +108,20 @@ jobs:
   #       with:
   #         tool: helmfile
   #         args: "lint --skip-deps -f helmfile.yaml.gotmpl -e prod"
+
+  shell-test:
+    name: Shell BDD Tests
+    needs: changes
+    if: needs.changes.outputs.shell == 'true' || github.event_name == 'workflow_call'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install tools via mise
+        uses: jdx/mise-action@v2
+
+      - name: Run shellspec BDD tests
+        run: mise run test:shell
 
   commitlint:
     name: Commitlint
