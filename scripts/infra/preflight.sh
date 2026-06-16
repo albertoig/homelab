@@ -1,18 +1,10 @@
 #!/usr/bin/env bash
 # Unified prerequisites + Kubernetes check
-# Usage: ./scripts/infra/preflight.sh
+# Usage: ./scripts/infra/preflight.sh [environment]   (prompts if omitted)
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-
-TARGET_ENV="${1:-}"
-ENVS=()
-if [ -n "$TARGET_ENV" ]; then
-    ENVS=("$TARGET_ENV")
-else
-    ENVS=("dev" "prod")
-fi
+ROOT_DIR="${PREFLIGHT_ROOT_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 source "$SCRIPT_DIR/../lib/colors.sh"
 source "$SCRIPT_DIR/../lib/header.sh"
@@ -23,6 +15,10 @@ if ! command -v gum &>/dev/null; then
 fi
 
 show_header
+
+# Select the environment to validate secrets for; prompts when none is given.
+source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
+ENVS=("$ENV")
 
 ERRORS=0
 

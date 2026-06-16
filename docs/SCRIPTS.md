@@ -113,14 +113,16 @@ metal/k3s/run.sh                          scripts/install-helmfiles.sh
 
 **Usage:**
 ```bash
-./scripts/infra/preflight.sh [environment]
+./scripts/infra/preflight.sh [environment]   # prompts to choose dev/prod if omitted
 ```
+
+The environment is resolved through `scripts/lib/env.sh` (argument → `ENV` variable → interactive prompt), matching the other scripts.
 
 **Checks:**
 - CLI tools: `mise`, `kubectl`, `helm`, `helmfile`, `sops`, `ansible`, `poetry`, `gum`, `fzf`, `jq`, `yq`
 - Helm plugins: `secrets`, `secrets-getter`, `secrets-post-renderer`, `diff`
 - Cluster is reachable (`kubectl cluster-info`), labelled with the active kube context
-- Each secret template has a matching `.enc.yaml` per environment (existence only — see `scripts/secrets/validate.sh` for content validation)
+- Each secret template has a matching `.enc.yaml` for the selected environment (existence only — see `scripts/secrets/validate.sh` for content validation)
 
 **Exit codes:**
 - `0` - All checks passed

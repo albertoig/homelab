@@ -5,14 +5,17 @@
 # Usage: source "$SCRIPT_DIR/../lib/env.sh" [environment]
 # Sets:  ENV  ("dev" | "prod")
 #
-# If an argument is provided it is validated and used directly.
-# If no argument is provided a gum choose prompt is shown.
+# Resolution order (first match wins):
+#   1. the argument, if one is provided
+#   2. the ENV variable, if it is already set in the environment
+#   3. an interactive gum choose prompt
+# The result is validated against dev/prod either way.
 
 _sel_arg="${1:-}"
 
 if [ -n "$_sel_arg" ]; then
     ENV="$_sel_arg"
-else
+elif [ -z "${ENV:-}" ]; then
     ENV=$(gum choose \
         --header "Select target environment:" \
         --cursor "> " \

@@ -13,24 +13,12 @@ Describe 'scripts/infra/preflight.sh'
   #   CHECKSPEC_HELM_PLUGINS  plugin list printed by `helm plugin list`
   #                           (unset = all four expected plugins)
   #   CHECKSPEC_K8S_FAIL      1 = `kubectl cluster-info` exits non-zero
-
-  SPEC_ENV="shellspec-check-env"
-
-  create_fixture_env() {
-    mkdir -p "helmfile/environments/$SPEC_ENV/secrets"
-    local template chart
-    for template in helmfile/secret-templates/*.template.yaml; do
-      chart=$(basename "$template" .template.yaml)
-      touch "helmfile/environments/$SPEC_ENV/secrets/${chart}.enc.yaml"
-    done
-  }
-
-  remove_fixture_env() {
-    rm -rf "helmfile/environments/$SPEC_ENV"
-  }
-
-  BeforeAll 'create_fixture_env'
-  AfterAll 'remove_fixture_env'
+  #   CHECKSPEC_NO_SECRETS    1 = leave the fixture env's secrets dir empty
+  #
+  # preflight.sh resolves the environment through scripts/lib/env.sh, which only
+  # accepts "dev"/"prod". Each run therefore points PREFLIGHT_ROOT_DIR at an
+  # isolated tree whose env is always "dev", so the check never reads (or the
+  # teardown deletes) real secret files under helmfile/environments/.
 
   make_sandbox() {
     local bin="$1" tool real
@@ -43,6 +31,10 @@ if [ "$1" = "spin" ]; then
   while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do shift; done
   shift
   exec "$@"
+fi
+if [ "$1" = "choose" ]; then
+  echo "dev"
+  exit 0
 fi
 echo "$*"
 EOF
@@ -73,29 +65,45 @@ EOF
 
     chmod +x "$bin"/*
 
-    # Real utilities check.sh needs, symlinked after chmod so it skips them
-    for real in bash dirname awk grep basename; do
+    # Real utilities preflight.sh needs, symlinked after chmod so it skips them
+    for real in bash dirname awk grep basename cp; do
       ln -s "$(command -v "$real")" "$bin/$real"
     done
   }
 
+  # Build an isolated repo root with secret templates and (optionally) a fully
+  # populated "dev" secrets dir, so secret presence is checked against fixtures.
+  make_fixture_root() {
+    local root="$1" template chart
+    mkdir -p "$root/helmfile/secret-templates" \
+             "$root/helmfile/environments/dev/secrets"
+    cp helmfile/secret-templates/*.template.yaml "$root/helmfile/secret-templates/"
+    [ "${CHECKSPEC_NO_SECRETS:-0}" = "1" ] && return 0
+    for template in "$root"/helmfile/secret-templates/*.template.yaml; do
+      chart=$(basename "$template" .template.yaml)
+      touch "$root/helmfile/environments/dev/secrets/${chart}.enc.yaml"
+    done
+  }
+
   run_check() {
-    local bin status tool
+    local bin root status tool
     bin=$(mktemp -d)
+    root=$(mktemp -d)
     make_sandbox "$bin"
+    make_fixture_root "$root"
     for tool in ${CHECKSPEC_REMOVE:-}; do
       rm -f "$bin/$tool"
     done
-    PATH="$bin" bash scripts/infra/preflight.sh "$@"
+    PATH="$bin" PREFLIGHT_ROOT_DIR="$root" bash scripts/infra/preflight.sh "$@"
     status=$?
-    rm -rf "$bin"
+    rm -rf "$bin" "$root"
     return "$status"
   }
 
   # ── Happy path ───────────────────────────────────────────────────────────────
 
   Describe 'when all tools, plugins, and secrets are present'
-    check_ok() { run_check "$SPEC_ENV"; }
+    check_ok() { run_check dev; }
 
     It 'exits successfully'
       When call check_ok
@@ -118,8 +126,8 @@ EOF
     It 'reports every secret of the environment'
       When call check_ok
       The status should be success
-      The output should include "$SPEC_ENV / authentik"
-      The output should include "$SPEC_ENV / velero"
+      The output should include "dev / authentik"
+      The output should include "dev / velero"
     End
 
     It 'lists each tool exactly once (no duplicated output)'
@@ -132,7 +140,7 @@ EOF
   # ── Missing CLI tools ────────────────────────────────────────────────────────
 
   Describe 'when a CLI tool is missing'
-    check_no_fzf() { CHECKSPEC_REMOVE="fzf" run_check "$SPEC_ENV"; }
+    check_no_fzf() { CHECKSPEC_REMOVE="fzf" run_check dev; }
 
     It 'exits with failure and marks the missing tool'
       When call check_no_fzf
@@ -143,7 +151,7 @@ EOF
   End
 
   Describe 'when mise is missing'
-    check_no_mise() { CHECKSPEC_REMOVE="mise" run_check "$SPEC_ENV"; }
+    check_no_mise() { CHECKSPEC_REMOVE="mise" run_check dev; }
 
     It 'marks mise as missing'
       When call check_no_mise
@@ -153,7 +161,7 @@ EOF
   End
 
   Describe 'when kubectl is missing'
-    check_no_kubectl() { CHECKSPEC_REMOVE="kubectl" run_check "$SPEC_ENV"; }
+    check_no_kubectl() { CHECKSPEC_REMOVE="kubectl" run_check dev; }
 
     It 'fails both the tool line and the connection line'
       When call check_no_kubectl
@@ -169,7 +177,7 @@ EOF
   Describe 'when a helm plugin is missing'
     check_no_diff() {
       CHECKSPEC_HELM_PLUGINS="secrets secrets-getter secrets-post-renderer" \
-        run_check "$SPEC_ENV"
+        run_check dev
     }
 
     It 'exits with failure and marks the missing plugin'
@@ -180,7 +188,7 @@ EOF
   End
 
   Describe 'when no helm plugins are installed'
-    check_no_plugins() { CHECKSPEC_HELM_PLUGINS="" run_check "$SPEC_ENV"; }
+    check_no_plugins() { CHECKSPEC_HELM_PLUGINS="" run_check dev; }
 
     It 'reports all four plugins as missing'
       When call check_no_plugins
@@ -196,7 +204,7 @@ EOF
   # ── Kubernetes connectivity ──────────────────────────────────────────────────
 
   Describe 'when the cluster is unreachable'
-    check_k8s_down() { CHECKSPEC_K8S_FAIL=1 run_check "$SPEC_ENV"; }
+    check_k8s_down() { CHECKSPEC_K8S_FAIL=1 run_check dev; }
 
     It 'fails the connection line with the context label'
       When call check_k8s_down
@@ -209,21 +217,44 @@ EOF
   # ── Missing secrets ──────────────────────────────────────────────────────────
 
   Describe 'when the environment has no secrets'
-    check_empty_env() { run_check "shellspec-no-such-env"; }
+    check_empty_env() { CHECKSPEC_NO_SECRETS=1 run_check dev; }
 
     It 'reports every chart secret as missing'
       When call check_empty_env
       The status should be failure
-      The output should include "shellspec-no-such-env / authentik"
-      The output should include "shellspec-no-such-env / velero"
+      The output should include "dev / authentik"
+      The output should include "dev / velero"
       The output should include "6 check(s) failed."
+    End
+  End
+
+  # ── Environment selection ────────────────────────────────────────────────────
+
+  Describe 'when no environment is given'
+    check_prompt() { run_check; }
+
+    It 'falls back to the interactive selector and checks that environment'
+      When call check_prompt
+      The status should be success
+      The output should include "dev / authentik"
+      The output should include "All checks passed"
+    End
+  End
+
+  Describe 'with an invalid environment'
+    check_invalid() { run_check staging; }
+
+    It 'exits with failure'
+      When call check_invalid
+      The status should be failure
+      The output should include "Invalid environment"
     End
   End
 
   # ── Missing gum ──────────────────────────────────────────────────────────────
 
   Describe 'when gum itself is missing'
-    check_no_gum() { CHECKSPEC_REMOVE="gum" run_check "$SPEC_ENV"; }
+    check_no_gum() { CHECKSPEC_REMOVE="gum" run_check dev; }
 
     It 'aborts immediately'
       When call check_no_gum
