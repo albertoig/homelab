@@ -16,13 +16,21 @@ _sel_arg="${1:-}"
 if [ -n "$_sel_arg" ]; then
     ENV="$_sel_arg"
 elif [ -z "${ENV:-}" ]; then
+    # Read the selector from the controlling terminal when there is one. Under
+    # `mise run` the task's stdin is not the terminal, so gum cannot consume the
+    # terminal's probe replies (OSC 11 background colour, cursor position) and
+    # they leak onto the screen as stray escape sequences. /dev/tty fixes that;
+    # fall back to inherited stdin where no controlling terminal exists.
+    _sel_tty=/dev/stdin
+    { :</dev/tty; } 2>/dev/null && _sel_tty=/dev/tty
     ENV=$(gum choose \
         --header "Select target environment:" \
         --cursor "> " \
         --cursor.foreground "$GUM_PRIMARY" \
         --selected.foreground "$GUM_PRIMARY" \
         --header.foreground "$GUM_SECONDARY" \
-        "dev" "prod") || { warn "Aborted."; exit 0; }
+        "dev" "prod" <"$_sel_tty") || { warn "Aborted."; exit 0; }
+    unset _sel_tty
 fi
 
 if [ "$ENV" != "dev" ] && [ "$ENV" != "prod" ]; then
