@@ -48,12 +48,6 @@ server:
     size: {{ $cfg.openbao.storageSize }}
     storageClass: longhorn
 
-  serviceMonitor:
-    enabled: true
-    interval: 30s
-    additionalLabels:
-      release: prometheus-stack
-
   ingress:
     enabled: true
     ingressClassName: traefik
@@ -75,3 +69,14 @@ server:
 ui:
   enabled: true
   serviceType: ClusterIP
+
+# The server ServiceMonitor lives under serverTelemetry — `server.serviceMonitor`
+# is silently ignored by the chart, so it was never created (no metrics scraped).
+# `selectors` sets the labels on the ServiceMonitor object; prometheus-stack only
+# discovers ServiceMonitors labelled release: prometheus-stack.
+serverTelemetry:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    selectors:
+      release: prometheus-stack
