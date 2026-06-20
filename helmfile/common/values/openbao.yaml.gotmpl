@@ -23,10 +23,21 @@ server:
         address     = "[::]:8200"
         cluster_address = "[::]:8201"
         tls_disable = 1
+
+        # Let the prometheus serviceMonitor scrape /v1/sys/metrics without a token
+        telemetry {
+          unauthenticated_metrics_access = true
+        }
       }
 
       storage "file" {
         path = "/openbao/data"
+      }
+
+      # Expose Prometheus-format metrics for the serviceMonitor below
+      telemetry {
+        prometheus_retention_time = "30s"
+        disable_hostname          = true
       }
 
       api_addr     = "http://openbao-internal.openbao-system.svc.cluster.local:8200"
