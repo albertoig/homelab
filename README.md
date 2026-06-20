@@ -28,29 +28,29 @@ The homelab follows a layered architecture:
 
 ### Services Deployed
 
-| Service | Purpose | Namespace |
-|---------|---------|-----------|
-| prometheus-operator-crds | Prometheus Operator CRDs | monitoring-system |
-| cert-manager | SSL/TLS certificate management | cert-manager-system |
-| cert-manager-config | Certificate configuration | cert-manager-system |
-| external-dns | DNS management with Cloudflare | cert-manager-system |
-| authentik-blueprints | Declarative provider/app/user provisioning | auth-system |
-| longhorn | Distributed block storage | longhorn-system |
-| metallb | Load balancer for bare metal | lb-system |
-| metallb-config | MetalLB IP Address Pool and L2 Advertisement | lb-system |
-| prometheus-stack | Monitoring and alerting | monitoring-system |
-| grafana | Metrics visualization | monitoring-system |
-| loki | Log aggregation | monitoring-system |
-| alloy | OpenTelemetry collector (logs, traces, profiling) | monitoring-system |
-| tempo | Distributed tracing | monitoring-system |
-| pyroscope | Continuous profiling | monitoring-system |
-| traefik | Reverse proxy and ingress | ingress-system |
-| authentik | Identity provider | auth-system |
-| argocd | GitOps continuous delivery | gitops-system |
-| authentik-ingress | Authentik ingress configuration | auth-system |
-| openbao | Runtime secrets manager (Vault-compatible) | openbao-system |
-| external-secrets | Sync OpenBao secrets into Kubernetes Secrets | external-secrets-system |
-| velero | Kubernetes backup and restore | velero-system |
+| Service | Purpose | Namespace | Grafana Dashboard |
+|---------|---------|-----------|-------------------|
+| prometheus-operator-crds | Prometheus Operator CRDs | monitoring-system | ❌ |
+| cert-manager | SSL/TLS certificate management | cert-manager-system | ❌ |
+| cert-manager-config | Certificate configuration | cert-manager-system | ❌ |
+| external-dns | DNS management with Cloudflare | cert-manager-system | ✅ External DNS |
+| authentik-blueprints | Declarative provider/app/user provisioning | auth-system | ❌ |
+| longhorn | Distributed block storage | longhorn-system | ✅ Longhorn |
+| metallb | Load balancer for bare metal | lb-system | ✅ MetalLB |
+| metallb-config | MetalLB IP Address Pool and L2 Advertisement | lb-system | ❌ |
+| prometheus-stack | Monitoring and alerting | monitoring-system | ✅ Kubernetes Cluster · Node Exporter · Kubernetes Pods |
+| grafana | Metrics visualization | monitoring-system | ❌ |
+| loki | Log aggregation | monitoring-system | ✅ Loki (chart-bundled) |
+| alloy | OpenTelemetry collector (logs, traces, profiling) | monitoring-system | ❌ |
+| tempo | Distributed tracing | monitoring-system | ❌ |
+| pyroscope | Continuous profiling | monitoring-system | ❌ |
+| traefik | Reverse proxy and ingress | ingress-system | ✅ Traefik |
+| authentik | Identity provider | auth-system | ✅ Authentik |
+| argocd | GitOps continuous delivery | gitops-system | ✅ ArgoCD Operations · Application · Notifications |
+| authentik-ingress | Authentik ingress configuration | auth-system | ❌ |
+| openbao | Runtime secrets manager (Vault-compatible) | openbao-system | ✅ Hashicorp Vault |
+| external-secrets | Sync OpenBao secrets into Kubernetes Secrets | external-secrets-system | ❌ |
+| velero | Kubernetes backup and restore | velero-system | ❌ |
 
 ---
 
