@@ -3,6 +3,13 @@
 # OpenBao configuration
 # https://openbao.github.io/openbao-helm/
 
+# The agent injector (annotation-based sidecar secret injection) is unused —
+# secrets reach workloads through the External Secrets Operator instead. Its
+# mutating webhook also patches its own caBundle (field manager "vault-k8s"),
+# which conflicts with helm's server-side apply on every upgrade. Disable it.
+injector:
+  enabled: false
+
 server:
   ha:
     enabled: false
