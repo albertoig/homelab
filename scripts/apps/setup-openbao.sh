@@ -63,22 +63,33 @@ ROOT_TOKEN=""
 
 # ── Step 1: Wait for pod ──────────────────────────────────────────────────────
 
+# OpenBao reports NotReady until it is unsealed (its readiness probe fails while
+# sealed), and unsealing happens in step 4 below. Waiting for condition=Ready
+# here would deadlock — the pod can only become Ready after this script unseals
+# it. Wait for the container to be Running instead (enough to exec in), then poll
+# the bao API, which answers even while sealed.
 gum spin --spinner pulse --show-error \
-    --title "  Waiting for $POD to be ready..." \
+    --title "  Waiting for $POD to start..." \
     -- kubectl --context "$KUBE_CONTEXT" wait pod "$POD" -n "$NAMESPACE" \
-        --for=condition=Ready --timeout=120s
+        --for=jsonpath='{.status.phase}'=Running --timeout=120s
 
-info "$POD is ready."
-echo ""
+STATUS=""
+for _ in $(seq 1 30); do
+    STATUS=$(kbao status -format=json 2>/dev/null || true)
+    [ -n "$STATUS" ] && jq -e 'has("sealed")' <<<"$STATUS" >/dev/null 2>&1 && break
+    STATUS=""
+    sleep 2
+done
 
 # ── Step 2: Check current state ───────────────────────────────────────────────
 
-STATUS=$(kbao status -format=json 2>/dev/null || true)
-
 if [ -z "$STATUS" ]; then
-    error "Could not reach OpenBao inside $POD at $BAO_ADDR."
+    error "OpenBao API at $BAO_ADDR did not become reachable inside $POD."
     exit 1
 fi
+
+info "$POD is running and the OpenBao API is reachable."
+echo ""
 
 INITIALIZED=$(jq -r '.initialized' <<<"$STATUS")
 SEALED=$(jq -r '.sealed' <<<"$STATUS")
