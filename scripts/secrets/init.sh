@@ -29,7 +29,7 @@ source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
 SECRETS_DIR="$HELMFILE_DIR/helmfile/environments/$ENV/secrets"
 
 if [ ! -d "$TEMPLATES_DIR" ] || [ -z "$(ls "$TEMPLATES_DIR"/*.template.yaml 2>/dev/null)" ]; then
-    gum log --level error "No template files found in $TEMPLATES_DIR"
+    error "No template files found in $TEMPLATES_DIR"
     exit 1
 fi
 
@@ -83,14 +83,14 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     # --- Ask before proceeding — always, for every chart ---
     if $has_existing; then
         if ! gum confirm --default=false "Secrets already exist for '$chart_name'. Overwrite?"; then
-            gum log --level info "Skipped $chart_name."
+            info "Skipped $chart_name."
             echo ""
             [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source" || true
             continue
         fi
     else
         if ! gum confirm "Configure secrets for '$chart_name'?"; then
-            gum log --level info "Skipped $chart_name."
+            info "Skipped $chart_name."
             echo ""
             continue
         fi
@@ -184,7 +184,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     # --- Phase 2: Prompt for values ---
 
     if [ "$entries" -eq 0 ]; then
-        gum log --level warn "No secret fields found in template for $chart_name."
+        warn "No secret fields found in template for $chart_name."
         echo ""
         continue
     fi
@@ -212,7 +212,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         if [ -n "$autogen" ]; then
             if gum confirm --default=true "  Auto-generate $(gum_accent "$kp")?"; then
                 response=$(eval "$autogen")
-                gum log --level info "Auto-generated $kp"
+                info "Auto-generated $kp"
             else
                 placeholder=""
                 [ -n "$existing" ] && placeholder="(press enter to keep existing)"
@@ -316,7 +316,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         done < "$template"
     } > "$secrets_file"
 
-    gum log --level info "Generated $(basename "$secrets_file")"
+    info "Generated $(basename "$secrets_file")"
 
     # Clean up temporary decrypted file
     [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source" || true
@@ -341,17 +341,17 @@ for secrets_file in "$SECRETS_DIR"/*.secrets.yaml; do
         --title "  $(basename "$secrets_file") → $(basename "$enc_file")" \
         -- bash -c 'sops --encrypt "$SOPS_IN" > "$SOPS_OUT"'; then
         rm -f "$secrets_file"
-        gum log --level info "Created $(basename "$enc_file")"
+        info "Created $(basename "$enc_file")"
         TOTAL_ENCRYPTED=$((TOTAL_ENCRYPTED + 1))
     else
-        gum log --level error "Failed to encrypt $(basename "$secrets_file")"
+        error "Failed to encrypt $(basename "$secrets_file")"
         TOTAL_FAILED=$((TOTAL_FAILED + 1))
     fi
 done
 
 echo ""
 if [ "$TOTAL_FAILED" -gt 0 ]; then
-    gum log --level warn "Encrypted $TOTAL_ENCRYPTED file(s), $TOTAL_FAILED failed."
+    warn "Encrypted $TOTAL_ENCRYPTED file(s), $TOTAL_FAILED failed."
 else
     gum style \
         --border rounded \

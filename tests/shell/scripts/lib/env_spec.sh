@@ -37,6 +37,9 @@ Describe 'scripts/lib/env.sh'
       Mock gum
         :
       End
+      Mock error
+        :
+      End
       When call source_env "staging"
       The output should eq ""
       The status should be failure
@@ -44,6 +47,9 @@ Describe 'scripts/lib/env.sh'
 
     It 'rejects "production" (only exact values are accepted)'
       Mock gum
+        :
+      End
+      Mock error
         :
       End
       When call source_env "production"
@@ -98,8 +104,10 @@ Describe 'scripts/lib/env.sh'
       Mock gum
         case "$1" in
           choose) echo "invalid" ;;
-          log)    :             ;;
         esac
+      End
+      Mock error
+        :
       End
       When call source_env
       The output should eq ""

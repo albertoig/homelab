@@ -34,7 +34,7 @@ elif [ -z "${ENV:-}" ]; then
 fi
 
 if [ "$ENV" != "dev" ] && [ "$ENV" != "prod" ]; then
-    gum log --level error "Invalid environment '$ENV'. Available: dev, prod"
+    error "Invalid environment '$ENV'. Available: dev, prod"
     exit 1
 fi
 

@@ -54,7 +54,7 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
         --title "  Initialising Terraform..." \
         -- terraform -chdir="$ROOT_DIR/terraform" init -reconfigure
 
-    gum log --level info "Initialised."
+    info "Initialised."
 
     gum spin \
         --spinner pulse \
@@ -65,7 +65,7 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
                 || terraform -chdir='$ROOT_DIR/terraform' workspace new '$ENV'
         "
 
-    gum log --level info "Workspace: $ENV"
+    info "Workspace: $ENV"
 
     gum spin \
         --spinner pulse \
@@ -73,7 +73,7 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
         --title "  Planning changes..." \
         -- bash -c "TF_VAR_environment='$ENV' terraform -chdir='$ROOT_DIR/terraform' plan -out='$TF_PLAN'"
 
-    gum log --level info "Plan ready."
+    info "Plan ready."
     echo ""
 
     TF_SHOW=$(terraform -chdir="$ROOT_DIR/terraform" show -no-color "$TF_PLAN" 2>/dev/null)
@@ -129,9 +129,9 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
         --title "  Applying changes..." \
         -- bash -c "terraform -chdir='$ROOT_DIR/terraform' apply -no-color '$TF_PLAN' > '$TF_LOG' 2>&1"; then
         SUMMARY=$(grep "Apply complete!" "$TF_LOG" || echo "Applied.")
-        gum log --level info "$SUMMARY"
+        info "$SUMMARY"
     else
-        gum log --level error "Apply failed — opening log."
+        error "Apply failed — opening log."
         echo ""
         gum pager < "$TF_LOG"
         exit 1
@@ -144,7 +144,7 @@ if [ -n "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" ] && [ -n "${CLOUDFLARE_R2_SECRET_ACC
         --title "  Writing Velero secrets..." \
         -- "$SCRIPT_DIR/../secrets/velero.sh" "$ENV"
 
-    gum log --level info "Velero secrets updated."
+    info "Velero secrets updated."
     echo ""
 else
     step 1 2 "Skipping Terraform — R2 credentials not set in .mise.local.toml."
@@ -172,7 +172,7 @@ while kill -0 "$HF_PID" 2>/dev/null; do
 
     if [ -n "$CUR" ] && [ "$CUR" != "$PREV" ]; then
         printf "\r\033[2K"
-        [ -n "$PREV" ] && gum log --level info "Installed $PREV"
+        [ -n "$PREV" ] && info "Installed $PREV"
         PREV="$CUR"
     fi
 
@@ -184,10 +184,10 @@ done
 printf "\r\033[2K"
 
 if wait "$HF_PID"; then
-    [ -n "$PREV" ] && gum log --level info "Installed $PREV"
-    gum log --level info "All releases installed."
+    [ -n "$PREV" ] && info "Installed $PREV"
+    info "All releases installed."
 else
-    gum log --level error "Helmfile sync failed — opening log."
+    error "Helmfile sync failed — opening log."
     echo ""
     gum pager < "$HF_LOG"
     exit 1
