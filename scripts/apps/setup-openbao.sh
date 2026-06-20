@@ -12,7 +12,7 @@
 #   7. Create Kubernetes secret for ESO authentication
 #   8. Apply ClusterSecretStore pointing at OpenBao
 #
-# Usage: ./scripts/apps/setup-openbao.sh
+# Usage: ./scripts/apps/setup-openbao.sh [environment]   (prompts if omitted)
 
 set -euo pipefail
 
@@ -36,16 +36,27 @@ if ! command -v gum &>/dev/null; then
     exit 1
 fi
 
+# Select the target environment (prompts when no argument is given).
+source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
+KUBE_CONTEXT="homelab-$ENV"
+
 clear
 show_header
-gum_secondary "  OpenBao post-deploy setup"
+gum_secondary "  OpenBao post-deploy setup — env → $(gum_primary --bold "$ENV")"
+echo ""
+
+# Verify every tool and cluster resource is in place before touching OpenBao.
+OPENBAO_PREFLIGHT_QUIET=1 "$SCRIPT_DIR/setup-openbao-preflight.sh" "$ENV" || exit 1
 echo ""
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+# All cluster reads/writes target the selected environment's context
+k() { kubectl --context "$KUBE_CONTEXT" "$@"; }
+
 # Run a bao command inside the pod (unauthenticated)
 kbao() {
-    kubectl exec -n "$NAMESPACE" "$POD" -- env BAO_ADDR="$BAO_ADDR" bao "$@"
+    k exec -n "$NAMESPACE" "$POD" -- env BAO_ADDR="$BAO_ADDR" bao "$@"
 }
 
 ROOT_TOKEN=""
@@ -54,10 +65,10 @@ ROOT_TOKEN=""
 
 gum spin --spinner pulse --show-error \
     --title "  Waiting for $POD to be ready..." \
-    -- kubectl wait pod "$POD" -n "$NAMESPACE" \
+    -- kubectl --context "$KUBE_CONTEXT" wait pod "$POD" -n "$NAMESPACE" \
         --for=condition=Ready --timeout=120s
 
-gum log --level info "$POD is ready."
+info "$POD is ready."
 echo ""
 
 # ── Step 2: Check current state ───────────────────────────────────────────────
@@ -65,7 +76,7 @@ echo ""
 STATUS=$(kbao status -format=json 2>/dev/null || true)
 
 if [ -z "$STATUS" ]; then
-    gum log --level error "Could not reach OpenBao inside $POD at $BAO_ADDR."
+    error "Could not reach OpenBao inside $POD at $BAO_ADDR."
     exit 1
 fi
 
@@ -73,7 +84,7 @@ INITIALIZED=$(jq -r '.initialized' <<<"$STATUS")
 SEALED=$(jq -r '.sealed' <<<"$STATUS")
 
 if [ "$INITIALIZED" = "true" ] && [ "$SEALED" = "false" ]; then
-    gum log --level info "OpenBao is already initialised and unsealed — nothing to do."
+    info "OpenBao is already initialised and unsealed — nothing to do."
     echo ""
     exit 0
 fi
@@ -83,7 +94,7 @@ if [ "$INITIALIZED" = "true" ] && [ "$SEALED" = "true" ]; then
         --border rounded --border-foreground "$GUM_ACCENT" --padding "0 2" \
         "$(gum_accent --bold "OpenBao is initialised but sealed.")" \
         "" \
-        "Unseal manually: kubectl exec -n $NAMESPACE $POD -- bao operator unseal"
+        "Unseal manually: kubectl --context $KUBE_CONTEXT exec -n $NAMESPACE $POD -- bao operator unseal"
     exit 1
 fi
 
@@ -120,24 +131,24 @@ echo ""
 for i in 0 1 2; do
     gum spin --spinner pulse \
         --title "  Applying unseal key $((i+1))/3..." \
-        -- kubectl exec -n "$NAMESPACE" "$POD" -- \
+        -- kubectl --context "$KUBE_CONTEXT" exec -n "$NAMESPACE" "$POD" -- \
             env BAO_ADDR="$BAO_ADDR" bao operator unseal "${UNSEAL_KEYS[$i]}"
-    gum log --level info "Unseal key $((i+1))/3 accepted."
+    info "Unseal key $((i+1))/3 accepted."
 done
 
 echo ""
-gum log --level info "OpenBao unsealed."
+info "OpenBao unsealed."
 echo ""
 
 # ── Step 5: Enable KV v2 ─────────────────────────────────────────────────────
 
 gum spin --spinner pulse --show-error \
     --title "  Enabling KV v2 at '$KV_PATH/'..." \
-    -- kubectl exec -n "$NAMESPACE" "$POD" -- \
+    -- kubectl --context "$KUBE_CONTEXT" exec -n "$NAMESPACE" "$POD" -- \
         env BAO_ADDR="$BAO_ADDR" BAO_TOKEN="$ROOT_TOKEN" \
         bao secrets enable -path="$KV_PATH" -version=2 kv
 
-gum log --level info "KV v2 enabled at $KV_PATH/."
+info "KV v2 enabled at $KV_PATH/."
 echo ""
 
 # ── Step 6: Create ESO read-only policy ──────────────────────────────────────
@@ -155,17 +166,17 @@ HCL
 
 gum spin --spinner pulse --show-error \
     --title "  Writing policy '$ESO_POLICY'..." \
-    -- bash -c "kubectl exec -i -n '$NAMESPACE' '$POD' -- \
+    -- bash -c "kubectl --context '$KUBE_CONTEXT' exec -i -n '$NAMESPACE' '$POD' -- \
         env BAO_ADDR='$BAO_ADDR' BAO_TOKEN='$ROOT_TOKEN' \
         bao policy write '$ESO_POLICY' - < '$_policy'"
 
 rm -f "$_policy"
-gum log --level info "Policy '$ESO_POLICY' created."
+info "Policy '$ESO_POLICY' created."
 echo ""
 
 # ── Step 7: Create ESO service token ─────────────────────────────────────────
 
-ESO_TOKEN=$(kubectl exec -n "$NAMESPACE" "$POD" -- \
+ESO_TOKEN=$(k exec -n "$NAMESPACE" "$POD" -- \
     env BAO_ADDR="$BAO_ADDR" BAO_TOKEN="$ROOT_TOKEN" \
     bao token create \
         -policy="$ESO_POLICY" \
@@ -173,19 +184,19 @@ ESO_TOKEN=$(kubectl exec -n "$NAMESPACE" "$POD" -- \
         -no-default-policy \
         -orphan \
         -field=token)
-gum log --level info "ESO service token created."
+info "ESO service token created."
 echo ""
 
 # ── Step 8: Kubernetes secret ─────────────────────────────────────────────────
 
 gum spin --spinner pulse --show-error \
     --title "  Applying secret '$ESO_SECRET' in $ESO_NAMESPACE..." \
-    -- bash -c "kubectl create secret generic '$ESO_SECRET' \
+    -- bash -c "kubectl --context '$KUBE_CONTEXT' create secret generic '$ESO_SECRET' \
         --from-literal=token='$ESO_TOKEN' \
         --namespace '$ESO_NAMESPACE' \
-        --dry-run=client -o yaml | kubectl apply -f -"
+        --dry-run=client -o yaml | kubectl --context '$KUBE_CONTEXT' apply -f -"
 
-gum log --level info "Secret '$ESO_SECRET' applied."
+info "Secret '$ESO_SECRET' applied."
 echo ""
 
 # ── Step 9: ClusterSecretStore ────────────────────────────────────────────────
@@ -212,10 +223,10 @@ EOF
 
 gum spin --spinner pulse --show-error \
     --title "  Applying ClusterSecretStore '$CSS_NAME'..." \
-    -- kubectl apply -f "$_css"
+    -- kubectl --context "$KUBE_CONTEXT" apply -f "$_css"
 
 rm -f "$_css"
-gum log --level info "ClusterSecretStore '$CSS_NAME' applied."
+info "ClusterSecretStore '$CSS_NAME' applied."
 echo ""
 
 # ── Done ──────────────────────────────────────────────────────────────────────
@@ -225,6 +236,7 @@ gum style \
     --align center --padding "1 4" --margin "1 2" \
     "$(gum_primary --bold "✓  OpenBao is configured and ready.")" \
     "" \
+    "Environment:        $ENV" \
     "KV engine:          $KV_PATH/ (v2)" \
     "ESO policy:         $ESO_POLICY" \
     "ClusterSecretStore: $CSS_NAME"

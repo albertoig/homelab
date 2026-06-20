@@ -86,9 +86,13 @@ run = '''
 
 # ── Secrets management ────────────────────────────────────────────────────────
 
+[tasks."openbao:preflight"]
+description = "Check tools and cluster resources required for OpenBao setup  [env: dev|prod]"
+run = "./scripts/apps/setup-openbao-preflight.sh \"${1:-}\""
+
 [tasks."openbao:setup"]
-description = "Initialise and configure OpenBao after helmfile deploy"
-run = "./scripts/apps/setup-openbao.sh"
+description = "Initialise and configure OpenBao after helmfile deploy  [env: dev|prod]"
+run = "./scripts/apps/setup-openbao.sh \"${1:-}\""
 
 [tasks."secrets:init"]
 description = "Initialise secrets from templates"
