@@ -19,15 +19,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/colors.sh"
 source "$SCRIPT_DIR/../lib/header.sh"
-
-NAMESPACE="openbao-system"
-ESO_NAMESPACE="external-secrets-system"
-POD="openbao-0"
-BAO_ADDR="http://127.0.0.1:8200"
-KV_PATH="secret"
-ESO_POLICY="eso-read"
-ESO_SECRET="openbao-eso-token"
-CSS_NAME="openbao"
+source "$SCRIPT_DIR/../lib/openbao.sh"
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
 

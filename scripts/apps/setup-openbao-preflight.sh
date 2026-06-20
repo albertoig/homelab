@@ -14,12 +14,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/colors.sh"
 source "$SCRIPT_DIR/../lib/header.sh"
-
-# Mirrors the constants in setup-openbao.sh
-NAMESPACE="openbao-system"
-ESO_NAMESPACE="external-secrets-system"
-POD="openbao-0"
-CSS_CRD="clustersecretstores.external-secrets.io"
+source "$SCRIPT_DIR/../lib/openbao.sh"
 
 if ! command -v gum &>/dev/null; then
     error "gum not found. Run: mise install"
