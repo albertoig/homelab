@@ -34,9 +34,13 @@ server:
         path = "/openbao/data"
       }
 
-      # Expose Prometheus-format metrics for the serviceMonitor below
+      # Expose Prometheus-format metrics for the serviceMonitor below.
+      # prometheus_retention_time is how long each metric is kept in the in-memory
+      # sink (NOT the scrape interval); too-short a value drops slowly-updated
+      # metrics (core/token/lease gauges), leaving only vault_runtime_*. Use the
+      # OpenBao default so the full metric set is exposed.
       telemetry {
-        prometheus_retention_time = "30s"
+        prometheus_retention_time = "24h"
         disable_hostname          = true
       }
 
