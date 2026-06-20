@@ -89,6 +89,7 @@ Hooks that run on commit:
 - **actionlint** — validates GitHub Actions workflow files
 - **ansible-lint** — lints Ansible playbooks in `metal/k3s/` when those files change
 - **helm-lint** — lints custom charts in `charts/` when chart files change
+- **Shell BDD Tests** — runs shellspec specs when files under `scripts/` or `tests/` change
 - **helmfile-lint** — lints helmfile configuration when `helmfile/` or `helmfile.yaml.gotmpl` change
 - **commitlint** — enforces the conventional commit format on every commit message
 

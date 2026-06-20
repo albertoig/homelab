@@ -16,11 +16,14 @@ mise run setup
 
 ### Available Hooks
 
-| Hook | Purpose |
-|------|---------|
-| ansible-lint | Lints Ansible playbooks in `metal/k3s/playbooks/` |
-| helm-lint | Lints Helm charts in `charts/` |
-| helmfile-lint | Lints helmfile configurations in `helmfile/` |
+| Hook | Stage | Purpose |
+|------|-------|---------|
+| actionlint | commit | Lints GitHub Actions workflows in `.github/workflows/` |
+| commitlint | commit-msg | Enforces Conventional Commits on the commit message |
+| ansible-lint | commit | Lints Ansible playbooks in `metal/k3s/playbooks/` |
+| helm-lint | commit | Lints Helm charts in `charts/` |
+| Shell BDD Tests | commit | Runs shellspec specs when `scripts/` or `tests/` change |
+| helmfile-lint | commit | Lints helmfile configurations in `helmfile/` |
 
 ### Running Hooks
 
@@ -130,3 +133,47 @@ If you add new secret templates or create new releases with secrets, update the 
 ### Configuration
 
 The helmfile-lint hook is configured to run on YAML files in `helmfile/`. See `.pre-commit-config.yaml` for details.
+
+## Shell tests (shellspec)
+
+Shell scripts are covered by [shellspec](https://shellspec.info/) BDD specs under
+`tests/shell/`, mirroring the `scripts/` layout (e.g.
+`tests/shell/scripts/infra/preflight_spec.sh`). They run the scripts inside a
+sandboxed `PATH` of stubs, so missing-tool and failure paths can be simulated
+without a real cluster.
+
+### Usage
+
+```bash
+mise run test:shell        # runs `shellspec tests/shell`
+```
+
+The `Shell BDD Tests` pre-commit hook runs the specs automatically whenever a
+file under `scripts/` or `tests/` changes.
+
+### Adding specs
+
+Place a `*_spec.sh` file under `tests/shell/` mirroring the script's path. Stub
+external tools by prepending a temporary `bin/` to `PATH`; see
+`tests/shell/scripts/infra/preflight_spec.sh` for the sandbox pattern.
+
+## Python integration tests (pytest)
+
+Cluster-facing integration tests live under `tests/` and run with
+[pytest](https://docs.pytest.org/). They target a live environment selected via
+the `ENV` variable (`dev` by default) and the matching `homelab-<env>` kube
+context.
+
+| Task | Scope |
+|------|-------|
+| `mise run test` | All integration tests |
+| `mise run test:smoke` | HTTP endpoint smoke checks (`tests/smoke/`) |
+| `mise run test:k8s` | Kubernetes pod/health checks (`tests/k8s/`) |
+
+```bash
+mise run test            # dev (default)
+mise run test prod       # target prod
+```
+
+These require a reachable cluster and are intended to run against a deployed
+environment, not in pre-commit.

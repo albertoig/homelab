@@ -47,6 +47,8 @@ metallb:          # MetalLB load balancer settings
 grafana:          # Grafana monitoring dashboards
 prometheus:       # Prometheus metrics collection
 alertmanager:     # Alertmanager alert routing
+velero:           # Backup schedule and R2 storage target
+openbao:          # Runtime secrets manager storage
 ```
 
 ---
@@ -141,6 +143,19 @@ Backup schedule and Cloudflare R2 storage target.
 
 ---
 
+## OpenBao
+
+Runtime secrets manager. Post-deploy initialisation is run once via
+`mise run openbao:setup <env>` (see [SCRIPTS.md](./SCRIPTS.md)).
+
+| Key | Description | Default | Example |
+|-----|-------------|---------|---------|
+| `openbao.storageSize` | Persistent volume size for the OpenBao data (file storage backend). | `5Gi` | `10Gi` |
+
+**Used by:** `helmfile/common/values/openbao.yaml.gotmpl`
+
+---
+
 ## Environment examples
 
 ### Production
@@ -174,6 +189,9 @@ velero:
   s3Url: "https://<account_id>.r2.cloudflarestorage.com"
   retention: "720h"
   schedule: "0 2 * * *"
+
+openbao:
+  storageSize: 5Gi
 ```
 
 ### Development
@@ -207,6 +225,9 @@ velero:
   s3Url: "https://<account_id>.r2.cloudflarestorage.com"
   retention: "168h"
   schedule: "0 3 * * *"
+
+openbao:
+  storageSize: 5Gi
 ```
 
 ---

@@ -15,7 +15,9 @@
 
 ## 📋 Overview
 
-This repository manages a personal homelab running on Kubernetes (K3s), using Helmfile to deploy services and Ansible to provision bare-metal nodes. Secrets are encrypted with SOPS, and ArgoCD handles GitOps delivery.
+This repository manages a personal homelab running on Kubernetes (K3s), using Helmfile to deploy services and Ansible to provision bare-metal nodes. Bootstrap secrets are encrypted with SOPS; runtime secrets are managed by OpenBao with the External Secrets Operator.
+
+ArgoCD and OpenBao are provided as **platform services for downstream application repositories** built on top of this foundation — they do not manage this repository's own releases, which are deployed directly by Helmfile.
 
 This project is the **cornerstone** of a homelab — it provides the base infrastructure (cluster, networking, monitoring, identity). If you want to deploy your own applications (a portfolio site, a blog, custom services, etc.), those should live in a separate repository and be deployed on top of this foundation. This keeps the infrastructure clean and your application deployments independent.
 
@@ -53,6 +55,8 @@ The homelab follows a layered architecture:
 | authentik | Identity provider | auth-system |
 | argocd | GitOps continuous delivery | gitops-system |
 | authentik-ingress | Authentik ingress configuration | auth-system |
+| openbao | Runtime secrets manager (Vault-compatible) | openbao-system |
+| external-secrets | Sync OpenBao secrets into Kubernetes Secrets | external-secrets-system |
 | velero | Kubernetes backup and restore | velero-system |
 
 ---
@@ -66,7 +70,9 @@ The homelab follows a layered architecture:
 | [Helmfile](https://helmfile.readthedocs.io/) | Helm releases management |
 | [Helm](https://helm.sh/) | Kubernetes package manager |
 | [ArgoCD](https://argoproj.github.io/cd/) | GitOps continuous delivery |
-| [SOPS](https://github.com/mozilla/sops) | Secrets encryption |
+| [SOPS](https://github.com/mozilla/sops) | Bootstrap secrets encryption |
+| [OpenBao](https://openbao.org/) | Runtime secrets manager (Vault-compatible) |
+| [External Secrets Operator](https://external-secrets.io/) | Sync OpenBao secrets into Kubernetes Secrets |
 | [Prometheus](https://prometheus.io/) | Monitoring and alerting |
 | [Grafana](https://grafana.com/) | Metrics visualization |
 | [Loki](https://grafana.com/oss/loki/) | Log aggregation |
@@ -117,7 +123,8 @@ homelab/
 │   └── locks/                 # Helmfile lock files
 ├── metal/                     # Bare metal provisioning
 │   └── k3s/                   # K3s cluster setup with Ansible
-├── scripts/                   # Utility scripts
+├── scripts/                   # Automation scripts (lib, infra, helm, secrets, apps)
+├── tests/                     # Shell BDD (shellspec) + Python integration tests
 ├── terraform/                 # Cloud infrastructure (Cloudflare R2, etc.)
 ├── helmfile.yaml.gotmpl       # Main Helmfile entry point
 ├── ROADMAP.md                 # Project roadmap
@@ -141,6 +148,7 @@ mise run secrets:init <env>                                                  # s
 mise run provision                                                           # provision cluster
 cp terraform/terraform.tfvars.example terraform/terraform.tfvars            # configure Cloudflare
 mise run install <env>                                                       # deploy services
+mise run openbao:setup <env>                                                 # initialise OpenBao + ESO
 ```
 
 ---
@@ -199,7 +207,7 @@ After applying, copy the outputs (`velero_bucket_name`, `velero_s3_endpoint`) in
 ## 📚 Documentation
 
 - [Roadmap](./ROADMAP.md) — upcoming features and progress
-- [Testing](./docs/TESTING.md) — pre-commit hooks and ansible-lint
+- [Testing](./docs/TESTING.md) — pre-commit hooks, shell BDD (shellspec), and Python integration tests
 - [Configuration](./docs/CONFIG.md) — config system reference and all available settings
 - [Installation](./docs/INSTALL.md) — step-by-step setup guide
 - [Forking](./docs/FORKING.md) — how to fork and maintain your own configs and secrets

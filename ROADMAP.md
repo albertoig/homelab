@@ -63,7 +63,7 @@ GitOps-driven environment.
 
 ### P3 — Platform (build on top of this infra)
 - [x] OpenBao — runtime secret manager with External Secrets Operator to bridge OpenBao → Kubernetes Secrets
-  - Manual steps post-deploy: `bao operator init`, `bao operator unseal` (3×), create ESO policy + token, apply ClusterSecretStore
+  - Post-deploy setup is automated and idempotent via `mise run openbao:setup` (init, unseal, KV v2, ESO policy + token, ClusterSecretStore); the unseal keys and root token are shown once to save
 - [ ] OpenBao hardening — document where unseal keys and the root token must be stored, revoke the root token after the ESO token is created, evaluate auto-unseal (static or transit) so a node reboot doesn't leave dependent workloads down, and replace the static ESO token with Kubernetes auth (no token to expire or leak)
 - [ ] Secrets end-state ADR — write down the boundary between the two systems: SOPS for bootstrap-time secrets this repo's helmfile needs at render time (SSO client secrets, OpenBao deployment itself), OpenBao + ESO for runtime secrets consumed by downstream projects built on top of this platform
 - [ ] Document the OpenBao secret-delivery choice — the agent injector is disabled (`injector.enabled: false`); secrets are delivered through ESO (pull → Kubernetes Secrets) rather than the injector (sidecar → tmpfs) or the CSI provider. Record the rationale and trade-offs in the end-state ADR: ESO keeps apps OpenBao-agnostic and GitOps-native but lands secrets in etcd, whereas the injector/CSI keep secrets out of etcd at the cost of a per-pod sidecar and a cluster-wide mutating webhook (the same webhook that conflicted with helm's server-side apply on upgrade). Note the CSI provider as the revisit path if short-TTL dynamic secrets are ever needed
@@ -79,14 +79,14 @@ GitOps-driven environment.
     - [ ] Cert-Manager
 - [ ] ADR integration into merge request workflow — automate the ADR requirement check on PRs
 - [ ] Track helm-secrets plugin version — `docs/INSTALL.md` pins v4.7.4 with a direct URL, not tracked by Renovate
-- [ ] Remove scripts hard-limit to `dev`/`prod` — `install-helmfiles.sh`, `destroy-helmfiles.sh`, `init-secrets.sh` reject any other environment name
+- [ ] Remove scripts hard-limit to `dev`/`prod` — `helm/install.sh`, `helm/destroy.sh`, `secrets/init.sh` (via `lib/env.sh`) reject any other environment name
 - [ ] Centralize environment → kube-context resolution — the `kubeContext` per environment is defined in `helmfile.yaml.gotmpl` (`homelab-dev`, `homelab-prod`) but `scripts/lib/env.sh` hardcodes the env list and `doctor.sh`/`preflight.sh` re-derive the `homelab-` prefix independently; add a small lib helper (or script) that reads the environments and their contexts from the helmfile (e.g. via `yq`) so scripts stop duplicating the mapping — pairs with removing the dev/prod hard-limit above
 - [ ] Fix lock file numbering — `005-ingresses.helmfile.yaml.gotmpl` references `004-ingresses.helmfile.lock` (cosmetic inconsistency)
 - [ ] Simplify config with scripts — `root_dns` is set in `config.yaml` but DNS-related values are also prompted separately in `secrets-init`; reduce duplication
-- [ ] Refresh `docs/SCRIPTS.md` — large parts still document the pre-reorg flat `scripts/` layout (`install-helmfiles.sh`, `init-secrets.sh`, `sops-*-secrets.sh`, the architecture diagram, and the directory tree); only the preflight/validate sections are current
+- [x] Refresh `docs/SCRIPTS.md` — rewritten for the domain-based `scripts/` layout (lib/infra/helm/secrets/apps), the current mise tasks, OpenBao setup, and the test suite
 - [ ] Extract secrets template parsing from `init.sh`/`lib/secrets.sh` into a small Python CLI — the hand-rolled YAML parser in bash (`find_colon`, `yaml_value`, `build_path`) should become a pytest-tested `scripts/secrets/template.py` that emits the field list, leaving the gum prompting loop in bash
 - [ ] Split `004-core-apps` by architecture layer — it currently mixes storage, networking, monitoring, logging, identity, and GitOps in one stage; splitting (e.g. storage/network, observability, identity/gitops) would match the layers described in the README and shrink blast radius per change
-- [ ] Clarify ArgoCD/OpenBao role in README — this repo is the platform foundation deployed by helmfile; ArgoCD and OpenBao are services it provides for downstream application repos built on top, they do not manage this repo's own releases. Reword "ArgoCD handles GitOps delivery" so forks don't expect Applications here
+- [x] Clarify ArgoCD/OpenBao role in README — reworded the overview: ArgoCD and OpenBao are platform services for downstream application repos, they do not manage this repo's own releases (deployed by helmfile)
 
 ### P5 — Nice to have
 - [ ] Grafana Dashboards

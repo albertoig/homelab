@@ -99,7 +99,7 @@ velero:
   schedule: "0 3 * * *"
 ```
 
-`velero.bucket`, `velero.s3Url`, and the R2 API credentials are all stored in the SOPS secret (`helmfile/environments/<env>/secrets/velero.enc.yaml`). They are populated automatically by `scripts/velero-secrets.sh`, which runs as part of `mise run install <env>` after `terraform apply`.
+`velero.bucket`, `velero.s3Url`, and the R2 API credentials are all stored in the SOPS secret (`helmfile/environments/<env>/secrets/velero.enc.yaml`). They are populated automatically by `scripts/secrets/velero.sh`, which runs as part of `mise run install <env>` after `terraform apply`.
 
 See [CONFIG.md](./CONFIG.md) for all available options.
 

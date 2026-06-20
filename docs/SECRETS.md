@@ -1,16 +1,24 @@
 # Secrets Reference
 
-Complete reference for all per-chart secrets used in this homelab. Each chart's secrets are stored in `helmfile/environments/<env>/secrets/<chart>.enc.yaml` (SOPS-encrypted) and loaded automatically by helmfile.
+Complete reference for all per-chart **SOPS bootstrap secrets** used in this
+homelab — the secrets the helmfile needs at render time. Each chart's secrets are
+stored in `helmfile/environments/<env>/secrets/<chart>.enc.yaml` (SOPS-encrypted)
+and loaded automatically by helmfile.
+
+> [!NOTE]
+> This file covers SOPS bootstrap secrets only. **Runtime** secrets consumed by
+> workloads are managed by OpenBao + the External Secrets Operator, wired up
+> after deploy via `mise run openbao:setup` (see [SCRIPTS.md](SCRIPTS.md)).
 
 ## How secrets work
 
 ```
 helmfile/secret-templates/<chart>.template.yaml   (templates with descriptions)
         │
-        ▼  ./scripts/init-secrets.sh <env>   (interactive prompts)
+        ▼  mise run secrets:init <env>   (interactive prompts)
 helmfile/environments/<env>/secrets/<chart>.secrets.yaml   (plaintext, gitignored)
         │
-        ▼  ./scripts/sops-encrypt-secrets.sh <env>   (or auto-encrypted by init)
+        ▼  mise run secrets:encrypt <env>   (or auto-encrypted by secrets:init)
 helmfile/environments/<env>/secrets/<chart>.enc.yaml   (encrypted, committed)
         │
         ▼  helmfile merges per-chart secrets into each release's values
@@ -223,7 +231,9 @@ This is the most complex secrets file. It powers two charts: the local `cert-man
 
 ## Related
 
-- **Initialize secrets:** `./scripts/init-secrets.sh <environment>` — interactive prompts from templates
-- **Encrypt:** `./scripts/sops-encrypt-secrets.sh <environment> [chart]`
-- **Decrypt:** `./scripts/sops-decrypt-secrets.sh <environment> [chart]`
+- **Initialize secrets:** `mise run secrets:init <environment>` — interactive prompts from templates
+- **Encrypt:** `mise run secrets:encrypt <environment> [chart]`
+- **Decrypt:** `mise run secrets:decrypt <environment> [chart]`
+- **Validate:** `mise run secrets:check` — ensure every template has a complete secret file
 - **Templates:** `helmfile/secret-templates/*.template.yaml` — source of truth for secret keys and descriptions
+- **Runtime secrets:** OpenBao + External Secrets Operator — see [SCRIPTS.md](SCRIPTS.md) (`mise run openbao:setup`)

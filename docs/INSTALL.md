@@ -198,13 +198,26 @@ This runs Ansible to provision K3s on bare-metal nodes defined in the inventory.
 mise run install <env>
 ```
 
-This runs 4 steps in order:
-1. Apply CRDs (prometheus-operator)
-2. Apply certificates (cert-manager, cert-manager-config, external-dns)
-3. Apply common releases (monitoring, storage, networking, auth, gitops)
-4. Apply ingresses (external-facing ingress resources)
+This resolves the environment, runs the preflight checks, applies Terraform
+(provisions the R2 bucket), refreshes the Velero secret from Terraform outputs,
+then syncs all helmfile releases — CRDs, certificates, core apps, and ingresses —
+via the principal helmfile.
 
-### 5. Verify
+### 5. Configure OpenBao
+
+The first deploy that includes OpenBao needs a one-time post-deploy setup to
+initialise it and wire up the External Secrets Operator:
+
+```bash
+mise run openbao:setup <env>
+```
+
+This initialises OpenBao, prints the **unseal keys and root token** (save them —
+they cannot be recovered), unseals it, enables the KV engine, and creates the
+`ClusterSecretStore`. It is idempotent and resumable, so it is safe to re-run.
+See [SCRIPTS.md](./SCRIPTS.md) for details.
+
+### 6. Verify
 
 ```bash
 kubectl get pods -A
