@@ -1,13 +1,6 @@
-<pre>
- ██╗  ██╗ ██████╗ ███╗   ███╗███████╗██╗      █████╗ ██████╗
- ██║  ██║██╔═══██╗████╗ ████║██╔════╝██║     ██╔══██╗██╔══██╗
- ███████║██║   ██║██╔████╔██║█████╗  ██║     ███████║██████╔╝
- ██╔══██║██║   ██║██║╚██╔╝██║██╔══╝  ██║     ██╔══██║██╔══██╗
- ██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗███████╗██║  ██║██████╔╝
- ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝
-
- Your Cluster, your rules                    by Alberto Iglesias
-</pre>
+<p align="center">
+  <img src="docs/images/homelab-banner.svg" alt="HOMELAB — Your Cluster, your rules, by Alberto Iglesias" />
+</p>
 
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 [![Shell BDD Tests](https://github.com/albertoig/homelab/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/albertoig/homelab/actions/workflows/validate.yml)
