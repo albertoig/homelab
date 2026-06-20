@@ -116,6 +116,12 @@ data:
         client_id: !Env GRAFANA_CLIENT_ID
         client_secret: !Env GRAFANA_CLIENT_SECRET
         client_type: confidential
+        # Authentik 2026.5+ requires grant types to be set explicitly; without
+        # this the provider rejects the authorization-code flow Grafana uses
+        # ("Invalid grant_type for provider"). refresh_token covers offline_access.
+        grant_types:
+          - authorization_code
+          - refresh_token
         redirect_uris:
           - url: "https://grafana.internal.{{ .Values.root_dns }}/login/generic_oauth"
             matching_mode: strict
@@ -159,6 +165,10 @@ data:
         client_id: !Env ARGOCD_CLIENT_ID
         client_secret: !Env ARGOCD_CLIENT_SECRET
         client_type: confidential
+        # Required since Authentik 2026.5 (see grafana-provider above).
+        grant_types:
+          - authorization_code
+          - refresh_token
         redirect_uris:
           - url: "https://argocd.internal.{{ .Values.root_dns }}/auth/callback"
             matching_mode: strict
