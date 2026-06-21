@@ -52,6 +52,21 @@ The homelab follows a layered architecture:
 | external-secrets | Sync OpenBao secrets into Kubernetes Secrets | external-secrets-system | ❌ |
 | velero | Kubernetes backup and restore | velero-system | ❌ |
 
+### Exposed services
+
+Services with a web UI, reachable over Traefik + TLS. `ROOT_URL` is your
+configured `root_dns`. **Internal** hosts resolve to the MetalLB load-balancer IP
+and are only reachable on the LAN/VPN; **External** is the public-facing SSO
+entry point.
+
+| Access | URL | Service |
+|--------|-----|---------|
+| External | `https://auth.ROOT_URL` | Authentik (SSO / identity provider) |
+| Internal | `https://argocd.internal.ROOT_URL` | ArgoCD |
+| Internal | `https://grafana.internal.ROOT_URL` | Grafana |
+| Internal | `https://longhorn.internal.ROOT_URL` | Longhorn |
+| Internal | `https://openbao.internal.ROOT_URL` | OpenBao |
+
 ---
 
 ## 🛠️ Tech Stack
@@ -208,6 +223,7 @@ After applying, copy the outputs (`velero_bucket_name`, `velero_s3_endpoint`) in
 - [Architecture Decisions](./docs/decisions/INDEX.md) — ADRs documenting significant infrastructure changes
 - [Scripts](./docs/SCRIPTS.md) — automation script documentation and usage
 - [Secrets](./docs/SECRETS.md) — full secrets reference with criticality levels
+- [OpenBao SSO](./docs/openbao-sso.md) — configure OIDC login to OpenBao via Authentik
 
 ---
 

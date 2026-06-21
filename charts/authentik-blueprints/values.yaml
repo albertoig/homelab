@@ -8,6 +8,9 @@ sso:
   argocd:
     client_id: ""
     client_secret: ""
+  openbao:
+    client_id: ""
+    client_secret: ""
   admin:
     username: ""
     name: ""
