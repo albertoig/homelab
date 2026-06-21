@@ -20,6 +20,7 @@ most are driven through `mise` tasks rather than called directly. Run
 | `mise run helmfile:update-locks` | `scripts/helm/update-locks.sh` | Refresh lock files for all envs |
 | `mise run openbao:preflight [env]` | `scripts/apps/setup-openbao-preflight.sh` | Pre-checks for OpenBao setup |
 | `mise run openbao:setup [env]` | `scripts/apps/setup-openbao.sh` | Init + unseal + wire ESO (idempotent) |
+| `mise run openbao:unseal [env]` | `scripts/apps/unseal-openbao.sh` | Unseal only, after a restart/reboot |
 | `mise run secrets:init [env]` | `scripts/secrets/init.sh` | Interactive secret init from templates |
 | `mise run secrets:encrypt <env> [chart]` | `scripts/secrets/encrypt.sh` | |
 | `mise run secrets:decrypt <env> [chart]` | `scripts/secrets/decrypt.sh` | |

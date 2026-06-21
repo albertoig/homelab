@@ -94,6 +94,10 @@ run = "./scripts/apps/setup-openbao-preflight.sh \"${1:-}\""
 description = "Initialise and configure OpenBao after helmfile deploy  [env: dev|prod]"
 run = "./scripts/apps/setup-openbao.sh \"${1:-}\""
 
+[tasks."openbao:unseal"]
+description = "Unseal OpenBao with 3 of 5 keys after a restart/reboot  [env: dev|prod]"
+run = "./scripts/apps/unseal-openbao.sh \"${1:-}\""
+
 [tasks."secrets:init"]
 description = "Initialise secrets from templates"
 run = "./scripts/secrets/init.sh \"${1:-}\""
