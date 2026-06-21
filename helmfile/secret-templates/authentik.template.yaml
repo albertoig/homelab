@@ -7,6 +7,7 @@ authentik:
   # @autogen: openssl rand -base64 24 | tr -d '=+/'
   bootstrap_password: ""
   # Initial admin email for bootstrapping the instance
+  # @visible
   bootstrap_email: ""
 
   # Secret key for cryptographic operations
@@ -14,12 +15,15 @@ authentik:
   secret_key: ""
   email:
     # Sender address (e.g., "Homelab <homelab@example.com>")
+    # @visible
     from: ""
     # SMTP account password
     password: ""
     # SMTP server hostname (e.g., smtp.protonmail.ch)
+    # @visible
     host: ""
     # SMTP account username
+    # @visible
     username: ""
   # PostgreSQL credentials for Authentik's internal database
   postgresql:

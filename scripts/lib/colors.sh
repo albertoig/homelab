@@ -10,6 +10,7 @@ GUM_ACCENT=214      # orange — prompts, highlighted keys, warnings
 GUM_SUCCESS=2       # green  — success borders and checkmarks
 GUM_ERROR=1         # red    — error borders, failure marks
 GUM_MUTED=240       # gray   — faint descriptions, subtitles
+GUM_HINT=247        # gray   — field hints/descriptions (soft but readable)
 GUM_HEADER=45       # cyan   — banner block letters (retro CRT)
 GUM_HEADER_SUB=214  # amber  — banner tagline and byline
 
@@ -21,6 +22,7 @@ gum_primary()   { gum style --foreground "$GUM_PRIMARY"   "$@"; }
 gum_secondary() { gum style --foreground "$GUM_SECONDARY" "$@"; }
 gum_accent()    { gum style --foreground "$GUM_ACCENT"    "$@"; }
 gum_muted()     { gum style --foreground "$GUM_MUTED" --faint "$@"; }
+gum_hint()      { gum style --foreground "$GUM_HINT"      "$@"; }
 gum_success()   { gum style --foreground "$GUM_SUCCESS"   "$@"; }
 gum_error()     { gum style --foreground "$GUM_ERROR"     "$@"; }
 

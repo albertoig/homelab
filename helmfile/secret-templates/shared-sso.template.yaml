@@ -2,10 +2,13 @@
 sso:
   admin:
     # Shared SSO admin username
+    # @visible
     username: ""
     # Shared SSO admin display name
+    # @visible
     name: ""
     # Shared SSO admin email
+    # @visible
     email: ""
     # Shared SSO admin password
     # @autogen: openssl rand -base64 24 | tr -d '=+/'
