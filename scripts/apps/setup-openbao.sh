@@ -43,8 +43,8 @@ KUBE_CONTEXT="homelab-$ENV"
 
 clear
 show_header
-gum_secondary "  OpenBao post-deploy setup — env → $(gum_primary --bold "$ENV")"
-echo ""
+gum_secondary "  OpenBao post-deploy setup"
+show_subheader "$ENV" "$KUBE_CONTEXT"
 
 # Verify every tool and cluster resource is in place before touching OpenBao.
 OPENBAO_PREFLIGHT_QUIET=1 "$SCRIPT_DIR/setup-openbao-preflight.sh" "$ENV" || exit 1

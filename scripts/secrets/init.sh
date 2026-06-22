@@ -39,8 +39,7 @@ mkdir -p "$SECRETS_DIR"
 
 clear
 show_header
-gum_secondary "  environment → $(gum_primary --bold "$ENV")"
-echo ""
+show_subheader "$ENV"
 
 # --- Helpers ---
 

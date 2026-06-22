@@ -25,8 +25,8 @@ KUBE_CONTEXT="homelab-$ENV"
 
 clear
 show_header
-gum_secondary "  OpenBao unseal — env → $(gum_primary --bold "$ENV")"
-echo ""
+gum_secondary "  OpenBao unseal"
+show_subheader "$ENV" "$KUBE_CONTEXT"
 
 # Verify tools and cluster resources before touching OpenBao.
 OPENBAO_PREFLIGHT_QUIET=1 "$SCRIPT_DIR/setup-openbao-preflight.sh" "$ENV" || exit 1
