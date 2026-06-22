@@ -20,13 +20,23 @@ show_header() {
 # Sub-header shown under the banner: the selected environment and kube context,
 # one per line with a consistent colour scheme. Call after show_header, with ENV
 # set (source lib/env.sh first). The context defaults to the homelab-<env>
-# kubeContext convention; pass an explicit one as the second argument.
+# kubeContext convention; pass an explicit one as the second argument. Any extra
+# "label=value" arguments are appended as additional aligned lines, e.g.
+#   show_subheader "$ENV" "$KUBE_CONTEXT" "openbao=https://openbao.internal..."
 show_subheader() {
     [[ -n "${HOMELAB_SUBHEADER_SHOWN:-}" ]] && return
     export HOMELAB_SUBHEADER_SHOWN=1
     local env="${1:-${ENV:-}}"
     local ctx="${2:-homelab-${env}}"
+    if [ "$#" -gt 2 ]; then shift 2; else set --; fi
     gum_secondary "  environment → $(gum_primary --bold "${env}")"
     gum_secondary "  cluster     → $(gum_primary --bold "${ctx}")"
+    local pair label value
+    for pair in "$@"; do
+        label="${pair%%=*}"
+        value="${pair#*=}"
+        printf -v label '%-12s' "$label"
+        gum_secondary "  ${label}→ $(gum_primary --bold "${value}")"
+    done
     echo ""
 }

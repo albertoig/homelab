@@ -46,14 +46,15 @@ KUBE_CONTEXT="homelab-$ENV"
 # OIDC endpoints derived from the env's root_dns (matches the Authentik provider
 # and the openbao ingress host).
 ROOT_DNS=$(yq -r '.general.root_dns' "$SCRIPT_DIR/../../helmfile/environments/$ENV/config.yaml")
+OPENBAO_URL="https://openbao.internal.${ROOT_DNS}"
 OIDC_ISSUER="https://auth.${ROOT_DNS}/application/o/openbao/"
-OIDC_UI_REDIRECT="https://openbao.internal.${ROOT_DNS}/ui/vault/auth/${OIDC_PATH}/oidc/callback"
+OIDC_UI_REDIRECT="${OPENBAO_URL}/ui/vault/auth/${OIDC_PATH}/oidc/callback"
 OIDC_CLI_REDIRECT="http://localhost:8250/oidc/callback"
 
 clear
 show_header
 gum_secondary "  OpenBao post-deploy setup"
-show_subheader "$ENV" "$KUBE_CONTEXT"
+show_subheader "$ENV" "$KUBE_CONTEXT" "openbao=$OPENBAO_URL"
 
 # Verify every tool and cluster resource is in place before touching OpenBao.
 OPENBAO_PREFLIGHT_QUIET=1 "$SCRIPT_DIR/setup-openbao-preflight.sh" "$ENV" || exit 1
