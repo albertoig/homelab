@@ -9,6 +9,31 @@ side, which is configured once at runtime with the `bao` CLI.
 Throughout, replace `ROOT_URL` with your `root_dns` (e.g. the value in
 `helmfile/environments/<env>/config.yaml`).
 
+## This is OIDC, not plain OAuth
+
+OpenBao does not act as a generic OAuth2 client. It uses its native **`oidc`
+auth method** — OpenID Connect, the identity layer built on top of OAuth 2.0 —
+so OpenBao is an OIDC *relying party*. Authentik's provider model is named
+`oauth2provider`, but Authentik labels it the **"OAuth2/OpenID Provider"**: the
+same object is the OIDC provider and publishes a discovery document per
+application at `https://auth.ROOT_URL/application/o/openbao/.well-known/openid-configuration`.
+
+The flow:
+
+```
+  bao login -method=oidc  (or the Web UI)
+        │  browser → Authentik authorize/login (+ MFA)
+        ▼
+  Authentik OIDC provider  ── id_token ──►  OpenBao oidc auth method
+        ▲                                        │ validates against the
+        └──────── oidc_discovery_url ────────────┘ issuer's jwks, maps a role
+```
+
+`auth/oidc/config`'s `oidc_discovery_url` is exactly that issuer
+(`https://auth.ROOT_URL/application/o/openbao/`); OpenBao reads the discovery
+doc and drives the standard OIDC authorization-code flow. (The same auth method
+also has a non-interactive `jwt` mode for machine logins.)
+
 ## Prerequisites
 
 1. `sso.openbao.client_id` / `sso.openbao.client_secret` are set in the
@@ -48,6 +73,24 @@ bao write auth/oidc/role/default \
   Authentik provider: the web UI and the CLI helper (port 8250).
 
 ## Logging in
+
+You log in with your **Authentik** account, not an OpenBao-local user — OpenBao
+hands you off to Authentik. Use the homelab SSO admin created by the blueprint
+(`sso.admin.*`); TOTP MFA is enforced, so the first login walks you through
+setting up an authenticator app.
+
+Find the SSO admin username/password (they live in the `shared-sso` secret):
+
+```bash
+# from the encrypted secret
+sops --decrypt helmfile/environments/<env>/secrets/shared-sso.enc.yaml | yq '.sso.admin'
+
+# …or from the live cluster secret
+kubectl -n auth-system get secret authentik-initial-config-secrets \
+  -o jsonpath='{.data.HOMELAB_ADMIN_USERNAME}' | base64 -d; echo
+kubectl -n auth-system get secret authentik-initial-config-secrets \
+  -o jsonpath='{.data.HOMELAB_ADMIN_PASSWORD}' | base64 -d; echo
+```
 
 **Web UI** — browse to `https://openbao.internal.ROOT_URL`, pick the **OIDC**
 method, and sign in through Authentik.
