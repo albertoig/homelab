@@ -86,29 +86,33 @@ run = '''
 
 # ── Secrets management ────────────────────────────────────────────────────────
 
+# These scripts select the environment via lib/env.sh (arg, ENV var, or prompt).
+# mise appends task args (it does not set $1/$2), so keep the run lines bare and
+# let the scripts read the appended args directly — same as check/doctor/install.
+
 [tasks."openbao:preflight"]
-description = "Check tools and cluster resources required for OpenBao setup  [env: dev|prod]"
-run = "./scripts/apps/setup-openbao-preflight.sh \"${1:-}\""
+description = "Check tools and cluster resources required for OpenBao setup  [env?]"
+run = "./scripts/apps/setup-openbao-preflight.sh"
 
 [tasks."openbao:setup"]
-description = "Initialise and configure OpenBao after helmfile deploy  [env: dev|prod]"
-run = "./scripts/apps/setup-openbao.sh \"${1:-}\""
+description = "Initialise and configure OpenBao after helmfile deploy  [env?]"
+run = "./scripts/apps/setup-openbao.sh"
 
 [tasks."openbao:unseal"]
-description = "Unseal OpenBao with 3 of 5 keys after a restart/reboot  [env: dev|prod]"
-run = "./scripts/apps/unseal-openbao.sh \"${1:-}\""
+description = "Unseal OpenBao with 3 of 5 keys after a restart/reboot  [env?]"
+run = "./scripts/apps/unseal-openbao.sh"
 
 [tasks."secrets:init"]
-description = "Initialise secrets from templates"
-run = "./scripts/secrets/init.sh \"${1:-}\""
+description = "Initialise secrets from templates  [env?]"
+run = "./scripts/secrets/init.sh"
 
 [tasks."secrets:encrypt"]
-description = "Encrypt secrets  [env: dev|prod]  [chart?]"
-run = "./scripts/secrets/encrypt.sh \"${1:-dev}\" \"${2:-}\""
+description = "Encrypt secrets  [env?]  [chart?]"
+run = "./scripts/secrets/encrypt.sh"
 
 [tasks."secrets:decrypt"]
-description = "Decrypt secrets  [env: dev|prod]  [chart?]"
-run = "./scripts/secrets/decrypt.sh \"${1:-dev}\" \"${2:-}\""
+description = "Decrypt secrets  [env?]  [chart?]"
+run = "./scripts/secrets/decrypt.sh"
 
 [tasks."secrets:check"]
 description = "Validate secrets are present and complete for all environments"
