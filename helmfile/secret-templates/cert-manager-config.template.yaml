@@ -4,8 +4,10 @@ secret:
   apiKey: ""
 clusterIssuer:
   # Email address for Let's Encrypt certificate notifications
+  # @visible
   email: ""
 certificate:
   # Domain names for the TLS certificate (e.g., example.com)
   dnsNames:
+    # @visible
     - ""

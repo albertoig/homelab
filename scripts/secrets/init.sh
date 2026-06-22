@@ -39,8 +39,7 @@ mkdir -p "$SECRETS_DIR"
 
 clear
 show_header
-gum_secondary "  environment → $(gum_primary --bold "$ENV")"
-echo ""
+show_subheader "$ENV"
 
 # --- Helpers ---
 
@@ -104,22 +103,26 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     declare -a entry_type=()
     declare -a entry_indent=()
     declare -a entry_autogen=()
+    declare -a entry_visible=()
     declare -a path_parts=()
 
     current_desc=""
     current_autogen=""
+    current_visible=false
     indent_level=0
 
     while IFS= read -r line || [ -n "$line" ]; do
         if [[ "$line" =~ ^[[:space:]]*$ ]]; then
             current_desc=""
             current_autogen=""
+            current_visible=false
             continue
         fi
 
         if [[ "$line" =~ ^[[:space:]]*#[[:space:]]*--- ]]; then
             current_desc=""
             current_autogen=""
+            current_visible=false
             continue
         fi
 
@@ -130,6 +133,9 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             if [[ "$comment" == @autogen:* ]]; then
                 current_autogen="${comment#@autogen:}"
                 current_autogen="${current_autogen#"${current_autogen%%[![:space:]]*}"}"
+            elif [[ "$comment" == "@visible" ]]; then
+                # Prompt for this field with visible (non-masked) input.
+                current_visible=true
             else
                 if [ -n "$current_desc" ]; then
                     current_desc="$current_desc $comment"
@@ -153,9 +159,11 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
             entry_type[$entries]="list_item"
             entry_indent[$entries]=$indent_level
             entry_autogen[$entries]="$current_autogen"
+            entry_visible[$entries]="$current_visible"
             entries=$((entries + 1))
             current_desc=""
             current_autogen=""
+            current_visible=false
         else
             colon_pos=$(find_colon "$trimmed")
             if [ "$colon_pos" -gt 0 ]; then
@@ -173,10 +181,12 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
                     entry_type[$entries]="value"
                     entry_indent[$entries]=$indent_level
                     entry_autogen[$entries]="$current_autogen"
+                    entry_visible[$entries]="$current_visible"
                     entries=$((entries + 1))
                 fi
                 current_desc=""
                 current_autogen=""
+                current_visible=false
             fi
         fi
     done < "$template"
@@ -197,6 +207,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         desc="${entry_desc[$i]}"
         kp="${entry_path[$i]}"
         autogen="${entry_autogen[$i]:-}"
+        visible="${entry_visible[$i]:-false}"
 
         existing=""
         if [ -n "$existing_source" ]; then
@@ -204,7 +215,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         fi
 
         if [ -n "$desc" ]; then
-            gum_muted "  $desc"
+            gum_hint "  $desc"
         fi
 
         response=""
@@ -225,11 +236,20 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
         else
             placeholder=""
             [ -n "$existing" ] && placeholder="(press enter to keep existing)"
-            response=$(gum input \
-                --password \
-                --prompt "  $(gum_accent "$kp"): " \
-                --placeholder "$placeholder" \
-                --width 60) || { warn "Aborted."; exit 0; }
+            if [ "$visible" = true ]; then
+                # Non-masked: the value is not display-sensitive (e.g. username,
+                # name, email). It is still written to the sops-encrypted secret.
+                response=$(gum input \
+                    --prompt "  $(gum_accent "$kp"): " \
+                    --placeholder "$placeholder" \
+                    --width 60) || { warn "Aborted."; exit 0; }
+            else
+                response=$(gum input \
+                    --password \
+                    --prompt "  $(gum_accent "$kp"): " \
+                    --placeholder "$placeholder" \
+                    --width 60) || { warn "Aborted."; exit 0; }
+            fi
         fi
 
         if [ -z "$response" ] && [ -n "$existing" ]; then
@@ -321,7 +341,7 @@ for template in "$TEMPLATES_DIR"/*.template.yaml; do
     # Clean up temporary decrypted file
     [[ "$existing_source" == "${TMPDIR:-/tmp}/"* ]] && rm -f "$existing_source" || true
 
-    unset entry_path entry_desc entry_type entry_indent entry_autogen path_parts responses_key responses_val
+    unset entry_path entry_desc entry_type entry_indent entry_autogen entry_visible path_parts responses_key responses_val
 done
 
 # --- Encrypt ---

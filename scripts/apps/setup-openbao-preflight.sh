@@ -29,8 +29,8 @@ if [ "${OPENBAO_PREFLIGHT_QUIET:-0}" != "1" ]; then
     clear
     show_header
 fi
-gum_secondary "  OpenBao setup preflight — env → $(gum_primary --bold "$ENV")"
-echo ""
+gum_secondary "  OpenBao setup preflight"
+show_subheader "$ENV" "$KUBE_CONTEXT"
 
 ERRORS=0
 BOX_LINES=""

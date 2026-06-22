@@ -90,6 +90,16 @@ worker:
         secretKeyRef:
           name: authentik-initial-config-secrets
           key: ARGOCD_CLIENT_SECRET
+    - name: OPENBAO_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: authentik-initial-config-secrets
+          key: OPENBAO_CLIENT_ID
+    - name: OPENBAO_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: authentik-initial-config-secrets
+          key: OPENBAO_CLIENT_SECRET
     - name: OAUTH_CERT_DATA
       valueFrom:
         secretKeyRef:

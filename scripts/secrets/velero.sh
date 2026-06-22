@@ -67,8 +67,21 @@ credentials:
       aws_secret_access_key=$CLOUDFLARE_R2_SECRET_ACCESS_KEY
 EOF
 
+# Idempotency: sops --encrypt always produces a fresh IV/MAC, so re-encrypting
+# unchanged content rewrites velero.enc.yaml on every install (noisy git diffs).
+# Skip the write when the decrypted current secret already matches the new one
+# (compared semantically, ignoring comments/formatting).
+if [[ -f "$ENC_FILE" ]] && \
+   diff -q <(sops --decrypt "$ENC_FILE" 2>/dev/null | yq -P '... comments=""') \
+           <(yq -P '... comments=""' "$SECRETS_FILE") >/dev/null 2>&1; then
+    rm -f "$SECRETS_FILE"
+    echo ""
+    success "velero secret unchanged — kept $ENC_FILE"
+    exit 0
+fi
+
 sops --encrypt "$SECRETS_FILE" > "$ENC_FILE"
 rm "$SECRETS_FILE"
 
 echo ""
-success "Created $ENC_FILE"
+success "Updated $ENC_FILE"

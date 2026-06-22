@@ -43,8 +43,8 @@ KUBE_CONTEXT="homelab-$ENV"
 k() { kubectl --context "$KUBE_CONTEXT" "$@"; }
 
 show_header
-gum_secondary "  cluster doctor — env → $(gum_primary --bold "$ENV")$( [ "$FIX" -eq 1 ] && gum_accent ' — fix mode' )"
-echo ""
+gum_secondary "  cluster doctor$( [ "$FIX" -eq 1 ] && gum_accent ' — fix mode' )"
+show_subheader "$ENV" "$KUBE_CONTEXT"
 
 # Pods/services older than this are considered stuck, not merely slow
 STUCK_SECONDS="${DOCTOR_STUCK_SECONDS:-180}"

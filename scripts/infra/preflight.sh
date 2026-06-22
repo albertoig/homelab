@@ -20,6 +20,8 @@ show_header
 source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
 ENVS=("$ENV")
 
+show_subheader "$ENV"
+
 ERRORS=0
 
 # One "group / name" line per check, mirroring the secrets "env / chart" style

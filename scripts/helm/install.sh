@@ -20,8 +20,7 @@ source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
 
 clear
 show_header
-gum_secondary "  environment → $(gum_primary --bold "$ENV")"
-echo ""
+show_subheader "$ENV"
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
 

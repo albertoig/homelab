@@ -22,11 +22,13 @@ fi
 # Select the target environment (prompts when no argument is given).
 source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
 KUBE_CONTEXT="homelab-$ENV"
+ROOT_DNS=$(yq -r '.general.root_dns' "$SCRIPT_DIR/../../helmfile/environments/$ENV/config.yaml")
+OPENBAO_URL="https://openbao.internal.${ROOT_DNS}"
 
 clear
 show_header
-gum_secondary "  OpenBao unseal — env → $(gum_primary --bold "$ENV")"
-echo ""
+gum_secondary "  OpenBao unseal"
+show_subheader "$ENV" "$KUBE_CONTEXT" "openbao=$OPENBAO_URL"
 
 # Verify tools and cluster resources before touching OpenBao.
 OPENBAO_PREFLIGHT_QUIET=1 "$SCRIPT_DIR/setup-openbao-preflight.sh" "$ENV" || exit 1
