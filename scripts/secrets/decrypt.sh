@@ -1,6 +1,6 @@
 #!/bin/bash
 # Decrypt per-chart secrets files for the specified environment.
-# Usage: ./scripts/secrets/decrypt.sh <environment> [chart-name]
+# Usage: ./scripts/secrets/decrypt.sh [environment] [chart-name]   (prompts if omitted)
 # Example: ./scripts/secrets/decrypt.sh prod
 #          ./scripts/secrets/decrypt.sh prod grafana
 
@@ -8,21 +8,21 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/colors.sh"
+source "$SCRIPT_DIR/../lib/header.sh"
 
-ENVIRONMENT="${1:-}"
+if ! command -v gum &>/dev/null; then
+    error "gum not found. Run: mise install"
+    exit 1
+fi
+
+# Environment selector (arg, ENV var, or prompt); the chart stays positional 2.
+source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
+ENVIRONMENT="$ENV"
 CHART="${2:-}"
 
-if [ -z "$ENVIRONMENT" ]; then
-    error "Usage: $0 <environment> [chart-name]"
-    info "Available environments: dev, prod"
-    exit 1
-fi
-
-if [ "$ENVIRONMENT" != "dev" ] && [ "$ENVIRONMENT" != "prod" ]; then
-    error "Invalid environment '$ENVIRONMENT'."
-    info "Available environments: dev, prod"
-    exit 1
-fi
+clear
+show_header
+show_subheader "$ENV"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SECRETS_DIR="$REPO_ROOT/helmfile/environments/$ENVIRONMENT/secrets"
