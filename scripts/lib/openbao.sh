@@ -25,6 +25,9 @@ CSS_CRD="clustersecretstores.external-secrets.io"     # CRD the store needs
 
 OIDC_PATH="oidc"                                      # auth method mount path
 OIDC_ROLE="default"                                   # default OIDC role
+# Authentik signs id_tokens with the shared ECDSA cert (ES256); OpenBao's OIDC
+# method only accepts RS256 unless told otherwise.
+OIDC_SIGNING_ALG="ES256"
 # Client id/secret are rendered by the authentik-blueprints chart into this
 # secret (keys OPENBAO_CLIENT_ID / OPENBAO_CLIENT_SECRET); see shared-sso.
 OIDC_CRED_NS="auth-system"

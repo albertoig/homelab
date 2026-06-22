@@ -62,7 +62,8 @@ bao write auth/oidc/config \
   oidc_discovery_url="https://auth.ROOT_URL/application/o/openbao/" \
   oidc_client_id="<OPENBAO_CLIENT_ID>" \
   oidc_client_secret="<OPENBAO_CLIENT_SECRET>" \
-  default_role="default"
+  default_role="default" \
+  jwt_supported_algs="ES256"
 
 bao write auth/oidc/role/default \
   user_claim="sub" \
@@ -78,6 +79,10 @@ bao write auth/oidc/role/default \
   secret.
 - The two `allowed_redirect_uris` match the redirect URIs declared on the
   Authentik provider: the web UI and the CLI helper (port 8250).
+- `jwt_supported_algs="ES256"` is **required**: Authentik signs id_tokens with
+  the shared ECDSA cert (ES256), but OpenBao's OIDC method only accepts RS256 by
+  default. Without it, login fails with *"unexpected signature algorithm
+  ES256; expected [RS256]"*.
 
 ## Logging in
 

@@ -343,7 +343,8 @@ else
             oidc_discovery_url="$OIDC_ISSUER" \
             oidc_client_id="$OIDC_CLIENT_ID" \
             oidc_client_secret="$OIDC_CLIENT_SECRET" \
-            default_role="$OIDC_ROLE" >/dev/null 2>&1; then
+            default_role="$OIDC_ROLE" \
+            jwt_supported_algs="$OIDC_SIGNING_ALG" >/dev/null 2>&1; then
         error "Failed to write OIDC config — can OpenBao reach $OIDC_ISSUER ?"
         exit 1
     fi
