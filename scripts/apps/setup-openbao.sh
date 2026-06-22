@@ -5,9 +5,10 @@
 # whatever a previous run left unfinished without ever re-initialising OpenBao or
 # regenerating the unseal keys / root token.
 #
-#   - Already initialised + unsealed + ClusterSecretStore Ready → no-op.
-#   - Already initialised but configuration incomplete → prompts for the saved
-#     root token and re-applies the KV mount, policy, token and store.
+#   - Already initialised + unsealed → prompts for the saved root token and
+#     reconciles every config step (KV mount, ESO policy/token/store, OIDC
+#     method/config/role) back to the desired state, so config drift such as
+#     jwt_supported_algs is re-applied. Each step is a no-op when already correct.
 #   - Sealed (e.g. after a node reboot) → prompts for 3 unseal keys, then continues.
 #   - Never initialised → initialises, shows the keys to save, unseals, configures.
 #
@@ -74,15 +75,6 @@ kbao() {
 kbao_auth() {
     k exec -n "$NAMESPACE" "$POD" -- \
         env BAO_ADDR="$BAO_ADDR" BAO_TOKEN="$ROOT_TOKEN" bao "$@"
-}
-
-# True if the OIDC auth method is enabled and the default role resolves (probed
-# unauthenticated via the login auth_url endpoint — no root token needed).
-oidc_role_ready() {
-    k exec -n "$NAMESPACE" "$POD" -- env BAO_ADDR="$BAO_ADDR" \
-        bao write -format=json "auth/${OIDC_PATH}/oidc/auth_url" \
-        role="$OIDC_ROLE" redirect_uri="$OIDC_UI_REDIRECT" 2>/dev/null \
-        | jq -e '.data.auth_url' >/dev/null 2>&1
 }
 
 ROOT_TOKEN=""
@@ -183,17 +175,11 @@ if [ "$SEALED" = "true" ]; then
     echo ""
 fi
 
-# Already fully configured? If the store is Ready, everything downstream works,
-# so re-running is a no-op and we never need the root token.
-if [ -z "$ROOT_TOKEN" ]; then
-    CSS_READY=$(k get clustersecretstore "$CSS_NAME" \
-        -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || true)
-    if [ "$CSS_READY" = "True" ] && oidc_role_ready; then
-        info "Already configured — ClusterSecretStore '$CSS_NAME' Ready and OIDC role present. Nothing to do."
-        echo ""
-        exit 0
-    fi
-fi
+# Note: the configuration steps below are all create-or-update, so re-running
+# this script reconciles everything (KV mount, ESO policy/token/store, and the
+# OIDC method/config/role) back to the desired state — including config drift
+# like jwt_supported_algs that can't be detected without the root token. The
+# trade-off is that a re-run always needs the root token (prompted in step 4).
 
 # ── Step 4: Obtain a privileged token for the configuration steps ────────────
 # A fresh init already produced the root token; on a re-run the operator must
