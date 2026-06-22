@@ -196,14 +196,17 @@ find . -type d -name __pycache__ -not -path './.git/*' -exec rm -rf {} + 2>/dev/
 description = "Initialise Terraform providers"
 run = "terraform -chdir=terraform init"
 
+# mise appends task args (it does not set $1), so the env must come after the
+# hardcoded subcommand — keep these bare. terraform.sh defaults to dev when no
+# env is appended (ENV="${2:-dev}").
 [tasks."tf:plan"]
-description = "Show Terraform execution plan  [env: dev|prod]"
-run = "./scripts/infra/terraform.sh plan \"${1:-dev}\""
+description = "Show Terraform execution plan  [env?: dev|prod, default dev]"
+run = "./scripts/infra/terraform.sh plan"
 
 [tasks."tf:apply"]
-description = "Apply Terraform changes  [env: dev|prod]"
-run = "./scripts/infra/terraform.sh apply \"${1:-dev}\""
+description = "Apply Terraform changes  [env?: dev|prod, default dev]"
+run = "./scripts/infra/terraform.sh apply"
 
 [tasks."tf:destroy"]
-description = "Destroy Terraform-managed resources  [env: dev|prod]"
-run = "./scripts/infra/terraform.sh destroy \"${1:-dev}\""
+description = "Destroy Terraform-managed resources  [env?: dev|prod, default dev]"
+run = "./scripts/infra/terraform.sh destroy"
