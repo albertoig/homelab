@@ -45,6 +45,13 @@ also has a non-interactive `jwt` mode for machine logins.)
 
 ## One-time: enable the OIDC auth method
 
+**This is automated by `mise run openbao:setup`** — its step 9 reads the client
+id/secret from the `authentik-initial-config-secrets` secret and runs the
+`bao auth enable oidc` + `config` + `role` below (idempotent; it skips with a
+warning if the client id/secret aren't set yet). Run it after the Authentik
+provider exists. The manual commands here are the equivalent, for reference or
+troubleshooting:
+
 ```bash
 export BAO_ADDR="https://openbao.internal.ROOT_URL"
 bao login                       # with an admin/root token
