@@ -114,27 +114,37 @@ export BAO_ADDR="https://openbao.internal.ROOT_URL"
 bao login -method=oidc
 ```
 
-## Optional: map the "OpenBao Admins" group to a policy
+## Admin group → policy (automated)
 
-To grant admins more than the `default` policy based on their Authentik group,
-include the groups claim and map it on the role:
+`mise run openbao:setup` also maps the Authentik **OpenBao Admins** group to an
+**`openbao-admins`** policy granting full access to the whole KV mount
+(`secret/*`) — so SSO admins (e.g. the operator running `homelab-apps bootstrap`)
+can read/write app secrets like `secret/homelab-apps/*`. The mount is granted
+broadly because downstream paths don't exist when the base runs.
+
+Without this, an OIDC login only gets the `default` policy (no `secret/*`
+access) and writes fail with `403` (e.g. `GET .../sys/internal/ui/mounts/...`).
+
+It is done with the `bao` calls below — `setup-openbao.sh` runs them idempotently:
 
 ```bash
-bao write auth/oidc/role/default \
-  user_claim="sub" \
-  groups_claim="groups" \
-  allowed_redirect_uris="https://openbao.internal.ROOT_URL/ui/vault/auth/oidc/oidc/callback,http://localhost:8250/oidc/callback" \
-  token_policies="default" \
-  oidc_scopes="openid,profile,email"
+# Admin policy over the whole KV mount
+bao policy write openbao-admins - <<'HCL'
+path "secret/data/*"     { capabilities = ["create","read","update","delete","list"] }
+path "secret/metadata/*" { capabilities = ["create","read","update","delete","list"] }
+path "secret/delete/*"   { capabilities = ["update"] }
+path "secret/undelete/*" { capabilities = ["update"] }
+path "secret/destroy/*"  { capabilities = ["update"] }
+path "sys/internal/ui/mounts"   { capabilities = ["read"] }
+path "sys/internal/ui/mounts/*" { capabilities = ["read"] }
+HCL
 
-# Bind the Authentik "OpenBao Admins" group to an OpenBao policy (e.g. admin):
-bao write identity/group name="OpenBao Admins" type="external" \
-  policies="admin" \
-  member_group_ids=""   # filled by the group-alias below
+# Role passes the groups claim
+bao write auth/oidc/role/default groups_claim="groups" ...   # plus the existing fields
 
-# Create a group alias linking the OIDC group name to the external group.
-# (Look up the accessor with: bao auth list -format=json | jq -r '."oidc/".accessor")
+# External group bound to the policy + an alias matching the Authentik group name
+bao write identity/group name="openbao-admins" type="external" policies="openbao-admins"
 bao write identity/group-alias name="OpenBao Admins" \
-  mount_accessor="<oidc-accessor>" \
-  canonical_id="<external-group-id>"
+  mount_accessor="$(bao auth list -format=json | jq -r '."oidc/".accessor')" \
+  canonical_id="$(bao read -format=json identity/group/name/openbao-admins | jq -r .data.id)"
 ```

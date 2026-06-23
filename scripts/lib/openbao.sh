@@ -32,3 +32,9 @@ OIDC_SIGNING_ALG="ES256"
 # secret (keys OPENBAO_CLIENT_ID / OPENBAO_CLIENT_SECRET); see shared-sso.
 OIDC_CRED_NS="auth-system"
 OIDC_CRED_SECRET="authentik-initial-config-secrets"
+# OIDC group → policy mapping. Members of the Authentik "OpenBao Admins" group
+# (provisioned by authentik-blueprints) get the admin policy, which grants full
+# access to the whole KV mount (downstream paths like homelab-apps/* may not
+# exist when the base runs, so it is granted broadly over secret/*).
+OIDC_ADMIN_GROUP="OpenBao Admins"
+OIDC_ADMIN_POLICY="openbao-admins"
