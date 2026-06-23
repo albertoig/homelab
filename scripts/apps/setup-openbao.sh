@@ -21,7 +21,8 @@
 #   6. Write the read-only ESO policy
 #   7. Ensure the ESO service token + its Kubernetes secret
 #   8. Apply the ClusterSecretStore pointing at OpenBao
-#   9. Configure the OIDC auth method for Authentik SSO (skipped if the client
+#   9. Configure the OIDC auth method for Authentik SSO, and map the "OpenBao
+#      Admins" group to an admin policy over secret/* (skipped if the client
 #      id/secret are not present yet)
 #
 # Usage: ./scripts/apps/setup-openbao.sh [environment]   (prompts if omitted)
@@ -337,11 +338,51 @@ else
 
     kbao_auth write "auth/${OIDC_PATH}/role/${OIDC_ROLE}" \
         user_claim="sub" \
+        groups_claim="groups" \
         allowed_redirect_uris="${OIDC_UI_REDIRECT},${OIDC_CLI_REDIRECT}" \
         token_policies="default" \
         oidc_scopes="openid,profile,email" >/dev/null
 
     success "OIDC auth method configured (path: ${OIDC_PATH}/, role: ${OIDC_ROLE})."
+
+    # ── Admin group → policy ──
+    # Admin policy: full access to the whole KV mount. Downstream paths such as
+    # homelab-apps/* may not exist when the base runs, so grant secret/* broadly.
+    _admin_policy=$(mktemp /tmp/bao-admin-policy.XXXXXX.hcl)
+    chmod 600 "$_admin_policy"
+    cat > "$_admin_policy" <<'HCL'
+path "secret/data/*"     { capabilities = ["create", "read", "update", "delete", "list"] }
+path "secret/metadata/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+path "secret/delete/*"   { capabilities = ["update"] }
+path "secret/undelete/*" { capabilities = ["update"] }
+path "secret/destroy/*"  { capabilities = ["update"] }
+# Needed by the `bao kv` helper to detect the KV version.
+path "sys/internal/ui/mounts"   { capabilities = ["read"] }
+path "sys/internal/ui/mounts/*" { capabilities = ["read"] }
+HCL
+    gum spin --spinner pulse --show-error \
+        --title "  Writing policy '${OIDC_ADMIN_POLICY}'..." \
+        -- bash -c "kubectl --context '$KUBE_CONTEXT' exec -i -n '$NAMESPACE' '$POD' -- \
+            env BAO_ADDR='$BAO_ADDR' BAO_TOKEN='$ROOT_TOKEN' \
+            bao policy write '$OIDC_ADMIN_POLICY' - < '$_admin_policy'"
+    rm -f "$_admin_policy"
+
+    # External identity group bound to that policy (create-or-update by name),
+    # plus a group alias linking the Authentik group name (as it appears in the
+    # OIDC "groups" claim) to it. The alias is created only if not already bound.
+    kbao_auth write identity/group \
+        name="$OIDC_ADMIN_POLICY" type="external" policies="$OIDC_ADMIN_POLICY" >/dev/null
+    _group_id=$(kbao_auth read -format=json "identity/group/name/$OIDC_ADMIN_POLICY" | jq -r '.data.id')
+    _oidc_accessor=$(kbao_auth auth list -format=json | jq -r ".\"${OIDC_PATH}/\".accessor")
+    _alias_name=$(kbao_auth read -format=json "identity/group/name/$OIDC_ADMIN_POLICY" | jq -r '.data.alias.name? // ""')
+    if [ "$_alias_name" != "$OIDC_ADMIN_GROUP" ]; then
+        kbao_auth write identity/group-alias \
+            name="$OIDC_ADMIN_GROUP" \
+            mount_accessor="$_oidc_accessor" \
+            canonical_id="$_group_id" >/dev/null
+    fi
+
+    success "Admin mapping: group '${OIDC_ADMIN_GROUP}' → policy '${OIDC_ADMIN_POLICY}' (secret/*)."
 fi
 echo ""
 
@@ -356,4 +397,5 @@ gum style \
     "KV engine:          $KV_PATH/ (v2)" \
     "ESO policy:         $ESO_POLICY" \
     "ClusterSecretStore: $CSS_NAME" \
-    "OIDC auth method:   ${OIDC_PATH}/ (role: ${OIDC_ROLE})"
+    "OIDC auth method:   ${OIDC_PATH}/ (role: ${OIDC_ROLE})" \
+    "OIDC admin group:   ${OIDC_ADMIN_GROUP} → ${OIDC_ADMIN_POLICY} (secret/*)"
