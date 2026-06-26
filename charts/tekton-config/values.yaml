@@ -17,13 +17,16 @@ dashboard:
 
 # Tekton Chains — sign build provenance. Stored in-cluster (tekton) by default;
 # transparency log (rekor) disabled until we wire it up.
+# NOTE: TektonConfig .spec.chain is a map of STRING values, so booleans must be
+# quoted ("false"), otherwise the operator's server-side apply rejects them
+# (".spec.chain.transparency.enabled: expected string").
 chain:
   artifacts.taskrun.format: in-toto
   artifacts.taskrun.storage: tekton
   artifacts.pipelinerun.format: in-toto
   artifacts.pipelinerun.storage: tekton
   artifacts.oci.storage: tekton
-  transparency.enabled: false
+  transparency.enabled: "false"
 
 # Periodic pruning of completed runs so the cluster doesn't fill up.
 pruner:
