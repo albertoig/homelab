@@ -34,3 +34,14 @@ sso:
     # OAuth2 client secret for OpenBao SSO
     # @autogen: openssl rand -hex 32
     client_secret: ""
+  tekton:
+    # OAuth2 client ID for Tekton Dashboard SSO
+    # @autogen: openssl rand -hex 16
+    client_id: ""
+    # OAuth2 client secret for Tekton Dashboard SSO
+    # @autogen: openssl rand -hex 32
+    client_secret: ""
+    # oauth2-proxy cookie encryption secret. Must be 16, 24 or 32 bytes;
+    # a 32-char hex string is a valid 32-byte (AES-256) key.
+    # @autogen: openssl rand -hex 16
+    cookie_secret: ""
