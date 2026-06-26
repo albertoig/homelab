@@ -1,0 +1,8 @@
+{{- /*
+  Emit the vendored, pinned Tekton Operator manifests verbatim.
+  .Files.Get returns the raw file (no Go-template evaluation), so upstream
+  content with literal braces is safe; Helm splits the multi-doc stream on "---".
+  Namespace creation is handled by helmfile (createNamespace), matching the
+  convention used by every other release in this repo.
+*/ -}}
+{{ .Files.Get "files/release.yaml" }}

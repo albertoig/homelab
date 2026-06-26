@@ -1,0 +1,65 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+{{- $host := printf "tekton.internal.%s" $cfg.general.root_dns -}}
+# oauth2-proxy in front of the Tekton Dashboard (which has no built-in auth).
+# OIDC against Authentik, reusing the shared-sso credentials (.Values.sso.tekton).
+# https://github.com/oauth2-proxy/manifests/blob/main/helm/oauth2-proxy/values.yaml
+
+config:
+  # Credentials are injected as OAUTH2_PROXY_* env from a chart-managed Secret.
+  clientID: {{ .Values.sso.tekton.client_id | quote }}
+  clientSecret: {{ .Values.sso.tekton.client_secret | quote }}
+  # 16/24/32-byte secret (generate with: openssl rand -base64 24 -> 32 chars).
+  cookieSecret: {{ .Values.sso.tekton.cookie_secret | quote }}
+  # Replace the chart's default configFile (which sets upstreams=file:///dev/null)
+  # so we have a single source of config. oauth2-proxy runs as a standalone
+  # reverse proxy: authenticate, then proxy upstream to the Dashboard service.
+  configFile: |-
+    provider = "oidc"
+    oidc_issuer_url = "https://auth.{{ $cfg.general.root_dns }}/application/o/tekton/"
+    redirect_url = "https://{{ $host }}/oauth2/callback"
+    upstreams = ["http://tekton-dashboard.tekton-pipelines.svc.cluster.local:9097"]
+    # Any user Authentik assigns the Tekton application may log in.
+    email_domains = ["*"]
+    scope = "openid profile email offline_access"
+    # Behind Traefik (TLS terminated at the edge): trust forwarded headers.
+    reverse_proxy = true
+    cookie_secure = true
+    cookie_domains = ["{{ $host }}"]
+    whitelist_domains = ["{{ $host }}"]
+    set_xauthrequest = true
+    pass_access_token = true
+
+# Resource footprint — this is a tiny auth shim.
+resources:
+  requests:
+    cpu: "10m"
+    memory: "32Mi"
+  limits:
+    cpu: "100m"
+    memory: "64Mi"
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: prometheus-stack
+
+ingress:
+  enabled: true
+  className: traefik
+  path: /
+  pathType: Prefix
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-{{ .Environment.Name }}"
+    external-dns.alpha.kubernetes.io/hostname: "{{ $host }}"
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    external-dns.alpha.kubernetes.io/action: sync
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+  hosts:
+    - {{ $host }}
+  tls:
+    - secretName: tekton-server-tls
+      hosts:
+        - {{ $host }}

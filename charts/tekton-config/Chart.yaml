@@ -1,0 +1,8 @@
+apiVersion: v2
+name: tekton-config
+description: |
+  The single TektonConfig custom resource the Tekton Operator reconciles into
+  Pipelines, Triggers, Dashboard and Chains. Requires the tekton-operator
+  release (which installs the TektonConfig CRD) to be applied first.
+type: application
+version: 0.1.0

@@ -11,6 +11,9 @@ sso:
   openbao:
     client_id: ""
     client_secret: ""
+  tekton:
+    client_id: ""
+    client_secret: ""
   admin:
     username: ""
     name: ""

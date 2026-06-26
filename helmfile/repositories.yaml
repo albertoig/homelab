@@ -27,3 +27,5 @@ repositories:
     url: https://openbao.github.io/openbao-helm
   - name: external-secrets
     url: https://charts.external-secrets.io
+  - name: oauth2-proxy
+    url: https://oauth2-proxy.github.io/manifests

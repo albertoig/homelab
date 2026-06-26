@@ -1,0 +1,15 @@
+apiVersion: operator.tekton.dev/v1alpha1
+kind: TektonConfig
+metadata:
+  name: config
+spec:
+  profile: {{ .Values.profile }}
+  targetNamespace: {{ .Values.targetNamespace }}
+  result:
+    disabled: {{ .Values.result.disabled }}
+  dashboard:
+    readonly: {{ .Values.dashboard.readonly }}
+  chain:
+    {{- toYaml .Values.chain | nindent 4 }}
+  pruner:
+    {{- toYaml .Values.pruner | nindent 4 }}

@@ -1,0 +1,61 @@
+bases:
+- ./../templates.yaml.gotmpl
+- ./../repositories.yaml
+- ./../environments/{{ .Environment.Name }}/{{ .Environment.Name }}.yaml
+
+---
+
+lockFilePath: ./../locks/{{ .Environment.Name }}/005-tekton.helmfile.lock
+
+---
+
+releases:
+  # Tekton Operator - installs and lifecycle-manages the Tekton components.
+  # Vendored, pinned upstream release (see charts/tekton-operator).
+  - name: tekton-operator
+    namespace: tekton-operator
+    createNamespace: true
+    chart: ./../../charts/tekton-operator
+    version: "0.1.0"
+    wait: true
+    # CRDs (incl. TektonConfig) ship in this release, so skip client-side schema
+    # validation that would otherwise fail before they exist in the cluster.
+    disableValidation: true
+    labels:
+      app: cicd
+    inherit:
+    - template: common_values_only
+
+  # TektonConfig - the single CR the operator reconciles into Pipelines,
+  # Triggers, Dashboard and Chains (Results disabled). Needs the operator CRDs.
+  - name: tekton-config
+    namespace: tekton-pipelines
+    createNamespace: true
+    chart: ./../../charts/tekton-config
+    version: "0.1.0"
+    disableValidation: true
+    labels:
+      app: cicd
+    needs:
+      - tekton-operator/tekton-operator
+    inherit:
+    - template: common_values_only
+
+  # oauth2-proxy - OIDC gate (Authentik) in front of the Tekton Dashboard,
+  # which ships no authentication of its own.
+  # https://github.com/oauth2-proxy/manifests/blob/main/helm/oauth2-proxy/values.yaml
+  - name: tekton-oauth2-proxy
+    namespace: tekton-pipelines
+    createNamespace: true
+    chart: oauth2-proxy/oauth2-proxy
+    version: "10.7.0"
+    wait: true
+    labels:
+      app: cicd
+    # needs only resolves within this sub-helmfile. Ordering relative to traefik
+    # / authentik (in 004-core-apps) is implicit: helmfile applies the release
+    # files in 001..006 order, so those are already up by the time this runs.
+    needs:
+      - tekton-pipelines/tekton-config
+    inherit:
+    - template: values_gotmpl_secrets_and_shared

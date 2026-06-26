@@ -1,0 +1,35 @@
+# Defaults for the TektonConfig CR. Overridden by
+# helmfile/common/values/tekton-config.yaml.gotmpl.
+
+# Profile "all" installs Pipelines + Triggers + Chains, and on Kubernetes also
+# the Dashboard. (Results is part of "all" too but disabled below.)
+profile: all
+
+# Namespace the operator deploys the components into.
+targetNamespace: tekton-pipelines
+
+# Tekton Results needs a Postgres + storage backend — out of scope for now.
+result:
+  disabled: true
+
+dashboard:
+  readonly: false
+
+# Tekton Chains — sign build provenance. Stored in-cluster (tekton) by default;
+# transparency log (rekor) disabled until we wire it up.
+chain:
+  artifacts.taskrun.format: in-toto
+  artifacts.taskrun.storage: tekton
+  artifacts.pipelinerun.format: in-toto
+  artifacts.pipelinerun.storage: tekton
+  artifacts.oci.storage: tekton
+  transparency.enabled: false
+
+# Periodic pruning of completed runs so the cluster doesn't fill up.
+pruner:
+  disabled: false
+  resources:
+    - pipelinerun
+    - taskrun
+  keep: 5
+  schedule: "0 8 * * *"

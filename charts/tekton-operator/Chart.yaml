@@ -1,0 +1,13 @@
+apiVersion: v2
+name: tekton-operator
+description: |
+  Vendored Tekton Operator install manifests (pinned upstream release).
+  The operator reconciles a TektonConfig CR into Pipelines, Triggers,
+  Dashboard and Chains — see the tekton-config chart.
+type: application
+# Chart version — bump on any change to the vendored manifests or templates.
+version: 0.1.0
+# Pinned upstream Tekton Operator release vendored in files/release.yaml.
+# Upgrade: bump this, then re-download the matching release.yaml and re-strip
+# the Namespace doc (helmfile owns the namespace). See README.md.
+appVersion: "v0.80.0"
