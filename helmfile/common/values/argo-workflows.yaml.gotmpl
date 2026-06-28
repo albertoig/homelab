@@ -56,6 +56,29 @@ server:
       - profile
       - email
     sessionExpiry: "10h"
+  # The SSO server does OIDC discovery at boot and treats failure as fatal, while
+  # Authentik applies its blueprints asynchronously. Block startup until Authentik
+  # has provisioned the argo-workflows OIDC app (discovery returns 200) so a
+  # from-scratch install converges without CrashLoopBackOff.
+  extraInitContainers:
+    - name: wait-for-authentik-oidc
+      image: curlimages/curl:8.10.1
+      command: ["sh", "-c"]
+      args:
+        - |
+          url="https://auth.{{ $cfg.general.root_dns }}/application/o/argo-workflows/.well-known/openid-configuration"
+          echo "Waiting for Authentik to provision the argo-workflows OIDC app at $url ..."
+          until curl -sf -o /dev/null "$url"; do
+            sleep 10
+          done
+          echo "Authentik OIDC issuer is ready."
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "16Mi"
+        limits:
+          cpu: "50m"
+          memory: "32Mi"
   ingress:
     enabled: true
     ingressClassName: traefik

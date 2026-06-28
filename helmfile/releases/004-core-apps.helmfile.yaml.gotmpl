@@ -211,15 +211,22 @@ releases:
     chart: argocd/argo-workflows
     version: "1.0.18"
     wait: true
+    # Generous timeout: the server's wait-for-oidc init container blocks until
+    # Authentik has applied the argo-workflows blueprint after its own first boot.
+    timeout: 600
     labels:
       app: gitops
     needs:
       - ingress-system/traefik
       - monitoring-system/prometheus-stack
+      # SSO server does OIDC discovery at boot, so Authentik must be up and have
+      # applied the argo-workflows blueprint first (a wait-for-oidc init container
+      # on the server covers Authentik's async blueprint apply — see values).
+      - auth-system/authentik
     inherit:
     - template: values_gotmpl_secrets_and_shared
 
-  # Argo Workflows Configuration - WorkflowTemplates, sample Workflow, RBAC
+  # Argo Workflows Configuration - SSO -> ServiceAccount RBAC
   - name: argo-workflows-config
     namespace: ci-system
     createNamespace: true
