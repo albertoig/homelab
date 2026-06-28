@@ -57,9 +57,11 @@ Supporting decisions:
   *asynchronously*. To make a clean install converge unattended, the workflows
   release `needs` Authentik, and the server carries a `wait-for-authentik-oidc`
   init container that blocks until the `argo-workflows` discovery endpoint returns
-  200. (When adding the app to an already-running Authentik, force a blueprint
-  re-apply — e.g. restart `authentik-worker` — so the init container doesn't wait
-  for the next scheduled discovery.)
+  200. To make updates to an already-running Authentik apply promptly (not on the
+  next scheduled discovery), the `authentik-worker` pod carries a
+  `checksum/blueprints` annotation derived from the blueprint template + `root_dns`
+  + the SSO values; any blueprint change rolls the worker, which re-applies
+  blueprints on startup.
 - **Argo CD integration = health only.** These components are installed via helmfile
   like everything else; the repo has no Argo CD `Application`/app-of-apps pattern and
   this change does not introduce one. We only add a Lua **resource health** check for
