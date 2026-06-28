@@ -1,7 +1,7 @@
 # ADR-007: OpenBao + External Secrets Operator for Runtime Secrets
 
 - **Date**: 2026-06-20
-- **Status**: Proposed
+- **Status**: Accepted
 - **Deciders**: Homelab maintainers
 - **Category**: infrastructure
 

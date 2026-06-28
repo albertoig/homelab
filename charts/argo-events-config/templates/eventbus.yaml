@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/part-of: argo-events-config
+spec:
+  nats:
+    native:
+      replicas: {{ .Values.eventbus.replicas }}
+      auth: token

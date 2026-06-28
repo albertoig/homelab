@@ -6,6 +6,15 @@ dependencies:
   - name: argo-cd
     repository: https://argoproj.github.io/argo-helm
     version: 9.5.17
+  - name: argo-events
+    repository: https://argoproj.github.io/argo-helm
+    version: 2.4.22
+  - name: argo-rollouts
+    repository: https://argoproj.github.io/argo-helm
+    version: 2.41.0
+  - name: argo-workflows
+    repository: https://argoproj.github.io/argo-helm
+    version: 1.0.18
   - name: authentik
     repository: https://charts.goauthentik.io
     version: 2026.5.2
@@ -42,5 +51,5 @@ dependencies:
   - name: velero
     repository: https://vmware-tanzu.github.io/helm-charts
     version: 12.0.1
-digest: sha256:55d063eb75898c5938adbaaf5b57714d24d72b15c49a63f3daadc2a0052eec5c
-generated: "2026-06-07T01:25:33.982440941-04:00"
+digest: sha256:8170fa3c71d57e212e547f013abee609596e3650abc93e680151fb8bb93a269b
+generated: "2026-06-27T22:48:55.053741557-04:00"

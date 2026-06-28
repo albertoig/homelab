@@ -1,0 +1,16 @@
+# Default values for argo-events-config chart.
+# Used by `helm lint` and as defaults for template rendering.
+
+# EventBus backing store (NATS).
+eventbus:
+  replicas: 3
+
+# Webhook EventSource — accepts an HTTP POST and emits an event.
+eventsource:
+  port: "12000"
+  endpoint: /push
+  method: POST
+
+# Workflow submitted by the Sensor on each event.
+trigger:
+  image: "busybox:1.36"

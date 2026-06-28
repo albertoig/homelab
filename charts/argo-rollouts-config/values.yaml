@@ -1,0 +1,12 @@
+# Default values for argo-rollouts-config chart.
+# Used by `helm lint` and as defaults for template rendering.
+
+# Prometheus-backed analysis. Address of the kube-prometheus-stack Prometheus.
+analysis:
+  prometheusAddress: "http://prometheus-stack-kube-prom-prometheus.monitoring-system.svc.cluster.local:9090"
+
+# Sample canary Rollout demonstrating analysis-gated promotion / automatic rollback.
+demo:
+  enabled: true
+  image: "argoproj/rollouts-demo:blue"
+  replicas: 3

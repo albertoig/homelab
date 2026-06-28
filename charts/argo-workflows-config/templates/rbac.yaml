@@ -1,0 +1,84 @@
+{{- /*
+  Argo Workflows native SSO RBAC.
+  The server (auth-mode=sso, sso.rbac.enabled=true) maps an authenticated user to
+  one of these ServiceAccounts using the `workflows.argoproj.io/rbac-rule` annotation,
+  then acts with that SA's token. Each SA therefore needs a long-lived token Secret.
+  Docs: https://argo-workflows.readthedocs.io/en/latest/argo-server-sso/
+*/ -}}
+# --- Admin: members of the Authentik admin group ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-admin
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/part-of: argo-workflows-config
+  annotations:
+    workflows.argoproj.io/rbac-rule: "'{{ .Values.sso.rbac.adminGroup }}' in groups"
+    workflows.argoproj.io/rbac-rule-precedence: "1"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argo-admin.service-account-token
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/service-account.name: argo-admin
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-admin
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/part-of: argo-workflows-config
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argo-workflows-admin
+subjects:
+  - kind: ServiceAccount
+    name: argo-admin
+    namespace: {{ .Release.Namespace }}
+---
+# --- Read-only default: any authenticated user who matched no higher-precedence rule ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-readonly
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/part-of: argo-workflows-config
+  annotations:
+    workflows.argoproj.io/rbac-rule: "true"
+    workflows.argoproj.io/rbac-rule-precedence: "0"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argo-readonly.service-account-token
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/service-account.name: argo-readonly
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-readonly
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/part-of: argo-workflows-config
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argo-workflows-view
+subjects:
+  - kind: ServiceAccount
+    name: argo-readonly
+    namespace: {{ .Release.Namespace }}

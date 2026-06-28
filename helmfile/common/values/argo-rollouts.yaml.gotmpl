@@ -1,0 +1,24 @@
+# Argo Rollouts Configuration
+# https://github.com/argoproj/argo-helm/blob/main/charts/argo-rollouts/values.yaml
+
+# CRDs ship with the chart (installCRDs default true).
+
+controller:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: prometheus-stack
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+
+# Dashboard kept internal-only: it has no native OIDC and no oauth2-proxy exists
+# to gate it. Access via `kubectl argo rollouts dashboard` / port-forward for now.
+dashboard:
+  enabled: false

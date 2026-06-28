@@ -203,6 +203,98 @@ releases:
     inherit:
     - template: values_gotmpl_secrets_and_shared
 
+  # Argo Workflows - container-native workflow/CI engine
+  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-workflows/values.yaml
+  - name: argo-workflows
+    namespace: argo-workflows-system
+    createNamespace: true
+    chart: argocd/argo-workflows
+    version: "1.0.18"
+    wait: true
+    labels:
+      app: gitops
+    needs:
+      - ingress-system/traefik
+      - monitoring-system/prometheus-stack
+    inherit:
+    - template: values_gotmpl_secrets_and_shared
+
+  # Argo Workflows Configuration - WorkflowTemplates, sample Workflow, RBAC
+  - name: argo-workflows-config
+    namespace: argo-workflows-system
+    createNamespace: true
+    chart: ./../../charts/argo-workflows-config
+    version: "0.1.0"
+    wait: true
+    disableValidation: true
+    labels:
+      app: gitops
+    needs:
+      - argo-workflows-system/argo-workflows
+    inherit:
+    - template: values_gotmpl_secrets_and_shared
+
+  # Argo Events - event-driven workflow triggering
+  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-events/values.yaml
+  - name: argo-events
+    namespace: argo-events-system
+    createNamespace: true
+    chart: argocd/argo-events
+    version: "2.4.22"
+    wait: true
+    labels:
+      app: gitops
+    needs:
+      - monitoring-system/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets
+
+  # Argo Events Configuration - EventBus, EventSource (webhook), Sensor
+  - name: argo-events-config
+    namespace: argo-events-system
+    createNamespace: true
+    chart: ./../../charts/argo-events-config
+    version: "0.1.0"
+    wait: true
+    disableValidation: true
+    labels:
+      app: gitops
+    needs:
+      - argo-events-system/argo-events
+      - argo-workflows-system/argo-workflows-config
+    inherit:
+    - template: values_gotmpl_and_secrets
+
+  # Argo Rollouts - progressive delivery (canary / blue-green)
+  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-rollouts/values.yaml
+  - name: argo-rollouts
+    namespace: argo-rollouts-system
+    createNamespace: true
+    chart: argocd/argo-rollouts
+    version: "2.41.0"
+    wait: true
+    labels:
+      app: gitops
+    needs:
+      - monitoring-system/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets
+
+  # Argo Rollouts Configuration - AnalysisTemplate + sample Rollout (demo)
+  - name: argo-rollouts-config
+    namespace: argo-rollouts-system
+    createNamespace: true
+    chart: ./../../charts/argo-rollouts-config
+    version: "0.1.0"
+    wait: true
+    disableValidation: true
+    labels:
+      app: gitops
+    needs:
+      - argo-rollouts-system/argo-rollouts
+    inherit:
+    - template: values_gotmpl_and_secrets
+
   # Velero - Kubernetes backup and restore
   # https://github.com/vmware-tanzu/helm-charts/blob/main/charts/velero/values.yaml
   - name: velero

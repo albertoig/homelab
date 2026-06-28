@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/part-of: argo-events-config
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: webhook-dep
+      eventSourceName: webhook
+      eventName: push
+  triggers:
+    - template:
+        name: webhook-workflow
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: webhook-triggered-
+                namespace: {{ .Release.Namespace }}
+              spec:
+                serviceAccountName: operate-workflow-sa
+                entrypoint: main
+                templates:
+                  - name: main
+                    container:
+                      image: {{ .Values.trigger.image | quote }}
+                      command: ["sh", "-c"]
+                      args: ["echo 'workflow triggered by argo events webhook'"]

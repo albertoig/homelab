@@ -47,6 +47,12 @@ The homelab follows a layered architecture:
 | traefik | Reverse proxy and ingress | ingress-system | ✅ Traefik |
 | authentik | Identity provider | auth-system | ✅ Authentik |
 | argocd | GitOps continuous delivery | gitops-system | ✅ ArgoCD Operations · Application · Notifications |
+| argo-workflows | Container-native workflow / CI engine (SSO UI) | argo-workflows-system | ❌ |
+| argo-workflows-config | Sample WorkflowTemplate/Workflow and SSO RBAC | argo-workflows-system | ❌ |
+| argo-events | Event-driven workflow triggering | argo-events-system | ❌ |
+| argo-events-config | EventBus, webhook EventSource and Sensor | argo-events-system | ❌ |
+| argo-rollouts | Progressive delivery (canary / blue-green) | argo-rollouts-system | ❌ |
+| argo-rollouts-config | AnalysisTemplate and sample canary Rollout | argo-rollouts-system | ❌ |
 | authentik-ingress | Authentik ingress configuration | auth-system | ❌ |
 | openbao | Runtime secrets manager (Vault-compatible) | openbao-system | ✅ Hashicorp Vault |
 | external-secrets | Sync OpenBao secrets into Kubernetes Secrets | external-secrets-system | ❌ |
@@ -78,6 +84,9 @@ entry point.
 | [Helmfile](https://helmfile.readthedocs.io/) | Helm releases management |
 | [Helm](https://helm.sh/) | Kubernetes package manager |
 | [ArgoCD](https://argoproj.github.io/cd/) | GitOps continuous delivery |
+| [Argo Workflows](https://argoproj.github.io/workflows/) | Container-native workflow / CI engine |
+| [Argo Events](https://argoproj.github.io/events/) | Event-driven workflow automation |
+| [Argo Rollouts](https://argoproj.github.io/rollouts/) | Progressive delivery (canary / blue-green) |
 | [SOPS](https://github.com/mozilla/sops) | Bootstrap secrets encryption |
 | [OpenBao](https://openbao.org/) | Runtime secrets manager (Vault-compatible) |
 | [External Secrets Operator](https://external-secrets.io/) | Sync OpenBao secrets into Kubernetes Secrets |

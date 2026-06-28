@@ -1,0 +1,8 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+# Argo Workflows config chart values
+root_dns: {{ $cfg.general.root_dns }}
+
+# Maps the Authentik group to the admin ServiceAccount via the native SSO RBAC rule.
+sso:
+  rbac:
+    adminGroup: "Argo Admins"

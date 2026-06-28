@@ -34,3 +34,10 @@ sso:
     # OAuth2 client secret for OpenBao SSO
     # @autogen: openssl rand -hex 32
     client_secret: ""
+  argoWorkflows:
+    # OAuth2 client ID for Argo Workflows SSO
+    # @autogen: openssl rand -hex 16
+    client_id: ""
+    # OAuth2 client secret for Argo Workflows SSO
+    # @autogen: openssl rand -hex 32
+    client_secret: ""

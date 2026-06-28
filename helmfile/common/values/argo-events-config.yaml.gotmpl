@@ -1,0 +1,5 @@
+# Argo Events config chart values
+# EventBus NATS replicas — 3 for HA. Override per environment under
+# environments/<env>/values/argo-events-config.yaml.gotmpl on single-node clusters.
+eventbus:
+  replicas: 3

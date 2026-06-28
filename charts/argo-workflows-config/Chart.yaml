@@ -1,0 +1,12 @@
+apiVersion: v2
+name: argo-workflows-config
+description: Argo Workflows configuration — sample WorkflowTemplate/Workflow and SSO RBAC
+type: application
+version: 0.1.0
+appVersion: "v4.0.6"
+keywords:
+  - argo-workflows
+  - ci
+  - workflows
+  - rbac
+dependencies: []

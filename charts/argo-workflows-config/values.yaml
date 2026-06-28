@@ -1,0 +1,22 @@
+# Default values for argo-workflows-config chart.
+# Used by `helm lint` and as defaults for template rendering.
+
+# Root DNS domain (injected from environments/<env>/config.yaml by the helmfile value template).
+root_dns: ""
+
+# ServiceAccount that workflow pods run as. Created by the upstream argo-workflows
+# chart (workflow.serviceAccount.create / workflow.rbac.create).
+workflowServiceAccount: argo-workflow
+
+# SSO → ServiceAccount RBAC mapping (Argo Workflows native RBAC).
+sso:
+  rbac:
+    # Authentik group whose members get the admin ServiceAccount.
+    adminGroup: "Argo Admins"
+
+# Sample hello-world Workflow that runs once on install (satisfies the
+# "a hello-world Workflow succeeds" acceptance criterion). Disable after the
+# first successful run if you don't want it recreated on every sync.
+helloWorkflow:
+  enabled: true
+  image: "busybox:1.36"

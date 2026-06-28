@@ -1,0 +1,19 @@
+# Argo Events Configuration
+# https://github.com/argoproj/argo-helm/blob/main/charts/argo-events/values.yaml
+
+# CRDs ship with the chart (crds.install default true).
+
+controller:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: prometheus-stack
+  resources:
+    requests:
+      cpu: "25m"
+      memory: "64Mi"
+    limits:
+      cpu: "100m"
+      memory: "128Mi"
