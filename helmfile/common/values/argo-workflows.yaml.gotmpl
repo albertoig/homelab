@@ -17,7 +17,7 @@ workflow:
 
 controller:
   workflowNamespaces:
-    - argo-workflows-system
+    - ci-system
   metricsConfig:
     enabled: true
   serviceMonitor:
@@ -95,7 +95,7 @@ extraObjects:
     kind: Secret
     metadata:
       name: argo-workflows-sso
-      namespace: argo-workflows-system
+      namespace: ci-system
     type: Opaque
     stringData:
       client-id: "{{ .Values.sso.argoWorkflows.client_id }}"

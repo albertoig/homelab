@@ -47,11 +47,11 @@ The homelab follows a layered architecture:
 | traefik | Reverse proxy and ingress | ingress-system | ✅ Traefik |
 | authentik | Identity provider | auth-system | ✅ Authentik |
 | argocd | GitOps continuous delivery | gitops-system | ✅ ArgoCD Operations · Application · Notifications |
-| argo-workflows | Container-native workflow / CI engine (SSO UI) | argo-workflows-system | ❌ |
-| argo-workflows-config | Argo Workflows SSO → ServiceAccount RBAC | argo-workflows-system | ❌ |
-| argo-events | Event-driven workflow triggering | argo-events-system | ❌ |
-| argo-events-config | EventBus and workflow-submission RBAC | argo-events-system | ❌ |
-| argo-rollouts | Progressive delivery (canary / blue-green) | argo-rollouts-system | ❌ |
+| argo-workflows | Container-native workflow / CI engine (SSO UI) | ci-system | ❌ |
+| argo-workflows-config | Argo Workflows SSO → ServiceAccount RBAC | ci-system | ❌ |
+| argo-events | Event-driven workflow triggering | ci-system | ❌ |
+| argo-events-config | EventBus and workflow-submission RBAC | ci-system | ❌ |
+| argo-rollouts | Progressive delivery (canary / blue-green) | rollouts-system | ❌ |
 | authentik-ingress | Authentik ingress configuration | auth-system | ❌ |
 | openbao | Runtime secrets manager (Vault-compatible) | openbao-system | ✅ Hashicorp Vault |
 | external-secrets | Sync OpenBao secrets into Kubernetes Secrets | external-secrets-system | ❌ |

@@ -30,11 +30,12 @@ Adopt the rest of the **Argo ecosystem**, installed from the official upstream
 `argoproj/argo-helm` charts (already wired as the `argocd` Helm repo), each paired
 with a thin local config chart, via helmfile (`004-core-apps`):
 
-- **Argo Workflows** (`argo-workflows-system`) — the CI/pipeline engine, plus
+- **Argo Workflows** (`ci-system`) — the CI/pipeline engine, plus
   `argo-workflows-config` for the SSO → ServiceAccount RBAC mapping.
-- **Argo Events** (`argo-events-system`) — `argo-events-config` provisions the
-  default EventBus and the workflow-submission RBAC as ready-to-use building blocks.
-- **Argo Rollouts** (`argo-rollouts-system`) — the controller only; real
+- **Argo Events** (`ci-system`, co-located with Workflows as the CI trigger layer) —
+  `argo-events-config` provisions the default EventBus and the workflow-submission
+  RBAC as ready-to-use building blocks.
+- **Argo Rollouts** (`rollouts-system`) — the controller only; real
   `Rollout`/`AnalysisTemplate` resources ship with the application repos they belong to.
 
 The config charts deliberately ship **no demo workloads** (no sample
