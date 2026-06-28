@@ -1,0 +1,12 @@
+apiVersion: v2
+name: argo-events-config
+description: Argo Events configuration — EventBus, webhook EventSource and a Sensor that triggers a Workflow
+type: application
+version: 0.1.0
+appVersion: "v1.9.10"
+keywords:
+  - argo-events
+  - eventbus
+  - eventsource
+  - sensor
+dependencies: []

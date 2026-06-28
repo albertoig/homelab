@@ -1,0 +1,8 @@
+# Default values for argo-workflows-config chart.
+# Used by `helm lint` and as defaults for template rendering.
+
+# SSO → ServiceAccount RBAC mapping (Argo Workflows native RBAC).
+sso:
+  rbac:
+    # Authentik group whose members get the admin ServiceAccount.
+    adminGroup: "Argo Admins"

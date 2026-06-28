@@ -1,3 +1,8 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+{{- $bpTemplate := readFile "../../../charts/authentik-blueprints/templates/sso-blueprint.yaml" -}}
+{{- /* Roll the worker (the blueprint applier) whenever the blueprint changes:
+       its raw template, the root DNS (redirect URIs), or any SSO client value. */ -}}
+{{- $blueprintChecksum := printf "%s|%s|%s" $cfg.general.root_dns $bpTemplate (.Values.sso | toYaml) | sha256sum -}}
 # Authentik values
 # https://github.com/goauthentik/helm/blob/authentik-2026.5.2/charts/authentik/values.yaml
 
@@ -49,6 +54,10 @@ server:
         release: prometheus-stack
 
 worker:
+  # Re-apply blueprints on change: this checksum rolls the worker pod (which runs
+  # blueprint discovery/apply on startup) whenever the blueprint content changes.
+  podAnnotations:
+    checksum/blueprints: "{{ $blueprintChecksum }}"
   env:
     - name: HOMELAB_ADMIN_USERNAME
       valueFrom:
@@ -100,6 +109,16 @@ worker:
         secretKeyRef:
           name: authentik-initial-config-secrets
           key: OPENBAO_CLIENT_SECRET
+    - name: ARGO_WORKFLOWS_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: authentik-initial-config-secrets
+          key: ARGO_WORKFLOWS_CLIENT_ID
+    - name: ARGO_WORKFLOWS_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: authentik-initial-config-secrets
+          key: ARGO_WORKFLOWS_CLIENT_SECRET
     - name: OAUTH_CERT_DATA
       valueFrom:
         secretKeyRef:

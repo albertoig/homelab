@@ -79,6 +79,16 @@ data:
           - !KeyOf homelab-admin
           - !Find [authentik_core.user, [username, akadmin]]
 
+    - model: authentik_core.group
+      state: present
+      id: group-argo-admins
+      identifiers:
+        name: Argo Admins
+      attrs:
+        name: Argo Admins
+        users:
+          - !KeyOf homelab-admin
+
     # ============================================
     # MFA - TOTP enforcement on login
     # ============================================
@@ -259,4 +269,51 @@ data:
         slug: openbao
         provider: !KeyOf openbao-provider
         meta_launch_url: "https://openbao.internal.{{ .Values.root_dns }}/"
+        policy_engine_mode: any
+
+    # ============================================
+    # ARGO WORKFLOWS - OAuth2 provider + application
+    # ============================================
+    - model: authentik_providers_oauth2.oauth2provider
+      state: present
+      id: argo-workflows-provider
+      identifiers:
+        name: argo-workflows-provider
+      attrs:
+        name: argo-workflows-provider
+        client_id: !Env ARGO_WORKFLOWS_CLIENT_ID
+        client_secret: !Env ARGO_WORKFLOWS_CLIENT_SECRET
+        client_type: confidential
+        # Required since Authentik 2026.5 (see grafana-provider above).
+        grant_types:
+          - authorization_code
+          - refresh_token
+        redirect_uris:
+          - url: "https://workflows.internal.{{ .Values.root_dns }}/oauth2/callback"
+            matching_mode: strict
+        signing_key: !KeyOf authentik-main-cert
+        authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+        invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+        access_token_validity: "hours=1"
+        refresh_token_validity: "days=30"
+        sub_mode: hashed_user_id
+        include_claims_in_id_token: true
+        # Argo Workflows uses the issuer URL to discover OIDC endpoints.
+        issuer_mode: per_provider
+        property_mappings:
+          - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+          - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+          # The 'profile' mapping carries the `groups` claim Argo RBAC matches on.
+          - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+
+    - model: authentik_core.application
+      state: present
+      id: argo-workflows-app
+      identifiers:
+        slug: argo-workflows
+      attrs:
+        name: Argo Workflows
+        slug: argo-workflows
+        provider: !KeyOf argo-workflows-provider
+        meta_launch_url: "https://workflows.internal.{{ .Values.root_dns }}/"
         policy_engine_mode: any

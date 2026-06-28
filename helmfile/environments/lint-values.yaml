@@ -42,6 +42,12 @@ sso:
   argocd:
     client_id: ""
     client_secret: ""
+  openbao:
+    client_id: ""
+    client_secret: ""
+  argoWorkflows:
+    client_id: ""
+    client_secret: ""
 grafana: {}
 secret:
   apiKey: ""

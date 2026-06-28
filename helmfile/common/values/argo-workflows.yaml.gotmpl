@@ -1,0 +1,125 @@
+{{- $cfg := readFile (printf "../../environments/%s/config.yaml" .Environment.Name) | fromYaml -}}
+{{- $host := printf "workflows.internal.%s" $cfg.general.root_dns -}}
+# Argo Workflows Configuration
+# https://github.com/argoproj/argo-helm/blob/main/charts/argo-workflows/values.yaml
+
+# CRDs ship with the chart (crds.install/keep default true) — matches the
+# cert-manager pattern; no separate CRD release needed.
+
+# ServiceAccount used to run workflows in this namespace (referenced by the
+# WorkflowTemplate/Workflow in argo-workflows-config).
+workflow:
+  serviceAccount:
+    create: true
+    name: "argo-workflow"
+  rbac:
+    create: true
+
+controller:
+  workflowNamespaces:
+    - ci-system
+  metricsConfig:
+    enabled: true
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: prometheus-stack
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+
+server:
+  # TLS is terminated at Traefik; server speaks plain HTTP behind the ingress.
+  secure: false
+  authModes:
+    - sso
+  # Native OIDC SSO against Authentik — same pattern as ArgoCD/Grafana.
+  sso:
+    enabled: true
+    issuer: "https://auth.{{ $cfg.general.root_dns }}/application/o/argo-workflows/"
+    clientId:
+      name: argo-workflows-sso
+      key: client-id
+    clientSecret:
+      name: argo-workflows-sso
+      key: client-secret
+    redirectUrl: "https://{{ $host }}/oauth2/callback"
+    rbac:
+      enabled: true
+    # Authentik delivers the `groups` claim within the default `profile` scope.
+    scopes:
+      - openid
+      - profile
+      - email
+    sessionExpiry: "10h"
+  # The SSO server does OIDC discovery at boot and treats failure as fatal, while
+  # Authentik applies its blueprints asynchronously. Block startup until Authentik
+  # has provisioned the argo-workflows OIDC app (discovery returns 200) so a
+  # from-scratch install converges without CrashLoopBackOff.
+  extraInitContainers:
+    - name: wait-for-authentik-oidc
+      image: curlimages/curl:8.10.1
+      command: ["sh", "-c"]
+      args:
+        - |
+          url="https://auth.{{ $cfg.general.root_dns }}/application/o/argo-workflows/.well-known/openid-configuration"
+          echo "Waiting for Authentik to provision the argo-workflows OIDC app at $url ..."
+          until curl -sf -o /dev/null "$url"; do
+            sleep 10
+          done
+          echo "Authentik OIDC issuer is ready."
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "16Mi"
+        limits:
+          cpu: "50m"
+          memory: "32Mi"
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-{{ .Environment.Name }}"
+      external-dns.alpha.kubernetes.io/hostname: "{{ $host }}"
+      external-dns.alpha.kubernetes.io/ttl: "300"
+      external-dns.alpha.kubernetes.io/action: sync
+      external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+      traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    hosts:
+      - {{ $host }}
+    paths:
+      - /
+    pathType: Prefix
+    tls:
+      - secretName: argo-workflows-server-tls
+        hosts:
+          - {{ $host }}
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+
+# OIDC client credentials Secret, created with the release so the server can read
+# it on first start. Sourced from the shared-sso SOPS secret.
+# NOTE: provided as a string block (with a leading blank line) because the chart's
+# extra-manifests template trims the newline after its `---` separator for non-string
+# entries, which would glue `---` to `apiVersion` and produce invalid YAML.
+extraObjects:
+  - |
+
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: argo-workflows-sso
+      namespace: ci-system
+    type: Opaque
+    stringData:
+      client-id: "{{ .Values.sso.argoWorkflows.client_id }}"
+      client-secret: "{{ .Values.sso.argoWorkflows.client_secret }}"

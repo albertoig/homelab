@@ -203,6 +203,91 @@ releases:
     inherit:
     - template: values_gotmpl_secrets_and_shared
 
+  # Argo Workflows - container-native workflow/CI engine
+  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-workflows/values.yaml
+  - name: argo-workflows
+    namespace: ci-system
+    createNamespace: true
+    chart: argocd/argo-workflows
+    version: "1.0.18"
+    wait: true
+    # Generous timeout: the server's wait-for-oidc init container blocks until
+    # Authentik has applied the argo-workflows blueprint after its own first boot.
+    timeout: 600
+    labels:
+      app: gitops
+    needs:
+      - ingress-system/traefik
+      - monitoring-system/prometheus-stack
+      # SSO server does OIDC discovery at boot, so Authentik must be up and have
+      # applied the argo-workflows blueprint first (a wait-for-oidc init container
+      # on the server covers Authentik's async blueprint apply — see values).
+      - auth-system/authentik
+    inherit:
+    - template: values_gotmpl_secrets_and_shared
+
+  # Argo Workflows Configuration - SSO -> ServiceAccount RBAC
+  - name: argo-workflows-config
+    namespace: ci-system
+    createNamespace: true
+    chart: ./../../charts/argo-workflows-config
+    version: "0.1.0"
+    wait: true
+    disableValidation: true
+    labels:
+      app: gitops
+    needs:
+      - ci-system/argo-workflows
+    inherit:
+    - template: values_gotmpl_secrets_and_shared
+
+  # Argo Events - event-driven workflow triggering
+  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-events/values.yaml
+  - name: argo-events
+    namespace: ci-system
+    createNamespace: true
+    chart: argocd/argo-events
+    version: "2.4.22"
+    wait: true
+    labels:
+      app: gitops
+    needs:
+      - monitoring-system/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets
+
+  # Argo Events Configuration - EventBus + workflow-submission RBAC
+  # NOTE: wait is disabled because the EventBus is reconciled asynchronously by the
+  # Argo Events controller (it provisions the NATS StatefulSet out-of-band).
+  - name: argo-events-config
+    namespace: ci-system
+    createNamespace: true
+    chart: ./../../charts/argo-events-config
+    version: "0.1.0"
+    wait: false
+    disableValidation: true
+    labels:
+      app: gitops
+    needs:
+      - ci-system/argo-events
+    inherit:
+    - template: values_gotmpl_and_secrets
+
+  # Argo Rollouts - progressive delivery (canary / blue-green)
+  # https://github.com/argoproj/argo-helm/blob/main/charts/argo-rollouts/values.yaml
+  - name: argo-rollouts
+    namespace: rollouts-system
+    createNamespace: true
+    chart: argocd/argo-rollouts
+    version: "2.41.0"
+    wait: true
+    labels:
+      app: gitops
+    needs:
+      - monitoring-system/prometheus-stack
+    inherit:
+    - template: values_gotmpl_and_secrets
+
   # Velero - Kubernetes backup and restore
   # https://github.com/vmware-tanzu/helm-charts/blob/main/charts/velero/values.yaml
   - name: velero

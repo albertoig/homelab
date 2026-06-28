@@ -1,0 +1,7 @@
+# Default values for argo-events-config chart.
+# Used by `helm lint` and as defaults for template rendering.
+
+# EventBus backing store (NATS). Provisioned as ready-to-use infrastructure;
+# EventSources/Sensors for real pipelines are added on top (see issue #28).
+eventbus:
+  replicas: 3

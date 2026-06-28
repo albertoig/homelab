@@ -29,7 +29,28 @@ configs:
       # Uses SHA256 hash of code verifier
       # This is recommended and enabled by default in Argo CD 2.9+
       # For older versions, add: usePKCE: true
-    resource.customizations: |
+    # Track Argo Rollouts health natively in the ArgoCD UI / sync status, so a
+    # canary that is paused or degraded surfaces correctly when managed by ArgoCD.
+    resource.customizations.health.argoproj.io_Rollout: |
+      hs = {}
+      if obj.status ~= nil and obj.status.phase ~= nil then
+        if obj.status.phase == "Healthy" then
+          hs.status = "Healthy"
+          hs.message = obj.status.message or "Rollout is healthy"
+          return hs
+        elseif obj.status.phase == "Degraded" then
+          hs.status = "Degraded"
+          hs.message = obj.status.message or "Rollout is degraded"
+          return hs
+        elseif obj.status.phase == "Paused" then
+          hs.status = "Suspended"
+          hs.message = obj.status.message or "Rollout is paused"
+          return hs
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for rollout to finish"
+      return hs
   secret:
     extra:
       oidc.authentik.clientSecret: {{ .Values.sso.argocd.client_secret | quote }}

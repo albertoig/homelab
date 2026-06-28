@@ -11,6 +11,9 @@ sso:
   openbao:
     client_id: ""
     client_secret: ""
+  argoWorkflows:
+    client_id: ""
+    client_secret: ""
   admin:
     username: ""
     name: ""
