@@ -48,11 +48,10 @@ The homelab follows a layered architecture:
 | authentik | Identity provider | auth-system | ✅ Authentik |
 | argocd | GitOps continuous delivery | gitops-system | ✅ ArgoCD Operations · Application · Notifications |
 | argo-workflows | Container-native workflow / CI engine (SSO UI) | argo-workflows-system | ❌ |
-| argo-workflows-config | Sample WorkflowTemplate/Workflow and SSO RBAC | argo-workflows-system | ❌ |
+| argo-workflows-config | Argo Workflows SSO → ServiceAccount RBAC | argo-workflows-system | ❌ |
 | argo-events | Event-driven workflow triggering | argo-events-system | ❌ |
-| argo-events-config | EventBus, webhook EventSource and Sensor | argo-events-system | ❌ |
+| argo-events-config | EventBus and workflow-submission RBAC | argo-events-system | ❌ |
 | argo-rollouts | Progressive delivery (canary / blue-green) | argo-rollouts-system | ❌ |
-| argo-rollouts-config | AnalysisTemplate and sample canary Rollout | argo-rollouts-system | ❌ |
 | authentik-ingress | Authentik ingress configuration | auth-system | ❌ |
 | openbao | Runtime secrets manager (Vault-compatible) | openbao-system | ✅ Hashicorp Vault |
 | external-secrets | Sync OpenBao secrets into Kubernetes Secrets | external-secrets-system | ❌ |

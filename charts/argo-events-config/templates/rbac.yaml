@@ -1,5 +1,6 @@
-# ServiceAccount used by the Sensor to submit Workflows, and by the triggered
-# Workflow's pods to run. Kept namespace-local so no cluster RBAC is needed.
+# ServiceAccount for Sensors to submit Workflows (and for those Workflows' pods to
+# run). Provisioned as a ready-to-use building block for real pipelines (issue #28);
+# kept namespace-local so no cluster RBAC is needed.
 apiVersion: v1
 kind: ServiceAccount
 metadata:

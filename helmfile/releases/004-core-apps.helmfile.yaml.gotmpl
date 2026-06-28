@@ -249,19 +249,20 @@ releases:
     inherit:
     - template: values_gotmpl_and_secrets
 
-  # Argo Events Configuration - EventBus, EventSource (webhook), Sensor
+  # Argo Events Configuration - EventBus + workflow-submission RBAC
+  # NOTE: wait is disabled because the EventBus is reconciled asynchronously by the
+  # Argo Events controller (it provisions the NATS StatefulSet out-of-band).
   - name: argo-events-config
     namespace: argo-events-system
     createNamespace: true
     chart: ./../../charts/argo-events-config
     version: "0.1.0"
-    wait: true
+    wait: false
     disableValidation: true
     labels:
       app: gitops
     needs:
       - argo-events-system/argo-events
-      - argo-workflows-system/argo-workflows-config
     inherit:
     - template: values_gotmpl_and_secrets
 
@@ -277,21 +278,6 @@ releases:
       app: gitops
     needs:
       - monitoring-system/prometheus-stack
-    inherit:
-    - template: values_gotmpl_and_secrets
-
-  # Argo Rollouts Configuration - AnalysisTemplate + sample Rollout (demo)
-  - name: argo-rollouts-config
-    namespace: argo-rollouts-system
-    createNamespace: true
-    chart: ./../../charts/argo-rollouts-config
-    version: "0.1.0"
-    wait: true
-    disableValidation: true
-    labels:
-      app: gitops
-    needs:
-      - argo-rollouts-system/argo-rollouts
     inherit:
     - template: values_gotmpl_and_secrets
 

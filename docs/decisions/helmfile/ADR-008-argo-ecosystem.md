@@ -31,11 +31,16 @@ Adopt the rest of the **Argo ecosystem**, installed from the official upstream
 with a thin local config chart, via helmfile (`004-core-apps`):
 
 - **Argo Workflows** (`argo-workflows-system`) — the CI/pipeline engine, plus
-  `argo-workflows-config` for a sample WorkflowTemplate/Workflow and SSO RBAC.
-- **Argo Events** (`argo-events-system`) — `argo-events-config` provides an
-  EventBus, a webhook EventSource and a Sensor that triggers a Workflow.
-- **Argo Rollouts** (`argo-rollouts-system`) — `argo-rollouts-config` provides an
-  AnalysisTemplate and a sample canary Rollout.
+  `argo-workflows-config` for the SSO → ServiceAccount RBAC mapping.
+- **Argo Events** (`argo-events-system`) — `argo-events-config` provisions the
+  default EventBus and the workflow-submission RBAC as ready-to-use building blocks.
+- **Argo Rollouts** (`argo-rollouts-system`) — the controller only; real
+  `Rollout`/`AnalysisTemplate` resources ship with the application repos they belong to.
+
+The config charts deliberately ship **no demo workloads** (no sample
+WorkflowTemplate/Workflow, no webhook EventSource/Sensor, no sample Rollout) — only
+the real, reusable platform configuration. A paused sample canary in particular
+never reaches a Ready state, which would stall a `helmfile` deploy.
 
 Supporting decisions:
 
@@ -66,9 +71,9 @@ Supporting decisions:
 - One consistent toolchain (Argo CD + Workflows + Events + Rollouts), one SSO
   pattern, one operating model.
 - **Artifact repository (MinIO / S3)** is a known dependency for Workflows artifact
-  passing and is **not** included here (hello-world needs none) — tracked as a
-  follow-up issue.
+  passing and is **not** included here — tracked as follow-up #26.
 - A real Git-webhook-triggered build/test/push pipeline (kaniko/buildkit) and
-  supply-chain provenance (cosign / in-toto) are follow-ups, not platform components.
+  supply-chain provenance (cosign / in-toto) are follow-ups (#28), not platform
+  components — they bring their own EventSource/Sensor/WorkflowTemplate.
 - The Rollouts dashboard has no native OIDC; it is left internal-only
   (`kubectl argo rollouts dashboard` / port-forward) until a gating story exists.
