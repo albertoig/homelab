@@ -215,7 +215,8 @@ After applying, copy the outputs (`velero_bucket_name`, `velero_s3_endpoint`) in
 ## 📚 Documentation
 
 - [Roadmap](./ROADMAP.md) — upcoming features and progress
-- [Testing](./docs/TESTING.md) — pre-commit hooks, shell BDD (shellspec), and Python integration tests
+- [Testing](./docs/TESTING.md) — pre-commit hooks, shell BDD (shellspec), Gherkin acceptance tests (pytest-bdd), and Python integration tests
+- [Spec-Driven Development](./CONTRIBUTING.md#spec-driven-development) — the `/speckit-*` flow, the project [constitution](./.specify/memory/constitution.md), and when to write a spec
 - [Configuration](./docs/CONFIG.md) — config system reference and all available settings
 - [Installation](./docs/INSTALL.md) — step-by-step setup guide
 - [Forking](./docs/FORKING.md) — how to fork and maintain your own configs and secrets
@@ -229,7 +230,9 @@ After applying, copy the outputs (`velero_bucket_name`, `velero_s3_endpoint`) in
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md). Every PR with a meaningful change must include an ADR.
+See [CONTRIBUTING.md](./CONTRIBUTING.md). Meaningful work starts from a spec (see
+[Spec-Driven Development](./CONTRIBUTING.md#spec-driven-development)), and every PR with a
+meaningful change must include an ADR.
 
 ---
 

@@ -32,3 +32,4 @@ Decisions related to project structure, distribution model, and contribution wor
 | ADR | Title | Date | Status |
 |-----|-------|------|--------|
 | [ADR-001](project/ADR-001-fork-based-user-config.md) | Fork-based model for user configs and secrets | 2026-03-31 | Proposed |
+| [ADR-002](project/ADR-002-adopt-spec-kit.md) | Adopt Spec Kit (SDD) with a BDD verification loop | 2026-06-29 | Proposed |

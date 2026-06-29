@@ -4,6 +4,55 @@ Contributions are welcome. Before opening a PR, read this guide to understand th
 
 If you want to deploy this homelab for yourself, see [docs/FORKING.md](./docs/FORKING.md) instead.
 
+## Spec-Driven Development
+
+This project uses [Spec Kit](https://github.com/github/spec-kit): meaningful work starts
+from a written spec and plan rather than ad-hoc implementation. Conventions are codified in
+the [project constitution](./.specify/memory/constitution.md), which specs must comply with.
+
+The toolkit is committed to the repo under `.specify/` and is **AI-agent agnostic** — Spec
+Kit supports Claude Code, Copilot, Gemini, Cursor, and others. Run the commands from
+whichever agent you use (re-run `specify init` to add your agent's integration if it isn't
+already present):
+
+1. `/speckit-specify` — capture **what** and **why** in `specs/NNN-<slug>/spec.md`
+2. `/speckit-plan` — derive the **how** into `plan.md`
+3. `/speckit-tasks` — break the plan into `tasks.md`
+4. `/speckit-implement` — implement, with acceptance tests
+
+The verification loop below is plain `mise` + `pytest-bdd`, so it runs identically in
+pre-commit and CI regardless of which AI agent (if any) authored the change.
+
+### When is a spec expected?
+
+| Write a spec first | No spec needed |
+|--------------------|----------------|
+| New script, chart, service, or Helmfile release | Typo / formatting / doc-only fixes |
+| Change to topology, networking, or security posture | Dependency version bumps |
+| A new pattern, convention, or cross-cutting workflow | One-line corrections |
+
+Keep it lightweight — SDD should help, not bureaucratise small fixes.
+
+### Acceptance criteria are executable (BDD)
+
+A spec's acceptance criteria are expressed as Gherkin scenarios under `tests/features/`
+(pytest-bdd), each tagged exactly one of:
+
+- `@offline` — needs no cluster; runs locally, in **pre-commit**, and in **CI on every
+  branch** (including `beta` and `main`).
+- `@online` — needs a live `homelab-<env>` cluster; runs locally only.
+
+Verify with:
+
+```bash
+mise run verify          # offline + online (online needs a cluster)
+mise run verify:offline  # offline only — exactly what pre-commit and CI run
+```
+
+The `offline-bdd` pre-commit hook and the `offline-bdd` CI job both run
+`mise run verify:offline`, so the offline gate is enforced before every commit and on every
+branch. See [docs/TESTING.md](./docs/TESTING.md) for details.
+
 ## ADR Requirement
 
 **Every PR that introduces a meaningful change must include an Architecture Decision Record (ADR).**

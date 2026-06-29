@@ -5,6 +5,10 @@
 ## NODE
 node_modules/
 
+## CLAUDE / SPEC KIT
+# Local, machine-specific Claude Code settings (skills/commands ARE committed).
+.claude/settings.local.json
+
 ## ANSIBLE
 metal/k3s/inventory.yml
 metal/k3s/.ansible/
