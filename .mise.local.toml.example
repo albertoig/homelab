@@ -65,3 +65,11 @@ CLOUDFLARE_R2_SECRET_ACCESS_KEY = ""
 # no env var is needed.
 #
 # SOPS_AGE_KEY_FILE = "~/.config/sops/age/keys.txt"
+
+# ── Spec Kit (optional) ───────────────────────────────────────────────────────
+#
+# AI-agent integration used by `mise run spec:init`. Defaults to "claude" in
+# .mise.toml; override here to scaffold a different agent's commands.
+# Supported values come from `specify check` (claude, copilot, gemini, cursor, …).
+#
+# AI_AGENT = "copilot"

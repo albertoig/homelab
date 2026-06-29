@@ -3,6 +3,10 @@ name: Validate
 on:
   pull_request:
   push:
+    # Feature branches trigger validate directly. Pushes to main/beta are validated
+    # through release.yml, which calls this workflow via workflow_call (avoiding a
+    # double run). The offline-bdd job below has no change gate, so it runs on every
+    # invocation — including the workflow_call from release.yml on main and beta.
     branches-ignore:
       - main
       - beta
@@ -122,6 +126,24 @@ jobs:
 
       - name: Run shellspec BDD tests
         run: mise run test:shell
+
+  offline-bdd:
+    name: Offline BDD (spec acceptance)
+    # No change gate: the Spec-Driven Development acceptance scenarios run on every
+    # branch (including beta and main) so a spec's offline behaviour is always verified.
+    # @online scenarios need a live cluster and run locally via `mise run verify`.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install tools via mise
+        uses: jdx/mise-action@v2
+
+      - name: Install Python dependencies
+        run: poetry install
+
+      - name: Run offline acceptance scenarios
+        run: mise run verify:offline
 
   commitlint:
     name: Commitlint

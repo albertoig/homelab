@@ -35,6 +35,12 @@ repos:
         language: system
         files: ^(scripts/|tests/)
         pass_filenames: false
+      - id: offline-bdd
+        name: Offline BDD Tests
+        entry: mise run verify:offline
+        language: system
+        files: ^(tests/features/|specs/|\.specify/|\.mise\.toml|pyproject\.toml)
+        pass_filenames: false
       - id: helmfile-lint
         name: helmfile-lint
         entry: mise exec -- bash

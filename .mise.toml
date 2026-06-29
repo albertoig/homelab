@@ -17,6 +17,9 @@ node   = "24"
 python = "3.12"
 poetry = "latest"
 
+# Spec Kit: `specify` CLI runs via `uvx` (see the `spec:init` task)
+uv     = "0.11.17"
+
 # CLI scripting
 gum              = "0.17.0"
 fzf              = "0.73.1"
@@ -29,6 +32,11 @@ yq               = "4.47.1"
 [env]
 # Poetry creates the venv inside the project so `mise run clean` can wipe it
 POETRY_VIRTUALENVS_IN_PROJECT = "true"
+
+# Spec Kit AI-agent integration used by `mise run spec:init`. Defaults to Claude Code;
+# override per-machine in the gitignored .mise.local.toml (e.g. AI_AGENT = "copilot").
+# Supported values come from `specify check` (claude, copilot, gemini, cursor, …).
+AI_AGENT = "claude"
 
 # Place sensitive or machine-specific vars in .mise.local.toml (gitignored).
 # See .mise.local.toml.example for all available variables and descriptions.
@@ -151,6 +159,29 @@ run = "mise exec -- npx commitlint --edit"
 description = "Run shellspec BDD tests for shell scripts"
 run = "shellspec tests/shell"
 
+# Gherkin acceptance scenarios (pytest-bdd) carry one of two tags:
+#   @offline → no cluster needed; runs everywhere (locally AND in CI, every branch).
+#   @online  → needs a reachable homelab-<env> cluster; runs locally only.
+#
+#   verify          → runs BOTH tags. Use locally; the @online scenarios need a cluster.
+#   verify:offline  → runs ONLY @offline. This is exactly what CI runs on every branch.
+[tasks.verify]
+description = "Run all acceptance scenarios — offline + online (online needs a cluster)"
+run = "poetry run pytest -m 'offline or online' tests/features"
+
+[tasks."verify:offline"]
+description = "Run only the offline acceptance scenarios (what CI runs on every branch)"
+run = "poetry run pytest -m offline tests/features"
+
+# ── Spec-Driven Development ─────────────────────────────────────────────────────
+
+# Bootstrap / refresh the Spec Kit scaffolding and the AI-agent integration. Spec Kit is
+# agent-agnostic; the agent comes from $AI_AGENT (default "claude", override in
+# .mise.local.toml).
+[tasks."spec:init"]
+description = "Bootstrap/refresh Spec Kit scaffolding (specify init, $AI_AGENT integration)"
+run = "uvx --from git+https://github.com/github/spec-kit.git specify init --here --integration \"$AI_AGENT\" --script sh --force"
+
 [tasks.test]
 description = "Run all integration tests"
 usage = '''
@@ -210,3 +241,4 @@ run = "./scripts/infra/terraform.sh apply"
 [tasks."tf:destroy"]
 description = "Destroy Terraform-managed resources  [env?: dev|prod, default dev]"
 run = "./scripts/infra/terraform.sh destroy"
+  

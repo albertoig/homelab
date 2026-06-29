@@ -23,6 +23,7 @@ mise run setup
 | ansible-lint | commit | Lints Ansible playbooks in `metal/k3s/playbooks/` |
 | helm-lint | commit | Lints Helm charts in `charts/` |
 | Shell BDD Tests | commit | Runs shellspec specs when `scripts/` or `tests/` change |
+| Offline BDD Tests | commit | Runs `mise run verify:offline` (pytest-bdd `@offline`) when specs, feature files, or the verify wiring change |
 | helmfile-lint | commit | Lints helmfile configurations in `helmfile/` |
 
 ### Running Hooks
@@ -156,6 +157,49 @@ file under `scripts/` or `tests/` changes.
 Place a `*_spec.sh` file under `tests/shell/` mirroring the script's path. Stub
 external tools by prepending a temporary `bin/` to `PATH`; see
 `tests/shell/scripts/infra/preflight_spec.sh` for the sandbox pattern.
+
+## Gherkin acceptance tests (pytest-bdd)
+
+Spec acceptance criteria are written as Gherkin `.feature` files under `tests/features/`
+and executed with [pytest-bdd](https://pytest-bdd.readthedocs.io/). This is the executable
+contract for [Spec-Driven Development](../CONTRIBUTING.md#spec-driven-development): each
+`/speckit-specify` spec maps its acceptance scenarios to a feature here.
+
+**Every scenario is tagged exactly one of two tags:**
+
+| Tag | Needs a cluster? | Runs where |
+|-----|------------------|------------|
+| `@offline` | No | Locally, in **pre-commit**, and in **CI on every branch** (incl. `beta`/`main`) |
+| `@online` | Yes (`homelab-<env>`) | Locally only |
+
+### Usage
+
+```bash
+mise run verify          # both tags — @online needs a reachable cluster
+mise run verify:offline  # @offline only — exactly what pre-commit and CI run
+```
+
+`verify` runs `pytest -m 'offline or online' tests/features`; `verify:offline` runs
+`pytest -m offline tests/features`.
+
+### Enforcement
+
+The offline gate runs in three places, all invoking `mise run verify:offline`:
+
+- **pre-commit** — the `offline-bdd` hook, when specs/features/verify wiring change.
+- **CI** — the `offline-bdd` job in `.github/workflows/validate.yml`, with no change gate
+  so it runs on every branch (reaching `main`/`beta` via `release.yml`'s `workflow_call`).
+- **locally** — as part of the full `mise run verify`.
+
+CI never runs `@online` scenarios — it has no cluster.
+
+### Adding scenarios
+
+Add a `*.feature` file under `tests/features/` and a `test_*.py` step module that binds it
+with `scenarios("<file>.feature")`. Tag each scenario `@offline` or `@online`. Offline
+steps may only inspect files/config/stubbed commands; online steps may use the cluster
+fixtures from `tests/conftest.py` (`urls`, `http`, `k8s`). See
+`tests/features/spec_kit_adoption.feature` for the pattern.
 
 ## Python integration tests (pytest)
 
