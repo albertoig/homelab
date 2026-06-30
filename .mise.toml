@@ -92,6 +92,18 @@ run = '''
 ./scripts/helm/destroy.sh "${usage_environment?}"
 '''
 
+[tasks."destroy:one"]
+description = "Delete a single helmfile release — managed + deployed only  [env] [release]"
+usage = '''
+arg "[environment]" help="Target environment" {
+  choices "dev" "prod"
+}
+arg "[release]" help="Release name or namespace/name to delete; required"
+'''
+run = '''
+./scripts/helm/destroy-one.sh ${usage_environment:-} ${usage_release:-}
+'''
+
 # ── Secrets management ────────────────────────────────────────────────────────
 
 # These scripts select the environment via lib/env.sh (arg, ENV var, or prompt).
