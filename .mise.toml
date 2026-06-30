@@ -93,16 +93,17 @@ run = '''
 '''
 
 [tasks."destroy:one"]
-description = "Delete a single helmfile release — managed + deployed only  [env] [release] [--dry-run]"
+description = "Delete a single helmfile release — managed + deployed only  [env] [release] [--dry-run] [--yes]"
 usage = '''
 arg "[environment]" help="Target environment" {
   choices "dev" "prod"
 }
 arg "[release]" help="Release name or namespace/name to delete; omit to pick interactively"
 flag "--dry-run" help="Preview the release and its dependents without deleting"
+flag "--yes" help="Skip the confirmation (non-interactive); requires a release; prod still confirms"
 '''
 run = '''
-./scripts/helm/destroy-one.sh ${usage_environment:-} ${usage_release:-} ${usage_dry_run:+--dry-run}
+./scripts/helm/destroy-one.sh ${usage_environment:-} ${usage_release:-} ${usage_dry_run:+--dry-run} ${usage_yes:+--yes}
 '''
 
 # ── Secrets management ────────────────────────────────────────────────────────

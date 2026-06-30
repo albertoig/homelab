@@ -89,6 +89,42 @@ Feature: Isolated delete of a single Helmfile release
     Then the command succeeds
     And the output mentions "web/app"
 
+  # ── User Story 4 (P2) — non-interactive --yes ──────────────────────────────────
+
+  @offline
+  Scenario: --yes deletes a non-prod release without prompting
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "web/ghost" deployed
+    When I run destroy-one for "dev" targeting "redis" with --yes
+    Then the command succeeds
+    And helmfile destroyed the release with selector "name=redis"
+    And no confirmation was requested
+
+  @offline
+  Scenario: --yes without a release is refused
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "web/ghost" deployed
+    When I run destroy-one for "dev" with --yes and no release
+    Then the command fails
+    And nothing was destroyed
+
+  @offline
+  Scenario: --yes cannot delete an unmanaged release
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "data/rogue" deployed
+    When I run destroy-one for "dev" targeting "rogue" with --yes
+    Then the command fails
+    And nothing was destroyed
+    And the output mentions "not a deletable release"
+
+  @offline
+  Scenario: --yes still requires confirmation on prod
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "web/ghost" deployed
+    When I run destroy-one for "prod" targeting "redis" with --yes
+    Then the command succeeds
+    And a confirmation was requested
+
   @online
   Scenario: Deleting one release leaves the others running
     Given a reachable "dev" cluster with more than one managed release deployed

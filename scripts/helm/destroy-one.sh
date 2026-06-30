@@ -30,16 +30,19 @@ done
 # ── Arguments ─────────────────────────────────────────────────────────────────
 
 DRY_RUN=0
+ASSUME_YES=0
 POSITIONAL=()
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        --dry-run) DRY_RUN=1 ;;
+        --dry-run)  DRY_RUN=1 ;;
+        --yes|-y)   ASSUME_YES=1 ;;
         --) shift; while [ "$#" -gt 0 ]; do POSITIONAL+=("$1"); shift; done; break ;;
         -*) error "Unknown option: $1"; exit 1 ;;
         *)  POSITIONAL+=("$1") ;;
     esac
     shift
 done
+[ -n "${MISE_NONINTERACTIVE:-}" ] && ASSUME_YES=1
 
 # ── Environment selector (arg, ENV var, or prompt) ─────────────────────────────
 
@@ -68,6 +71,11 @@ if [ "${#SELECTABLE[@]}" -eq 0 ]; then
 fi
 
 # ── Resolve the target release ────────────────────────────────────────────────
+
+if [ -z "$RELEASE_ARG" ] && [ "$ASSUME_YES" -eq 1 ]; then
+    error "Non-interactive mode (--yes) requires an explicit release name."
+    exit 1
+fi
 
 if [ -z "$RELEASE_ARG" ]; then
     # No release given — let the operator pick from the selectable set. Read the
@@ -155,13 +163,17 @@ if [ "$DRY_RUN" -eq 1 ]; then
     exit 0
 fi
 
-# ── Confirm (prod always requires explicit confirmation) ───────────────────────
+# ── Confirm (prod always requires explicit confirmation, even with --yes) ──────
 
-CONFIRM_MSG="Delete release '$NAME' from '$ENV'? This is irreversible."
-[ "$ENV" = "prod" ] && CONFIRM_MSG="⚠️  PROD — $CONFIRM_MSG"
-if ! gum confirm --default=false "$CONFIRM_MSG"; then
-    warn "Aborted."
-    exit 0
+if [ "$ASSUME_YES" -eq 1 ] && [ "$ENV" != "prod" ]; then
+    info "Proceeding non-interactively (--yes)."
+else
+    CONFIRM_MSG="Delete release '$NAME' from '$ENV'? This is irreversible."
+    [ "$ENV" = "prod" ] && CONFIRM_MSG="⚠️  PROD — $CONFIRM_MSG"
+    if ! gum confirm --default=false "$CONFIRM_MSG"; then
+        warn "Aborted."
+        exit 0
+    fi
 fi
 
 # ── Delete the single release (no environment-wide cleanup) ────────────────────
