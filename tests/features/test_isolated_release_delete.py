@@ -42,6 +42,7 @@ def harness(tmp_path: Path):
     cluster_json = tmp_path / "cluster.json"
     destroy_log = tmp_path / "destroy.log"
     kubectl_log = tmp_path / "kubectl.log"
+    choose_log = tmp_path / "choose.log"
 
     _write(bindir / "helmfile", f"""#!/usr/bin/env bash
 args="$*"
@@ -58,12 +59,20 @@ if [ "$1" = "list" ]; then cat "{cluster_json}"; exit 0; fi
 exit 0
 """)
 
-    # gum: confirm -> yes (proceed), choose -> first line, spin -> run wrapped cmd,
-    # everything else just echoes its args so log/style output stays visible.
-    _write(bindir / "gum", """#!/usr/bin/env bash
+    # gum: confirm -> yes (proceed); choose records what it was offered then picks
+    # the first line (or cancels with exit 1 when GUM_CHOOSE_CANCEL=1); spin runs
+    # the wrapped command; everything else echoes its args so log/style stays visible.
+    _write(bindir / "gum", f"""#!/usr/bin/env bash
 case "$1" in
   confirm) exit 0 ;;
-  choose)  head -n1 ;;
+  choose)  shift
+           opts=()
+           while [ "$#" -gt 0 ]; do
+             case "$1" in --*) shift 2 ;; *) opts+=("$1"); shift ;; esac
+           done
+           printf '%s\\n' "${{opts[@]}}" > "{choose_log}"
+           [ "${{GUM_CHOOSE_CANCEL:-0}}" = "1" ] && exit 1
+           head -n1 "{choose_log}" ;;
   spin)    shift; while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do shift; done; shift; exec "$@" ;;
   *)       shift; echo "$@" ;;
 esac
@@ -84,13 +93,18 @@ exit 0
         def set_cluster(self, releases: list[dict]) -> None:
             cluster_json.write_text(json.dumps(releases), encoding="utf-8")
 
-        def run(self, env_name: str, release: str) -> subprocess.CompletedProcess:
+        def run(self, env_name: str, release: str | None = None,
+                choose_cancel: bool = False) -> subprocess.CompletedProcess:
             child_env = dict(os.environ)
             child_env["PATH"] = f"{bindir}:{child_env['PATH']}"
             child_env.pop("ENV", None)  # force the env to come from the argument
+            if choose_cancel:
+                child_env["GUM_CHOOSE_CANCEL"] = "1"
+            argv = ["bash", str(SCRIPT), env_name]
+            if release is not None:
+                argv.append(release)  # omit entirely to trigger the picker
             self.result = subprocess.run(
-                ["bash", str(SCRIPT), env_name, release],
-                capture_output=True, text=True, env=child_env, cwd=str(REPO_ROOT),
+                argv, capture_output=True, text=True, env=child_env, cwd=str(REPO_ROOT),
             )
             return self.result
 
@@ -101,6 +115,10 @@ exit 0
         @property
         def kubectl_called(self) -> bool:
             return kubectl_log.exists() and kubectl_log.read_text(encoding="utf-8").strip() != ""
+
+        @property
+        def offered(self) -> str:
+            return choose_log.read_text(encoding="utf-8") if choose_log.exists() else ""
 
         @property
         def output(self) -> str:
@@ -203,6 +221,30 @@ def no_env_wide_cleanup(harness) -> None:
 @then(parsers.parse('the output mentions "{needle}"'))
 def output_mentions(harness, needle: str) -> None:
     assert needle in harness.output, f"expected {needle!r} in output:\n{harness.output}"
+
+
+# ── User Story 2 — interactive picker ────────────────────────────────────────────
+
+@when(parsers.parse('I run destroy-one for "{env_name}" with no release'))
+def run_no_release(harness, env_name: str) -> None:
+    harness.run(env_name)
+
+
+@when(parsers.parse('I cancel the picker for "{env_name}"'))
+def cancel_picker(harness, env_name: str) -> None:
+    harness.run(env_name, choose_cancel=True)
+
+
+@then(parsers.parse('the picker offered "{key}"'))
+def picker_offered(harness, key: str) -> None:
+    offered = [ln.strip() for ln in harness.offered.splitlines() if ln.strip()]
+    assert key in offered, f"expected {key!r} among picker options: {offered!r}"
+
+
+@then(parsers.parse('the picker did not offer "{key}"'))
+def picker_not_offered(harness, key: str) -> None:
+    offered = [ln.strip() for ln in harness.offered.splitlines() if ln.strip()]
+    assert key not in offered, f"{key!r} must not be selectable, but picker offered: {offered!r}"
 
 
 # ── Online steps (run locally with a cluster; deselected by -m offline) ──────────
