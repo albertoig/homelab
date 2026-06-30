@@ -43,6 +43,7 @@ def harness(tmp_path: Path):
     destroy_log = tmp_path / "destroy.log"
     kubectl_log = tmp_path / "kubectl.log"
     choose_log = tmp_path / "choose.log"
+    confirm_log = tmp_path / "confirm.log"
 
     build_yaml = tmp_path / "build.yaml"
 
@@ -66,7 +67,7 @@ exit 0
     # the wrapped command; everything else echoes its args so log/style stays visible.
     _write(bindir / "gum", f"""#!/usr/bin/env bash
 case "$1" in
-  confirm) exit 0 ;;
+  confirm) echo called >> "{confirm_log}"; exit 0 ;;
   choose)  shift
            opts=()
            while [ "$#" -gt 0 ]; do
@@ -108,7 +109,8 @@ exit 0
             )
 
         def run(self, env_name: str, release: str | None = None,
-                choose_cancel: bool = False, dry_run: bool = False) -> subprocess.CompletedProcess:
+                choose_cancel: bool = False, dry_run: bool = False,
+                assume_yes: bool = False) -> subprocess.CompletedProcess:
             child_env = dict(os.environ)
             child_env["PATH"] = f"{bindir}:{child_env['PATH']}"
             child_env.pop("ENV", None)  # force the env to come from the argument
@@ -119,6 +121,8 @@ exit 0
                 argv.append(release)  # omit entirely to trigger the picker
             if dry_run:
                 argv.append("--dry-run")
+            if assume_yes:
+                argv.append("--yes")
             self.result = subprocess.run(
                 argv, capture_output=True, text=True, env=child_env, cwd=str(REPO_ROOT),
             )
@@ -135,6 +139,10 @@ exit 0
         @property
         def offered(self) -> str:
             return choose_log.read_text(encoding="utf-8") if choose_log.exists() else ""
+
+        @property
+        def confirmed(self) -> bool:
+            return confirm_log.exists() and confirm_log.read_text(encoding="utf-8").strip() != ""
 
         @property
         def output(self) -> str:
@@ -273,6 +281,28 @@ def declares_needs(harness, dependent: str, target: str) -> None:
 @when(parsers.parse('I dry-run destroy-one for "{env_name}" targeting "{release}"'))
 def run_dry_run(harness, env_name: str, release: str) -> None:
     harness.run(env_name, release, dry_run=True)
+
+
+# ── User Story 4 — non-interactive --yes ─────────────────────────────────────────
+
+@when(parsers.parse('I run destroy-one for "{env_name}" targeting "{release}" with --yes'))
+def run_yes(harness, env_name: str, release: str) -> None:
+    harness.run(env_name, release, assume_yes=True)
+
+
+@when(parsers.parse('I run destroy-one for "{env_name}" with --yes and no release'))
+def run_yes_no_release(harness, env_name: str) -> None:
+    harness.run(env_name, assume_yes=True)
+
+
+@then("no confirmation was requested")
+def no_confirmation(harness) -> None:
+    assert not harness.confirmed, "a confirmation prompt was shown but --yes should skip it"
+
+
+@then("a confirmation was requested")
+def confirmation_requested(harness) -> None:
+    assert harness.confirmed, "expected a confirmation prompt (prod must confirm even with --yes)"
 
 
 # ── Online steps (run locally with a cluster; deselected by -m offline) ──────────
