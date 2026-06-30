@@ -68,18 +68,27 @@ fi
 # ── Resolve the target release ────────────────────────────────────────────────
 
 if [ -z "$RELEASE_ARG" ]; then
-    error "No release given. Usage: mise run destroy:one $ENV <release>"
-    info "Selectable releases in '$ENV':"
-    printf '  - %s\n' "${SELECTABLE[@]}"
-    exit 1
+    # No release given — let the operator pick from the selectable set. Read the
+    # picker from the controlling terminal when there is one (under `mise run` the
+    # task's stdin is not the terminal), mirroring lib/env.sh.
+    _pick_tty=/dev/stdin
+    { :</dev/tty; } 2>/dev/null && _pick_tty=/dev/tty
+    KEY=$(gum choose \
+        --header "Select a release to delete from '$ENV':" \
+        --cursor "> " \
+        --cursor.foreground "$GUM_PRIMARY" \
+        --header.foreground "$GUM_SECONDARY" \
+        "${SELECTABLE[@]}" <"$_pick_tty") || { warn "Aborted."; exit 0; }
+    unset _pick_tty
+    MATCHES=("$KEY")
+else
+    MATCHES=()
+    for rel in "${SELECTABLE[@]}"; do
+        if [ "$rel" = "$RELEASE_ARG" ] || [ "${rel##*/}" = "$RELEASE_ARG" ]; then
+            MATCHES+=("$rel")
+        fi
+    done
 fi
-
-MATCHES=()
-for rel in "${SELECTABLE[@]}"; do
-    if [ "$rel" = "$RELEASE_ARG" ] || [ "${rel##*/}" = "$RELEASE_ARG" ]; then
-        MATCHES+=("$rel")
-    fi
-done
 
 if [ "${#MATCHES[@]}" -gt 1 ]; then
     error "'$RELEASE_ARG' matches multiple releases; qualify it as namespace/name:"

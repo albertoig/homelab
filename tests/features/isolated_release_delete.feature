@@ -46,6 +46,26 @@ Feature: Isolated delete of a single Helmfile release
     And nothing was destroyed
     And the output mentions "Nothing to delete"
 
+  # ── User Story 2 (P2) — interactive picker ────────────────────────────────────
+
+  @offline
+  Scenario: With no release argument the picker lists only selectable releases
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "web/ghost" and "data/rogue" deployed
+    When I run destroy-one for "dev" with no release
+    Then the command succeeds
+    And the picker offered "data/redis"
+    And the picker offered "web/ghost"
+    And the picker did not offer "data/rogue"
+
+  @offline
+  Scenario: Cancelling the picker deletes nothing
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "web/ghost" deployed
+    When I cancel the picker for "dev"
+    Then the command succeeds
+    And nothing was destroyed
+
   @online
   Scenario: Deleting one release leaves the others running
     Given a reachable "dev" cluster with more than one managed release deployed
