@@ -44,11 +44,13 @@ def harness(tmp_path: Path):
     kubectl_log = tmp_path / "kubectl.log"
     choose_log = tmp_path / "choose.log"
 
+    build_yaml = tmp_path / "build.yaml"
+
     _write(bindir / "helmfile", f"""#!/usr/bin/env bash
 args="$*"
 case "$args" in
   *" list "*)    cat "{defined_json}"; exit 0 ;;
-  *" build"*)    exit 0 ;;
+  *" build"*)    cat "{build_yaml}" 2>/dev/null || true; exit 0 ;;
   *" destroy"*)  echo "$args" >> "{destroy_log}"; exit 0 ;;
 esac
 exit 0
@@ -93,8 +95,20 @@ exit 0
         def set_cluster(self, releases: list[dict]) -> None:
             cluster_json.write_text(json.dumps(releases), encoding="utf-8")
 
+        def add_dependency(self, dependent: str, target: str) -> None:
+            """Make ``dependent`` (namespace/name) declare a needs: on ``target``."""
+            dep_ns, dep_name = dependent.split("/", 1)
+            build_yaml.write_text(
+                "releases:\n"
+                f"  - name: {dep_name}\n"
+                f"    namespace: {dep_ns}\n"
+                "    needs:\n"
+                f"      - {target}\n",
+                encoding="utf-8",
+            )
+
         def run(self, env_name: str, release: str | None = None,
-                choose_cancel: bool = False) -> subprocess.CompletedProcess:
+                choose_cancel: bool = False, dry_run: bool = False) -> subprocess.CompletedProcess:
             child_env = dict(os.environ)
             child_env["PATH"] = f"{bindir}:{child_env['PATH']}"
             child_env.pop("ENV", None)  # force the env to come from the argument
@@ -103,6 +117,8 @@ exit 0
             argv = ["bash", str(SCRIPT), env_name]
             if release is not None:
                 argv.append(release)  # omit entirely to trigger the picker
+            if dry_run:
+                argv.append("--dry-run")
             self.result = subprocess.run(
                 argv, capture_output=True, text=True, env=child_env, cwd=str(REPO_ROOT),
             )
@@ -245,6 +261,18 @@ def picker_offered(harness, key: str) -> None:
 def picker_not_offered(harness, key: str) -> None:
     offered = [ln.strip() for ln in harness.offered.splitlines() if ln.strip()]
     assert key not in offered, f"{key!r} must not be selectable, but picker offered: {offered!r}"
+
+
+# ── User Story 3 — dry-run preview + dependency warning ──────────────────────────
+
+@given(parsers.parse('"{dependent}" declares a needs on "{target}"'))
+def declares_needs(harness, dependent: str, target: str) -> None:
+    harness.add_dependency(dependent, target)
+
+
+@when(parsers.parse('I dry-run destroy-one for "{env_name}" targeting "{release}"'))
+def run_dry_run(harness, env_name: str, release: str) -> None:
+    harness.run(env_name, release, dry_run=True)
 
 
 # ── Online steps (run locally with a cluster; deselected by -m offline) ──────────

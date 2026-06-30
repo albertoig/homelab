@@ -29,9 +29,11 @@ done
 
 # ── Arguments ─────────────────────────────────────────────────────────────────
 
+DRY_RUN=0
 POSITIONAL=()
 while [ "$#" -gt 0 ]; do
     case "$1" in
+        --dry-run) DRY_RUN=1 ;;
         --) shift; while [ "$#" -gt 0 ]; do POSITIONAL+=("$1"); shift; done; break ;;
         -*) error "Unknown option: $1"; exit 1 ;;
         *)  POSITIONAL+=("$1") ;;
@@ -135,6 +137,23 @@ msg "  version:   ${VERSION:-?}"
 echo ""
 
 warn "⚠️  This uninstalls the release and may delete its PersistentVolumes/data."
+
+# ── Dependents (advisory warning) ──────────────────────────────────────────────
+
+mapfile -t DEPENDENTS < <(helmfile_dependents "$ENV" "$KEY")
+if [ "${#DEPENDENTS[@]}" -gt 0 ]; then
+    echo ""
+    warn "These releases declare a 'needs:' on $KEY and may break:"
+    printf '  - %s\n' "${DEPENDENTS[@]}"
+fi
+echo ""
+
+# ── Dry run stops before any change ────────────────────────────────────────────
+
+if [ "$DRY_RUN" -eq 1 ]; then
+    info "Dry run — no changes made."
+    exit 0
+fi
 
 # ── Confirm (prod always requires explicit confirmation) ───────────────────────
 

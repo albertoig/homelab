@@ -66,6 +66,29 @@ Feature: Isolated delete of a single Helmfile release
     Then the command succeeds
     And nothing was destroyed
 
+  # ── User Story 3 (P2) — dry-run preview + dependency warning ───────────────────
+
+  @offline
+  Scenario: Dry run previews the release and makes no changes
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "web/ghost" deployed
+    When I dry-run destroy-one for "dev" targeting "redis"
+    Then the command succeeds
+    And nothing was destroyed
+    And the output mentions "redis"
+    And the output mentions "repo/redis"
+    And the output mentions "1.0.0"
+    And the output mentions "Dry run"
+
+  @offline
+  Scenario: Dependents are listed as a warning
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "web/ghost" deployed
+    And "web/app" declares a needs on "data/redis"
+    When I dry-run destroy-one for "dev" targeting "redis"
+    Then the command succeeds
+    And the output mentions "web/app"
+
   @online
   Scenario: Deleting one release leaves the others running
     Given a reachable "dev" cluster with more than one managed release deployed

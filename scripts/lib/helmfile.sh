@@ -63,11 +63,13 @@ helmfile_release_meta() {
 
 # Best-effort dependency hint; never fails the caller.
 helmfile_dependents() {
-    local env="$1" key="$2"
+    local env="$1"
+    export HF_DEP_KEY="$2"
     helmfile -f "$HELMFILE_MAIN" -e "$env" build 2>/dev/null \
-        | yq -r --arg key "$key" '
+        | yq -r '
             .releases[]
-            | select((.needs // []) | any(. == $key))
+            | select((.needs // []) | any_c(. == strenv(HF_DEP_KEY)))
             | (.namespace // "default") + "/" + .name' 2>/dev/null \
         | sort -u || true
+    unset HF_DEP_KEY
 }
