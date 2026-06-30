@@ -125,6 +125,23 @@ Feature: Isolated delete of a single Helmfile release
     Then the command succeeds
     And a confirmation was requested
 
+  # ── User Story 5 (P3) — shared selection library reused by install-one (#29) ────
+
+  @offline
+  Scenario: The guard logic lives only in the shared library
+    Given the repository root
+    Then the file "scripts/lib/helmfile.sh" contains "helmfile_selectable_releases"
+    And the file "scripts/lib/helmfile.sh" contains "helmfile_dependents"
+    And the file "scripts/helm/destroy-one.sh" contains "lib/helmfile.sh"
+    And the file "scripts/helm/destroy-one.sh" contains "helmfile_selectable_releases"
+    And the file "scripts/helm/destroy-one.sh" does not contain "--argjson"
+
+  @offline
+  Scenario: The shared library documents its public API for reuse by #29
+    Given the repository root
+    Then the file "scripts/lib/helmfile.sh" contains "Public API"
+    And the file "scripts/lib/helmfile.sh" contains "install-one"
+
   @online
   Scenario: Deleting one release leaves the others running
     Given a reachable "dev" cluster with more than one managed release deployed

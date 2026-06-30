@@ -183,6 +183,12 @@ def file_contains(repo_root: Path, rel: str, needle: str) -> None:
     assert needle in text, f"expected {rel} to contain {needle!r}"
 
 
+@then(parsers.parse('the file "{rel}" does not contain "{needle}"'))
+def file_not_contains(repo_root: Path, rel: str, needle: str) -> None:
+    text = (repo_root / rel).read_text(encoding="utf-8")
+    assert needle not in text, f"expected {rel} to NOT contain {needle!r}"
+
+
 @then(parsers.parse('the mise task "{task}" runs "{command}"'))
 def mise_task_runs(repo_root: Path, task: str, command: str) -> None:
     doc = tomllib.loads((repo_root / ".mise.toml").read_text(encoding="utf-8"))
