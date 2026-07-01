@@ -66,6 +66,24 @@ Feature: Isolated delete of a single Helmfile release
     Then the command succeeds
     And nothing was destroyed
 
+  # ── User Story 2b (P2) — progress feedback while waiting on the cluster ────────
+
+  @offline
+  Scenario: Loading the selectable releases shows a progress spinner
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "web/ghost" deployed
+    When I run destroy-one for "dev" targeting "redis"
+    Then the command succeeds
+    And a loading spinner titled "Loading releases" was shown
+
+  @offline
+  Scenario: Deleting a release shows a progress spinner
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" and "web/ghost" deployed
+    When I run destroy-one for "dev" targeting "redis"
+    Then the command succeeds
+    And a loading spinner titled "Deleting redis" was shown
+
   # ── User Story 3 (P2) — dry-run preview + dependency warning ───────────────────
 
   @offline

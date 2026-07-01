@@ -63,6 +63,9 @@ the same confirm-and-delete flow as US1; cancelling the picker changes nothing.
 1. **Given** several defined-and-deployed releases, **When** I run the task with no release
    argument, **Then** I am offered a picker listing exactly those releases.
 2. **Given** the picker, **When** I cancel it, **Then** no release is deleted.
+3. **Given** the task is waiting to fetch information or performing a long-running operation,
+   **When** I run it, **Then** a `gum` spinner is shown so the run is never a silent, frozen
+   screen that looks hung.
 
 ### User Story 3 - Preview and dependency awareness before deleting (Priority: P2)
 
@@ -172,6 +175,9 @@ both the delete-one and install-one entry points consume, and it is covered by i
   the sibling install-one feature (#29), and the implementation MUST reuse the existing shared
   helpers (`scripts/lib/env.sh`, `scripts/lib/colors.sh`) and `gum`, per the Bash+gum scripting
   principle.
+- **FR-013**: Whenever the task waits to fetch information or perform a long-running operation, it
+  MUST show a `gum` spinner with a descriptive title. The run MUST NOT present a silent, frozen
+  screen, which is indistinguishable from a hang.
 - **FR-011**: Acceptance criteria MUST be authored as `pytest-bdd` Gherkin scenarios under
   `tests/features/`, each tagged exactly one of `@offline` (wiring + guard verified via file
   inspection and by running the script under stubbed `helmfile`/`helm`/`gum`/`kubectl`) or

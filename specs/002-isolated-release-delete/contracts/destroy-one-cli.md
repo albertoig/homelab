@@ -41,6 +41,9 @@ mise run destroy:one [<environment>] [<release>] [--dry-run] [--yes]
    before deletion proceeds. (FR-008)
 7. **Ambiguity**: a bare name matching multiple selectable releases is refused with a request to
    qualify as `namespace/name`. (R6)
+8. **Progress feedback**: whenever the task waits to fetch information or runs a long-running
+   operation, it shows a `gum spin` spinner with a descriptive title. The screen is never a silent
+   freeze. (FR-013)
 
 ## Exit codes
 

@@ -44,6 +44,7 @@ def harness(tmp_path: Path):
     kubectl_log = tmp_path / "kubectl.log"
     choose_log = tmp_path / "choose.log"
     confirm_log = tmp_path / "confirm.log"
+    spin_log = tmp_path / "spin.log"
 
     build_yaml = tmp_path / "build.yaml"
 
@@ -76,7 +77,15 @@ case "$1" in
            printf '%s\\n' "${{opts[@]}}" > "{choose_log}"
            [ "${{GUM_CHOOSE_CANCEL:-0}}" = "1" ] && exit 1
            head -n1 "{choose_log}" ;;
-  spin)    shift; while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do shift; done; shift; exec "$@" ;;
+  spin)    shift
+           title=""
+           while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do
+             [ "$1" = "--title" ] && title="$2"
+             shift
+           done
+           shift
+           echo "$title" >> "{spin_log}"
+           exec "$@" ;;
   *)       shift; echo "$@" ;;
 esac
 """)
@@ -143,6 +152,10 @@ exit 0
         @property
         def confirmed(self) -> bool:
             return confirm_log.exists() and confirm_log.read_text(encoding="utf-8").strip() != ""
+
+        @property
+        def spun(self) -> str:
+            return spin_log.read_text(encoding="utf-8") if spin_log.exists() else ""
 
         @property
         def output(self) -> str:
@@ -251,6 +264,13 @@ def no_env_wide_cleanup(harness) -> None:
 @then(parsers.parse('the output mentions "{needle}"'))
 def output_mentions(harness, needle: str) -> None:
     assert needle in harness.output, f"expected {needle!r} in output:\n{harness.output}"
+
+
+@then(parsers.parse('a loading spinner titled "{phrase}" was shown'))
+def spinner_shown(harness, phrase: str) -> None:
+    assert phrase in harness.spun, (
+        f"expected a gum spin titled containing {phrase!r}; spinners shown:\n{harness.spun!r}"
+    )
 
 
 # ── User Story 2 — interactive picker ────────────────────────────────────────────
