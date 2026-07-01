@@ -54,16 +54,24 @@ RELEASE_ARG="${POSITIONAL[1]:-}"
 show_header
 show_subheader "$ENV"
 
-# ── Cluster reachability ──────────────────────────────────────────────────────
+# ── Selectable releases (defined in YAML AND deployed) ─────────────────────────
+# `helm list -A` can take ~15s on a busy cluster, so compute the selectable set
+# ONCE (not once for a reachability probe and again here) and show a spinner —
+# otherwise the screen freezes silently after the banner and looks hung.
 
-if ! helm list -A --output json >/dev/null 2>&1; then
+SEL_TMP="$(mktemp)"
+trap 'rm -f "$SEL_TMP"' EXIT
+export -f helmfile_selectable_releases helmfile_defined_releases helmfile_cluster_releases
+export HELMFILE_MAIN HELMFILE_ROOT _hf_jq_key
+
+if ! gum spin --spinner pulse --show-error \
+        --title "  Loading releases in '$ENV'…" \
+        -- bash -c "helmfile_selectable_releases '$ENV' > '$SEL_TMP'"; then
     error "Cannot reach the cluster (helm list failed). Check your kube context."
     exit 1
 fi
 
-# ── Selectable releases (defined in YAML AND deployed) ─────────────────────────
-
-mapfile -t SELECTABLE < <(helmfile_selectable_releases "$ENV")
+mapfile -t SELECTABLE < "$SEL_TMP"
 
 if [ "${#SELECTABLE[@]}" -eq 0 ]; then
     info "No managed releases are currently deployed in '$ENV'. Nothing to delete."
@@ -147,8 +155,15 @@ echo ""
 warn "⚠️  This uninstalls the release and may delete its PersistentVolumes/data."
 
 # ── Dependents (advisory warning) ──────────────────────────────────────────────
+# `helmfile build` renders every release, so show a spinner while it runs.
 
-mapfile -t DEPENDENTS < <(helmfile_dependents "$ENV" "$KEY")
+DEP_TMP="$(mktemp)"
+trap 'rm -f "$SEL_TMP" "$DEP_TMP"' EXIT
+export -f helmfile_dependents
+gum spin --spinner pulse --show-error \
+    --title "  Checking for dependents…" \
+    -- bash -c "helmfile_dependents '$ENV' '$KEY' > '$DEP_TMP'" || true
+mapfile -t DEPENDENTS < "$DEP_TMP"
 if [ "${#DEPENDENTS[@]}" -gt 0 ]; then
     echo ""
     warn "These releases declare a 'needs:' on $KEY and may break:"
@@ -179,5 +194,14 @@ fi
 # ── Delete the single release (no environment-wide cleanup) ────────────────────
 
 header "Deleting $NAME from $ENV"
-helmfile -f "$ROOT_DIR/helmfile.yaml.gotmpl" -e "$ENV" -l name="$NAME" destroy --skip-deps
-success "Release '$NAME' deleted from '$ENV'."
+HF_LOG="$(mktemp)"
+trap 'rm -f "$SEL_TMP" "$DEP_TMP" "$HF_LOG"' EXIT
+if gum spin --spinner pulse --show-error \
+        --title "  Deleting $NAME from $ENV…" \
+        -- bash -c "helmfile -f '$ROOT_DIR/helmfile.yaml.gotmpl' -e '$ENV' -l name='$NAME' destroy --skip-deps > '$HF_LOG' 2>&1"; then
+    success "Release '$NAME' deleted from '$ENV'."
+else
+    error "Delete failed — output follows:"
+    gum pager < "$HF_LOG"
+    exit 1
+fi
