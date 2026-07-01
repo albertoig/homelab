@@ -17,6 +17,7 @@ most are driven through `mise` tasks rather than called directly. Run
 | `mise run provision [playbook]` | `metal/k3s/run.sh` | Default playbook: `site` |
 | `mise run install` | `scripts/helm/install.sh` | Prompts for env; terraform → velero secrets → helmfile sync |
 | `mise run destroy <env>` | `scripts/helm/destroy.sh` | ⚠️ irreversible |
+| `mise run destroy:one [env] [release]` | `scripts/helm/destroy-one.sh` | Delete ONE release; picker if no release; `--dry-run`, `--yes` |
 | `mise run helmfile:update-locks` | `scripts/helm/update-locks.sh` | Refresh lock files for all envs |
 | `mise run openbao:preflight [env]` | `scripts/apps/setup-openbao-preflight.sh` | Pre-checks for OpenBao setup |
 | `mise run openbao:setup [env]` | `scripts/apps/setup-openbao.sh` | Init + unseal + wire ESO (idempotent) |
@@ -138,6 +139,27 @@ volumes/PVCs, namespace finalizers).
 
 **⚠️ Warning:** Deletes all PersistentVolumes and permanent storage. Irreversible
 — prompts for confirmation.
+
+### `destroy-one.sh`
+
+**Purpose:** Deletes a **single** helmfile release in isolation, without any
+environment-wide cleanup. The set of deletable releases is the intersection of
+what the Helmfile defines for the environment (the source of truth) and what is
+actually deployed — a release running in the cluster but not defined in the
+Helmfile is never selectable.
+
+**Usage:** `mise run destroy:one [environment] [release]`. With no `release`
+argument it shows a `gum` picker of the selectable releases; by name it deletes
+that release directly. Blocking steps (loading releases, checking dependents,
+deleting) show a `gum` spinner so the run is never a silent, frozen screen.
+
+**Flags:** `--dry-run` previews the target (release, namespace, chart, version)
+and any dependents, then exits without changes; `--yes` skips the confirmation
+for non-interactive use (still requires an explicit release, and prod always
+confirms).
+
+**⚠️ Warning:** Uninstalling a release may delete its PersistentVolumes/data.
+Irreversible — prompts for confirmation by default.
 
 ### `install-plugins.sh`
 
