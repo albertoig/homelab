@@ -16,6 +16,7 @@ most are driven through `mise` tasks rather than called directly. Run
 | `mise run doctor` | `scripts/infra/doctor.sh` | `-- <env> --fix` to remediate, `--yes` non-interactive |
 | `mise run provision [playbook]` | `metal/k3s/run.sh` | Default playbook: `site` |
 | `mise run install` | `scripts/helm/install.sh` | Prompts for env; terraform → velero secrets → helmfile sync |
+| `mise run install:one [env] [release]` | `scripts/helm/install-one.sh` | Install/update ONE defined release; picker if no release; `--dry-run`, `--yes` |
 | `mise run destroy <env>` | `scripts/helm/destroy.sh` | ⚠️ irreversible |
 | `mise run destroy:one [env] [release]` | `scripts/helm/destroy-one.sh` | Delete ONE release; picker if no release; `--dry-run`, `--yes` |
 | `mise run helmfile:update-locks` | `scripts/helm/update-locks.sh` | Refresh lock files for all envs |
@@ -128,6 +129,27 @@ principal `helmfile.yaml.gotmpl`.
 
 **Usage:** `mise run install` (prompts for env). Interactive — confirms before
 applying.
+
+### `install-one.sh`
+
+**Purpose:** Installs or updates a **single** helmfile release in isolation,
+instead of syncing the whole environment. The set of selectable releases is
+everything the Helmfile **defines** for the environment (the source of truth),
+whether or not it is deployed — the cluster is cross-checked only to label each
+target `install` (not yet deployed) or `update` (already deployed). A release
+running in the cluster but not defined in the Helmfile is never selectable.
+
+**Usage:** `mise run install:one [environment] [release]`. With no `release`
+argument it shows a `gum` picker of the selectable releases (each tagged
+install/update); by name it syncs that release directly via
+`-l name=<release> sync --skip-deps`. Blocking steps (loading releases, checking
+prerequisites, syncing) show a `gum` spinner so the run is never a silent,
+frozen screen.
+
+**Flags:** `--dry-run` previews the target (release, namespace, chart, version,
+action) and any `needs:` prerequisites, then exits without changes; `--yes` skips
+the confirmation for non-interactive use (still requires an explicit release, and
+prod always confirms).
 
 ### `destroy.sh`
 
