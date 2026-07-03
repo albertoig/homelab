@@ -75,6 +75,27 @@ never committed. Lint and tests must run without real secrets — use the stub
 specs. `.claude/settings.local.json` and other local/credential artifacts stay
 gitignored.
 
+### VI. Never Bypass the Commit Gates (NON-NEGOTIABLE)
+The pre-commit hooks are a hard gate, not a suggestion. Under **no circumstance** may a
+commit skip them: `git commit --no-verify` / `-n`, `SKIP=<hook>`, `--no-hooks`, disabling
+or uninstalling hooks, or any other bypass is **forbidden** — including for humans, agents,
+CI, and "just this once" fixes. This holds even when a failing hook trips on something
+unrelated to the change: the correct response is to **fix the underlying cause** (e.g. clean
+up the stray artifact, repair the broken chart, or amend the hook itself in the same or a
+prior commit) so the gate passes honestly, never to route around it. A red hook blocks the
+commit until the tree is genuinely green. If a hook is wrong, fix the hook — do not skip it.
+
+### VII. Cascading Changes Must Propagate to Specs and Tests
+When a change triggers subsequent, consequential breaking changes elsewhere — a chain
+reaction where fixing one thing forces edits to others — that ripple MUST NOT be absorbed
+silently in code alone. Because the specs (`specs/NNN-<slug>/`) and BDD scenarios
+(`.feature` files + step definitions) are the contract (Principle III), a cascade that
+leaves them stale makes the contract lie. In that situation you MUST **surface the full
+blast radius and suggest the corresponding updates** to every affected spec and BDD test,
+alongside the code change, so reviewers see the whole chain rather than a code-only patch
+with drifted documentation. Do not quietly "make it compile"; keep the spec, the tests, and
+the code telling the same story.
+
 ## Additional Constraints
 
 - **Toolchain via mise.** All tools and versions are pinned in `.mise.toml`; contributors
@@ -129,4 +150,4 @@ recorded as an ADR). Amendments are made by editing this file in a PR that expla
 change and bumps the version below (semantic: MAJOR for principle removal/redefinition,
 MINOR for a new principle or section, PATCH for clarifications).
 
-**Version**: 1.0.1 | **Ratified**: 2026-06-29 | **Last Amended**: 2026-07-03
+**Version**: 1.2.0 | **Ratified**: 2026-06-29 | **Last Amended**: 2026-07-03
