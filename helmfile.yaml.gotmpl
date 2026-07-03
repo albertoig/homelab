@@ -8,6 +8,10 @@ environments:
     kubeContext: homelab-prod
     secrets:
     - ./helmfile/environments/prod/secrets/shared-sso.enc.yaml
+  # Hermetic, disposable environment for deep online BDD (issue #35). No secrets,
+  # no external deps; pinned to the throwaway `kind-homelab-test` cluster.
+  test:
+    kubeContext: kind-homelab-test
 
 ---
 
@@ -18,9 +22,17 @@ bases:
 ---
 
 helmfiles:
-- path: helmfile/releases/*
+{{- if eq .Environment.Name "test" }}
+# The `test` env loads ONLY the trivial, dependency-free release group so it can
+# sync onto a bare ephemeral cluster (never Longhorn/MetalLB/cert-manager/etc.).
+- path: helmfile/releases/900-test.helmfile.yaml.gotmpl
   values:
     - {{ toYaml .Values | nindent 8 }}
+{{- else }}
+- path: helmfile/releases/0*
+  values:
+    - {{ toYaml .Values | nindent 8 }}
+{{- end }}
 
 ---
 

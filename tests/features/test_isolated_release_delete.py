@@ -331,25 +331,70 @@ def confirmation_requested(harness) -> None:
     assert harness.confirmed, "expected a confirmation prompt (prod must confirm even with --yes)"
 
 
-# ── Online steps (run locally with a cluster; deselected by -m offline) ──────────
+# ── Online steps (real; run against the disposable kind-homelab-test cluster) ────
+# Deselected by `-m offline`. They skip cleanly with no test cluster and refuse to
+# run against any homelab-<env> context, so they can never touch dev/prod.
 
-@given(parsers.parse('a reachable "{env_name}" cluster with more than one managed '
-                     'release deployed'), target_fixture="online_ctx")
-def online_cluster(env_name: str) -> dict:
-    pytest.skip("online deletion scenario requires a live cluster and a throwaway release")
-    return {"env": env_name}
+import shutil  # noqa: E402
+
+TEST_CONTEXT = "kind-homelab-test"
 
 
-@when("I delete a single throwaway release with destroy:one")
+def _current_context() -> str:
+    r = subprocess.run(["kubectl", "config", "current-context"], capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else ""
+
+
+def _test_releases() -> list[str]:
+    r = subprocess.run(
+        ["helm", "list", "-A", "--kube-context", TEST_CONTEXT, "--output", "json"],
+        capture_output=True, text=True,
+    )
+    return [f"{x['namespace']}/{x['name']}" for x in json.loads(r.stdout or "[]")]
+
+
+def _require_test_cluster() -> None:
+    if shutil.which("kubectl") is None or shutil.which("helm") is None:
+        pytest.skip("kubectl/helm not available")
+    if _current_context().startswith("homelab-"):
+        pytest.skip(f"refusing @online against homelab context {_current_context()!r}")
+    r = subprocess.run(["kubectl", "--context", TEST_CONTEXT, "get", "--raw", "/readyz"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        pytest.skip(f"{TEST_CONTEXT!r} not reachable; run 'mise run cluster:test:up'")
+
+
+@given("a reachable test cluster with the test releases deployed", target_fixture="online_ctx")
+def online_cluster() -> dict:
+    _require_test_cluster()
+    # Ensure the hermetic test env is present, then self-discover target + sibling.
+    subprocess.run(
+        ["helmfile", "-f", str(REPO_ROOT / "helmfile.yaml.gotmpl"), "-e", "test",
+         "sync", "--skip-deps", "--wait"],
+        cwd=str(REPO_ROOT), capture_output=True, text=True,
+    )
+    releases = _test_releases()
+    if len(releases) < 2:
+        pytest.skip(f"need >=2 test releases for an isolation assertion, got {releases!r}")
+    return {"target": releases[0], "sibling": releases[1]}
+
+
+@when("I delete one test release with destroy:one")
 def online_delete(online_ctx) -> None:  # pragma: no cover - online only
-    raise NotImplementedError
+    name = online_ctx["target"].split("/", 1)[1]
+    r = subprocess.run(["bash", str(SCRIPT), "test", name, "--yes"],
+                       cwd=str(REPO_ROOT), capture_output=True, text=True)
+    online_ctx["output"] = r.stdout + r.stderr
+    assert r.returncode == 0, online_ctx["output"]
 
 
-@then("that release is gone")
+@then("that release is gone from the cluster")
 def online_release_gone(online_ctx) -> None:  # pragma: no cover - online only
-    raise NotImplementedError
+    assert online_ctx["target"] not in _test_releases(), \
+        f"{online_ctx['target']} should have been deleted"
 
 
-@then("the other managed releases are still deployed")
+@then("the other test releases are still deployed")
 def online_others_present(online_ctx) -> None:  # pragma: no cover - online only
-    raise NotImplementedError
+    assert online_ctx["sibling"] in _test_releases(), \
+        f"sibling {online_ctx['sibling']} must remain deployed"

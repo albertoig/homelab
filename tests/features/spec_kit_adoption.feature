@@ -31,7 +31,7 @@ Feature: Spec Kit adoption
   Scenario: The verification loop is wired into mise with an offline/online split
     Given the repository root
     Then the file ".mise.toml" contains "verify:offline"
-    And the file ".mise.toml" contains "offline or online"
+    And the file ".mise.toml" contains "verify:online"
     And the file ".mise.toml" contains "[tasks.verify]"
 
   @offline

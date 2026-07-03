@@ -1,0 +1,10 @@
+apiVersion: v2
+name: test-app
+description: >-
+  Trivial, dependency-free chart used only by the `test` environment for deep
+  online BDD of the isolated release tooling (issue #35). Renders a single
+  ConfigMap — no images, no external dependencies — so it installs instantly on a
+  bare ephemeral cluster.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

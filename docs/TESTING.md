@@ -175,12 +175,14 @@ contract for [Spec-Driven Development](../CONTRIBUTING.md#spec-driven-developmen
 ### Usage
 
 ```bash
-mise run verify          # both tags — @online needs a reachable cluster
+mise run verify          # @offline, then @online against an ephemeral kind cluster (up → run → down)
 mise run verify:offline  # @offline only — exactly what pre-commit and CI run
+mise run verify:online   # @online only — brings up the ephemeral cluster, runs, tears down
 ```
 
-`verify` runs `pytest -m 'offline or online' tests/features`; `verify:offline` runs
-`pytest -m offline tests/features`.
+`verify` runs the `@offline` scenarios (`pytest -m offline`), then invokes `verify:online`, which
+creates the disposable `kind-homelab-test` cluster, runs `pytest -m online`, and deletes it.
+`verify:offline` runs `pytest -m offline tests/features` only — no cluster.
 
 ### Enforcement
 

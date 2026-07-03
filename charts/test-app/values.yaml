@@ -1,0 +1,2 @@
+# Trivial chart: renders one ConfigMap. No images, no dependencies, no secrets.
+message: "hello from test-app"

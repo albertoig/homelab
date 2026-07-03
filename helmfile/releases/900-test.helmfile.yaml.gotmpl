@@ -1,0 +1,20 @@
+# Trivial, dependency-free releases for the `test` environment ONLY (issue #35).
+# Loaded exclusively by helmfile.yaml.gotmpl when .Environment.Name == "test", so
+# these never appear in dev/prod. Two releases so online BDD can act on one and
+# assert the other is untouched (isolation).
+
+releases:
+  - name: test-a
+    namespace: test
+    createNamespace: true
+    chart: ./../../charts/test-app
+    version: "0.1.0"
+    labels:
+      app: test
+  - name: test-b
+    namespace: test
+    createNamespace: true
+    chart: ./../../charts/test-app
+    version: "0.1.0"
+    labels:
+      app: test

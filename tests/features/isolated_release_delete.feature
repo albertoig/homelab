@@ -162,7 +162,7 @@ Feature: Isolated delete of a single Helmfile release
 
   @online
   Scenario: Deleting one release leaves the others running
-    Given a reachable "dev" cluster with more than one managed release deployed
-    When I delete a single throwaway release with destroy:one
-    Then that release is gone
-    And the other managed releases are still deployed
+    Given a reachable test cluster with the test releases deployed
+    When I delete one test release with destroy:one
+    Then that release is gone from the cluster
+    And the other test releases are still deployed

@@ -139,6 +139,11 @@ cluster cross-check reflects env B's releases, not env A's.
   from the default offline/CI run (`-m offline`) unless an ephemeral cluster is explicitly provided.
 - **FR-011**: The workflow (create cluster → run online → tear down) MUST be documented for
   operators (`docs/`), alongside the existing verify tasks.
+- **FR-012**: The dedicated test kube context MUST NOT match the `homelab-<env>` naming pattern, so
+  the `@online` safety guard can refuse **every** `homelab-*` context wholesale (protecting dev/prod)
+  while still allowing the disposable test context. The context is therefore `kind-homelab-test`,
+  never `homelab-test`. This guard MUST be covered by an `@offline` scenario so the rule holds in CI
+  without a cluster.
 
 ### Key Entities
 

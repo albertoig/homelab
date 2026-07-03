@@ -41,8 +41,9 @@ tests:
 - `@online` — needs a reachable `homelab-<env>` cluster. Runs **locally only**.
 
 Two entry points enforce the split:
-- `mise run verify` → runs **both** tags (`pytest -m 'offline or online' tests/features`).
-  The `@online` scenarios require a cluster, so this is the local full check.
+- `mise run verify` → the local full check: runs `@offline`, then brings up the disposable
+  ephemeral test cluster, runs the `@online` scenarios against it, and tears it down (via
+  `verify:online`). This is the only entry point that provisions a cluster.
 - `mise run verify:offline` → runs **only** `@offline`. This is the exact command the
   **GitHub pipeline runs on every branch**; CI never runs `@online` scenarios (it has no
   cluster).
@@ -128,4 +129,4 @@ recorded as an ADR). Amendments are made by editing this file in a PR that expla
 change and bumps the version below (semantic: MAJOR for principle removal/redefinition,
 MINOR for a new principle or section, PATCH for clarifications).
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-29 | **Last Amended**: 2026-06-29
+**Version**: 1.0.1 | **Ratified**: 2026-06-29 | **Last Amended**: 2026-07-03
