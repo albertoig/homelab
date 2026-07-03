@@ -1,6 +1,7 @@
 [tools]
 # Kubernetes
 kubectl  = "1.33.0"
+kind     = "latest"   # ephemeral throwaway cluster for @online BDD (issue #35)
 
 # Helm ecosystem
 helm     = "4.2.0"
@@ -180,12 +181,43 @@ run = "shellspec tests/shell"
 #   verify          → runs BOTH tags. Use locally; the @online scenarios need a cluster.
 #   verify:offline  → runs ONLY @offline. This is exactly what CI runs on every branch.
 [tasks.verify]
-description = "Run all acceptance scenarios — offline + online (online needs a cluster)"
-run = "poetry run pytest -m 'offline or online' tests/features"
+description = "Full local check — @offline, then @online against an ephemeral kind cluster"
+run = '''
+status=0
+poetry run pytest -m offline tests/features || status=$?
+mise run verify:online || status=$?
+exit $status
+'''
 
 [tasks."verify:offline"]
 description = "Run only the offline acceptance scenarios (what CI runs on every branch)"
 run = "poetry run pytest -m offline tests/features"
+
+# Deep online BDD (issue #35): a DISPOSABLE kind cluster + the hermetic `test`
+# helmfile env, so @online scenarios exercise the real isolated tools without ever
+# touching dev/prod. Never creates/selects a homelab-<env> context.
+[tasks."cluster:test:up"]
+description = "Create the disposable kind-homelab-test cluster (podman) for @online BDD"
+run = '''
+export KIND_EXPERIMENTAL_PROVIDER=podman
+# Idempotent: reuse an existing cluster instead of erroring on re-run.
+kind get clusters 2>/dev/null | grep -qx homelab-test && exit 0
+kind create cluster --name homelab-test --wait 90s
+'''
+
+[tasks."cluster:test:down"]
+description = "Delete the disposable kind-homelab-test cluster"
+run = "KIND_EXPERIMENTAL_PROVIDER=podman kind delete cluster --name homelab-test"
+
+[tasks."verify:online"]
+description = "Bring up the ephemeral cluster, run the @online scenarios, then tear it down"
+run = '''
+mise run cluster:test:up || exit $?
+status=0
+poetry run pytest -m online tests/features || status=$?
+mise run cluster:test:down
+exit $status
+'''
 
 # ── Spec-Driven Development ─────────────────────────────────────────────────────
 

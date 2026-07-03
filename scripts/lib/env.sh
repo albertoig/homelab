@@ -3,13 +3,17 @@
 # Source this file to set the ENV variable.
 #
 # Usage: source "$SCRIPT_DIR/../lib/env.sh" [environment]
-# Sets:  ENV  ("dev" | "prod")
+# Sets:  ENV  ("dev" | "prod" | "test")
 #
 # Resolution order (first match wins):
 #   1. the argument, if one is provided
 #   2. the ENV variable, if it is already set in the environment
 #   3. an interactive gum choose prompt
-# The result is validated against dev/prod either way.
+# `dev`/`prod` are the two operational environments and the only ones the
+# interactive picker offers. `test` is a hermetic, tooling-only environment (the
+# disposable ephemeral cluster used by @online BDD, issue #35): it is accepted
+# only when named explicitly, never presented for interactive selection, so
+# operators can never pick it by accident.
 
 _sel_arg="${1:-}"
 
@@ -33,8 +37,8 @@ elif [ -z "${ENV:-}" ]; then
     unset _sel_tty
 fi
 
-if [ "$ENV" != "dev" ] && [ "$ENV" != "prod" ]; then
-    error "Invalid environment '$ENV'. Available: dev, prod"
+if [ "$ENV" != "dev" ] && [ "$ENV" != "prod" ] && [ "$ENV" != "test" ]; then
+    error "Invalid environment '$ENV'. Available: dev, prod (test: tooling-only, explicit)"
     exit 1
 fi
 
