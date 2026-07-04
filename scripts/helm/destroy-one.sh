@@ -198,9 +198,16 @@ fi
 header "Deleting $NAME from $ENV"
 HF_LOG="$(mktemp)"
 trap 'rm -f "$SEL_TMP" "$DEP_TMP" "$HF_LOG"' EXIT
+# Pin the destroy to the target env's context explicitly. helmfile does NOT honour
+# environments.<env>.kubeContext for the helm operation — it falls back to the
+# active current-context — so without this an unset/wrong current-context makes
+# the destroy hit http://localhost:8080. Only add the flag when we resolved a
+# context, else let helmfile use its own default.
+HF_CTX=""
+[ -n "$HELMFILE_KUBE_CONTEXT" ] && HF_CTX="--kube-context '$HELMFILE_KUBE_CONTEXT'"
 if gum spin --spinner pulse --show-error \
         --title "  Deleting $NAME from $ENV…" \
-        -- bash -c "helmfile -f '$ROOT_DIR/helmfile.yaml.gotmpl' -e '$ENV' -l name='$NAME' destroy --skip-deps > '$HF_LOG' 2>&1"; then
+        -- bash -c "helmfile -f '$ROOT_DIR/helmfile.yaml.gotmpl' -e '$ENV' $HF_CTX -l name='$NAME' destroy --skip-deps > '$HF_LOG' 2>&1"; then
     success "Release '$NAME' deleted from '$ENV'."
 else
     error "Delete failed — output follows:"

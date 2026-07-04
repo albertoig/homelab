@@ -210,9 +210,16 @@ fi
 header "Syncing $NAME in $ENV"
 HF_LOG="$(mktemp)"
 trap 'rm -f "$SEL_TMP" "$REQ_TMP" "$HF_LOG"' EXIT
+# Pin the sync to the target env's context explicitly. helmfile does NOT honour
+# environments.<env>.kubeContext for the helm operation — it falls back to the
+# active current-context — so without this an unset/wrong current-context makes
+# the sync hit http://localhost:8080. Only add the flag when we resolved a
+# context, else let helmfile use its own default.
+HF_CTX=""
+[ -n "$HELMFILE_KUBE_CONTEXT" ] && HF_CTX="--kube-context '$HELMFILE_KUBE_CONTEXT'"
 if gum spin --spinner pulse --show-error \
         --title "  Syncing $NAME in $ENV…" \
-        -- bash -c "helmfile -f '$ROOT_DIR/helmfile.yaml.gotmpl' -e '$ENV' -l name='$NAME' sync --skip-deps > '$HF_LOG' 2>&1"; then
+        -- bash -c "helmfile -f '$ROOT_DIR/helmfile.yaml.gotmpl' -e '$ENV' $HF_CTX -l name='$NAME' sync --skip-deps > '$HF_LOG' 2>&1"; then
     success "Synced '$NAME' in '$ENV'."
 else
     error "Sync failed — output follows:"

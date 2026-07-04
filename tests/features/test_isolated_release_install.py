@@ -247,6 +247,14 @@ def sync_used_flag(harness, flag: str) -> None:
     assert flag in harness.synced, f"expected {flag!r} in: {harness.synced!r}"
 
 
+@then(parsers.parse('the sync targeted kube context "{ctx}"'))
+def sync_targeted_context(harness, ctx: str) -> None:
+    # The sync command must carry an explicit --kube-context so it never relies on
+    # the active current-context (helmfile ignores environments.<env>.kubeContext).
+    assert f"--kube-context {ctx}" in harness.synced, \
+        f"expected the sync to pass --kube-context {ctx!r}; sync args were: {harness.synced!r}"
+
+
 @then("nothing was synced")
 def nothing_synced(harness) -> None:
     assert harness.synced.strip() == "", f"unexpected sync: {harness.synced!r}"

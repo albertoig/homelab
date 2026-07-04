@@ -29,6 +29,17 @@ Feature: Isolated install/update of a single Helmfile release
     And the output mentions "install"
     And only one release was synced
 
+  # helmfile ignores environments.<env>.kubeContext, so the sync MUST pass the
+  # env's context explicitly or it falls back to the current-context (localhost:8080
+  # when unset). Regression guard for that.
+  @offline
+  Scenario: The sync is pinned to the target environment's kube context
+    Given a Helmfile defining "data/redis" and "web/ghost"
+    And the cluster has "data/redis" deployed
+    When I run install-one for "dev" targeting "redis"
+    Then the command succeeds
+    And the sync targeted kube context "homelab-dev"
+
   @offline
   Scenario: Updating a defined release that is already deployed syncs it as an update
     Given a Helmfile defining "data/redis" and "web/ghost"
