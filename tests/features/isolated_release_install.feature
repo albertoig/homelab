@@ -198,3 +198,17 @@ Feature: Isolated install/update of a single Helmfile release
     Then that release is present at the defined version
     And it was installed, not updated
     And the sibling release was not re-synced
+
+  # ── User Story 1 (P1) — context pinning proven on a real cluster ────────────────
+  # Reproduces the production failure: helmfile ignores environments.<env>.kubeContext
+  # and falls back to the current-context, so with current-context UNSET the sync hit
+  # http://localhost:8080. install:one must pass --kube-context explicitly and succeed
+  # regardless of the active context. Uses a throwaway kubeconfig COPY so the real
+  # ~/.kube/config is never modified. This scenario FAILS on the pre-fix script.
+
+  @online
+  Scenario: install:one targets the env context even with current-context unset
+    Given a reachable test cluster and a kubeconfig copy with current-context unset
+    When I install a test release with install:one using that kubeconfig
+    Then that release is present at the defined version
+    And no localhost:8080 fallback occurred
