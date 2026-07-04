@@ -61,8 +61,10 @@ show_subheader "$ENV"
 
 SEL_TMP="$(mktemp)"
 trap 'rm -f "$SEL_TMP"' EXIT
+# Cross-check the cluster against the TARGET env's context, not the active one.
+export HELMFILE_KUBE_CONTEXT="$(helmfile_kube_context "$ENV")"
 export -f helmfile_installable_rows helmfile_defined_releases helmfile_cluster_releases
-export HELMFILE_MAIN HELMFILE_ROOT _hf_jq_key
+export HELMFILE_MAIN HELMFILE_ROOT _hf_jq_key HELMFILE_KUBE_CONTEXT
 
 if ! gum spin --spinner pulse --show-error \
         --title "  Loading releases in '$ENV'…" \

@@ -173,9 +173,17 @@ Feature: Isolated install/update of a single Helmfile release
     And the file "scripts/helm/install-one.sh" contains "lib/helmfile.sh"
     And the file "scripts/helm/install-one.sh" does not contain "--argjson"
 
+  # ── User Story 1 (P1) — real end-to-end install against the ephemeral cluster ───
+  # Runs only under `mise run verify:online`, against the disposable
+  # kind-homelab-test cluster (never dev/prod — the step guard refuses any
+  # homelab-<env> context). The scenario proves the two guarantees that matter:
+  # a defined-but-undeployed release is INSTALLED (not updated), and the sibling
+  # release is left byte-for-byte untouched (its helm revision does not change).
+
   @online
-  Scenario: Syncing one release leaves the others untouched
-    Given a reachable "dev" cluster with more than one managed release deployed
-    When I sync a single throwaway release with install:one
+  Scenario: Installing one release installs it and leaves the sibling untouched
+    Given a reachable test cluster with only the sibling release deployed
+    When I install the missing release with install:one
     Then that release is present at the defined version
-    And the other managed releases are unchanged
+    And it was installed, not updated
+    And the sibling release was not re-synced
