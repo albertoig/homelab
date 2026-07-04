@@ -445,3 +445,54 @@ def online_sibling_untouched(online_ctx) -> None:  # pragma: no cover - online o
         f"({online_ctx['sibling_revision']} -> {rel['revision']}); "
         "an isolated install must NOT re-sync it"
     )
+
+
+# ── Online: context pinning proven against a real cluster (reproduces the bug) ───
+# Uses a COPY of the kubeconfig with current-context unset — the real ~/.kube/config
+# is never modified, so it's safe even if the test crashes. On the pre-fix script
+# this fails with the localhost:8080 fallback; with --kube-context it passes.
+
+@given("a reachable test cluster and a kubeconfig copy with current-context unset",
+       target_fixture="online_ctx")
+def broken_kubeconfig(tmp_path) -> dict:  # pragma: no cover - online only
+    _require_test_cluster()
+    # Put the real cluster in a known-good state first.
+    subprocess.run(
+        ["helmfile", "-f", str(REPO_ROOT / "helmfile.yaml.gotmpl"), "-e", "test",
+         "sync", "--skip-deps", "--wait"],
+        cwd=str(REPO_ROOT), capture_output=True, text=True,
+    )
+    # Copy the merged kubeconfig, then strip current-context from the COPY ONLY. The
+    # copy still KNOWS the kind-homelab-test context — it just isn't current — which
+    # is exactly the production condition that broke the sync.
+    merged = subprocess.run(["kubectl", "config", "view", "--raw"],
+                            capture_output=True, text=True, check=True).stdout
+    kubeconfig = tmp_path / "kubeconfig-no-current.yaml"
+    kubeconfig.write_text(merged, encoding="utf-8")
+    subprocess.run(["kubectl", "--kubeconfig", str(kubeconfig), "config", "unset",
+                    "current-context"], capture_output=True, text=True, check=True)
+    cur = subprocess.run(["kubectl", "--kubeconfig", str(kubeconfig), "config",
+                          "current-context"], capture_output=True, text=True)
+    assert not cur.stdout.strip(), "the kubeconfig copy must have NO current-context"
+    return {"kubeconfig": str(kubeconfig)}
+
+
+@when("I install a test release with install:one using that kubeconfig")
+def online_install_broken_kubeconfig(online_ctx) -> None:  # pragma: no cover - online only
+    env = dict(os.environ)
+    env["KUBECONFIG"] = online_ctx["kubeconfig"]
+    r = subprocess.run(["bash", str(SCRIPT), "test", TARGET, "--yes"],
+                       cwd=str(REPO_ROOT), capture_output=True, text=True, env=env)
+    online_ctx["output"] = r.stdout + r.stderr
+    assert r.returncode == 0, (
+        "install:one failed with current-context unset — the sync is not pinned to "
+        f"the env context:\n{online_ctx['output']}"
+    )
+
+
+@then("no localhost:8080 fallback occurred")
+def online_no_localhost_fallback(online_ctx) -> None:  # pragma: no cover - online only
+    assert "localhost:8080" not in online_ctx["output"], (
+        "helm fell back to http://localhost:8080 — the env context was not pinned:\n"
+        + online_ctx["output"]
+    )
