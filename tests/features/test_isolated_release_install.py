@@ -338,25 +338,102 @@ def confirmation_requested(harness) -> None:
     assert harness.confirmed, "expected a confirmation prompt (prod must confirm even with --yes)"
 
 
-# ── Online steps (run locally with a cluster; deselected by -m offline) ──────────
+# ── Online steps (real; run against the disposable kind-homelab-test cluster) ────
+# Deselected by `-m offline`. They skip cleanly with no test cluster and refuse to
+# run against any homelab-<env> context, so they can never touch dev/prod. Mirrors
+# the isolated-release-delete online steps (specs/002) and the ephemeral test
+# cluster harness (issue #35).
 
-@given(parsers.parse('a reachable "{env_name}" cluster with more than one managed '
-                     'release deployed'), target_fixture="online_ctx")
-def online_cluster(env_name: str) -> dict:
-    pytest.skip("online sync scenario requires a live cluster and a throwaway release")
-    return {"env": env_name}
+import shutil  # noqa: E402
+
+TEST_CONTEXT = "kind-homelab-test"
+TEST_NS = "test"
+TARGET = "test-a"   # defined in helmfile/releases/900-test — installed by the test
+SIBLING = "test-b"  # its sibling — must be left untouched by an isolated install
 
 
-@when("I sync a single throwaway release with install:one")
-def online_sync(online_ctx) -> None:  # pragma: no cover - online only
-    raise NotImplementedError
+def _current_context() -> str:
+    r = subprocess.run(["kubectl", "config", "current-context"], capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else ""
+
+
+def _test_releases() -> dict[str, dict]:
+    """name -> helm release record, for everything in the test namespace."""
+    r = subprocess.run(
+        ["helm", "list", "-A", "--kube-context", TEST_CONTEXT, "--output", "json"],
+        capture_output=True, text=True,
+    )
+    return {x["name"]: x for x in json.loads(r.stdout or "[]")}
+
+
+def _require_test_cluster() -> None:
+    if shutil.which("kubectl") is None or shutil.which("helm") is None:
+        pytest.skip("kubectl/helm not available")
+    if _current_context().startswith("homelab-"):
+        pytest.skip(f"refusing @online against homelab context {_current_context()!r}")
+    r = subprocess.run(["kubectl", "--context", TEST_CONTEXT, "get", "--raw", "/readyz"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        pytest.skip(f"{TEST_CONTEXT!r} not reachable; run 'mise run cluster:test:up'")
+
+
+@given("a reachable test cluster with only the sibling release deployed",
+       target_fixture="online_ctx")
+def online_cluster() -> dict:
+    _require_test_cluster()
+    # Bring both test releases up and Ready, then remove the target so install:one
+    # performs a genuine INSTALL (not an update). The sibling stays deployed; we
+    # record its helm revision to later prove an isolated install never touched it.
+    subprocess.run(
+        ["helmfile", "-f", str(REPO_ROOT / "helmfile.yaml.gotmpl"), "-e", "test",
+         "sync", "--skip-deps", "--wait"],
+        cwd=str(REPO_ROOT), capture_output=True, text=True,
+    )
+    subprocess.run(
+        ["helm", "uninstall", TARGET, "-n", TEST_NS, "--kube-context", TEST_CONTEXT,
+         "--wait"],
+        capture_output=True, text=True,
+    )  # ignore result: the target may already be absent
+    releases = _test_releases()
+    if SIBLING not in releases:
+        pytest.skip(f"sibling {SIBLING!r} not deployed; run 'mise run verify:online'")
+    assert TARGET not in releases, f"{TARGET!r} should be absent before an install test"
+    return {"sibling_revision": releases[SIBLING]["revision"]}
+
+
+@when("I install the missing release with install:one")
+def online_install(online_ctx) -> None:  # pragma: no cover - online only
+    r = subprocess.run(["bash", str(SCRIPT), "test", TARGET, "--yes"],
+                       cwd=str(REPO_ROOT), capture_output=True, text=True)
+    online_ctx["output"] = r.stdout + r.stderr
+    assert r.returncode == 0, online_ctx["output"]
 
 
 @then("that release is present at the defined version")
 def online_release_present(online_ctx) -> None:  # pragma: no cover - online only
-    raise NotImplementedError
+    rel = _test_releases().get(TARGET)
+    assert rel is not None, f"{TARGET!r} was not installed"
+    # helm reports the chart as "<name>-<version>"; 900-test pins version 0.1.0.
+    assert rel["chart"].endswith("-0.1.0"), f"unexpected chart version: {rel['chart']!r}"
 
 
-@then("the other managed releases are unchanged")
-def online_others_unchanged(online_ctx) -> None:  # pragma: no cover - online only
-    raise NotImplementedError
+@then("it was installed, not updated")
+def online_labelled_install(online_ctx) -> None:  # pragma: no cover - online only
+    # The script must have LABELLED the action install (target was undeployed), and
+    # a fresh install starts helm history at revision 1 — an update would be >1.
+    assert "install" in online_ctx["output"].lower(), \
+        f"expected the action to be labelled 'install':\n{online_ctx['output']}"
+    rel = _test_releases().get(TARGET)
+    assert rel is not None and str(rel["revision"]) == "1", \
+        f"expected a fresh install at revision 1, got: {rel!r}"
+
+
+@then("the sibling release was not re-synced")
+def online_sibling_untouched(online_ctx) -> None:  # pragma: no cover - online only
+    rel = _test_releases().get(SIBLING)
+    assert rel is not None, f"sibling {SIBLING!r} disappeared — it must stay deployed"
+    assert str(rel["revision"]) == str(online_ctx["sibling_revision"]), (
+        f"sibling {SIBLING!r} revision changed "
+        f"({online_ctx['sibling_revision']} -> {rel['revision']}); "
+        "an isolated install must NOT re-sync it"
+    )
