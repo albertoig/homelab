@@ -1,3 +1,23 @@
+<!--
+Sync Impact Report
+- Version change: 1.2.0 → 1.2.1 (PATCH)
+- Bump rationale: Clarifies/refines the existing "Release bump rules" with an explicit
+  rule for adding vs. updating Helmfile software. No new principle, no redefinition —
+  makes an existing convention (new chart = minor via feat(helmfile)) unambiguous.
+- Modified sections:
+  - Additional Constraints → "Release bump rules": added two bullets — adding new
+    software = minor/feat (never breaking merely for being new); updating existing =
+    patch/minor per the fix/feat rules.
+- Added sections: none
+- Removed sections: none
+- Templates / docs checked:
+  - .specify/templates/plan-template.md — ✅ no change (no release-bump references)
+  - .specify/templates/spec-template.md — ✅ no change
+  - .specify/templates/tasks-template.md — ✅ no change
+  - docs/VERSIONING.md — ✅ already consistent (Minor = new or upgraded service)
+- Follow-up TODOs: none
+-->
+
 # Homelab Constitution
 
 This constitution captures the non-negotiable conventions of the homelab platform
@@ -116,6 +136,14 @@ the code telling the same story.
     regardless of scope.
   - `feat(helmfile)` / `feat(charts)` → **minor**.
   - `fix(helmfile)` / `fix(charts)` → **patch**.
+  - **Adding new software** — a new Helmfile release/chart under `helmfile/releases/` — is
+    **additive**: it MUST bump the version as a **minor** via `feat(helmfile)`, and MUST NOT
+    be classed as a breaking/major change merely for being new. Reserve `major` for a change
+    that actually forces migration of existing deployed state (e.g. a namespace rename or an
+    incompatible config restructure), not for the mere presence of a new release.
+  - **Updating existing software** MUST also bump the version, per the rules above: a chart
+    **patch** bump → `fix(helmfile)` (patch), a chart **minor/major** bump → `feat(helmfile)`
+    (minor). An update is only `major` when it carries a genuine `BREAKING CHANGE:`.
   - **Every other `feat`/`fix` scope is silent** (`release: false`) — e.g.
     `feat(scripts)`, `fix(ci)`, `fix(metal)` do **not** cut a release.
   - Other types (`chore`, `docs`, `refactor`, `test`, `ci`, …) are silent unless they
@@ -150,4 +178,4 @@ recorded as an ADR). Amendments are made by editing this file in a PR that expla
 change and bumps the version below (semantic: MAJOR for principle removal/redefinition,
 MINOR for a new principle or section, PATCH for clarifications).
 
-**Version**: 1.2.0 | **Ratified**: 2026-06-29 | **Last Amended**: 2026-07-03
+**Version**: 1.2.1 | **Ratified**: 2026-06-29 | **Last Amended**: 2026-07-04
