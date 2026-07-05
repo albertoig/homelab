@@ -8,16 +8,16 @@
   "assignees": ["albertoig"],
   "prConcurrentLimit": 10,
   "minimumReleaseAge": "3 days",
-  "schedule": ["after 9am and before 5pm on weekdays"],
+  "schedule": ["* 9-16 * * 1-5"],
   "semanticCommits": "enabled",
   "packageRules": [
     {
       "matchManagers": ["helmfile"],
-      "ignorePrerelease": true
+      "ignoreUnstable": true
     },
     {
       "matchManagers": ["custom.regex"],
-      "ignorePrerelease": true
+      "ignoreUnstable": true
     },
     {
       "matchManagers": ["helmfile"],
