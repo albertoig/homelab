@@ -1,0 +1,61 @@
+name: Renovate
+
+# Self-hosted Renovate (issue #40). The Mend-hosted Renovate app is not installed
+# on this repo, so we run the same engine ourselves on a schedule. It reuses the
+# existing renovate.json unchanged and opens dependency PRs against `beta`.
+#
+# Requires a repository secret RENOVATE_TOKEN — a PAT (classic: repo + workflow) or
+# a GitHub App installation token with contents+pull-requests write. The default
+# GITHUB_TOKEN is intentionally NOT used: PRs it opens cannot trigger the validate
+# workflow, and it cannot manage the Dependency Dashboard issue.
+
+on:
+  schedule:
+    # Wake Renovate hourly on weekdays (UTC). Whether it actually opens PRs is
+    # gated by renovate.json's own `schedule`/`timezone`, so this only controls
+    # how often it checks — not when PRs land.
+    - cron: "0 * * * 1-5"
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: Log level
+        type: choice
+        default: info
+        options:
+          - debug
+          - info
+          - warn
+      dryRun:
+        description: Dry run (compute updates but write no branches or PRs)
+        type: boolean
+        default: false
+
+concurrency:
+  # Never let two Renovate runs overlap on the same repo.
+  group: renovate
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  renovate:
+    name: Renovate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Self-hosted Renovate
+        uses: renovatebot/github-action@v46.1.17
+        with:
+          configurationFile: renovate.json
+          token: ${{ secrets.RENOVATE_TOKEN }}
+        env:
+          # Restrict to this repo (no org-wide autodiscovery).
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+          LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
+          # Empty string on scheduled runs = live; "full" only on a manual dry run.
+          RENOVATE_DRY_RUN: ${{ inputs.dryRun && 'full' || '' }}

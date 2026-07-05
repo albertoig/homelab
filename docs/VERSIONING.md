@@ -74,7 +74,9 @@ The principle is that a release reflects a change to the **deployed infrastructu
 
 ## Automated dependency updates — Renovate
 
-[Renovate](https://docs.renovatebot.com/) runs on a weekday schedule and opens pull requests to `beta` when new versions are available. It uses the same commit conventions as manual commits so that releases are cut correctly.
+[Renovate](https://docs.renovatebot.com/) runs **self-hosted** from a scheduled GitHub Actions workflow ([`.github/workflows/renovate.yml`](../.github/workflows/renovate.yml)) — the Mend-hosted app is not installed on this repo (see ADR-003). It wakes on a weekday schedule and opens pull requests to `beta` when new versions are available, using the same commit conventions as manual commits so that releases are cut correctly.
+
+> **Setup:** the workflow needs a `RENOVATE_TOKEN` repository secret — a PAT (classic: `repo` + `workflow`) or a GitHub App installation token with contents + pull-requests write. The default `GITHUB_TOKEN` is not used, because PRs it opens cannot trigger the `validate` workflow.
 
 ### What Renovate tracks
 
