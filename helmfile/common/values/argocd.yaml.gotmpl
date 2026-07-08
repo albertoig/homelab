@@ -53,10 +53,12 @@ controller:
   resources:
     requests:
       cpu: "100m"
-      memory: "256Mi"
+      # The application-controller's steady-state working set exceeds 512Mi and
+      # was OOMKilled in a crashloop (see issue #50). 1Gi gives ~2x headroom.
+      memory: "512Mi"
     limits:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "1Gi"
   metrics:
     enabled: true
     serviceMonitor:
