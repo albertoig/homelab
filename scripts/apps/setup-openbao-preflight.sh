@@ -23,7 +23,7 @@ fi
 
 # Select the target environment (prompts when no argument is given).
 source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
-KUBE_CONTEXT="homelab-$ENV"
+KUBE_CONTEXT="$(kube_context)"
 
 if [ "${OPENBAO_PREFLIGHT_QUIET:-0}" != "1" ]; then
     clear

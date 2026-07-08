@@ -51,10 +51,8 @@ EOF
 
     cat > "$bin/kubectl" <<'EOF'
 #!/bin/bash
-if [ "$1" = "config" ] && [ "$2" = "current-context" ]; then
-  echo "homelab-prod"
-  exit 0
-fi
+# preflight calls `kubectl --context homelab-<env> cluster-info`; it no longer
+# reads current-context. The stub ignores the args and just honours the fail flag.
 [ "${CHECKSPEC_K8S_FAIL:-0}" = "1" ] && exit 1
 exit 0
 EOF
@@ -119,7 +117,8 @@ EOF
       The output should include "cli / yq"
       The output should include "helm / secrets"
       The output should include "helm / diff"
-      The output should include "prod / Kubernetes connection"
+      # Labelled by the SELECTED environment (dev), not the current context.
+      The output should include "dev / Kubernetes connection"
       The output should not include "✗"
     End
 
@@ -167,7 +166,7 @@ EOF
       When call check_no_kubectl
       The status should be failure
       The output should include "✗  cli / kubectl"
-      The output should include "✗  cluster / Kubernetes connection"
+      The output should include "✗  dev / Kubernetes connection"
       The output should include "2 check(s) failed."
     End
   End
@@ -206,10 +205,10 @@ EOF
   Describe 'when the cluster is unreachable'
     check_k8s_down() { CHECKSPEC_K8S_FAIL=1 run_check dev; }
 
-    It 'fails the connection line with the context label'
+    It 'fails the connection line with the environment label'
       When call check_k8s_down
       The status should be failure
-      The output should include "✗  prod / Kubernetes connection"
+      The output should include "✗  dev / Kubernetes connection"
       The output should include "1 check(s) failed."
     End
   End

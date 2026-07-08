@@ -56,16 +56,16 @@ done
 
 # ── Kubernetes ────────────────────────────────────────────────────────────────
 
-# Label the connection check with the active context (homelab-prod → prod)
+# Check connectivity to the cluster for the SELECTED environment, not whatever
+# context happens to be current. kube_context (lib/env.sh) maps $ENV to its
+# homelab-<env> context.
 ok=1
-CTX_LABEL="cluster"
+KUBE_CONTEXT="$(kube_context)"
 if command -v kubectl &>/dev/null; then
-    ctx=$(kubectl config current-context 2>/dev/null || true)
-    [ -n "$ctx" ] && CTX_LABEL="${ctx#homelab-}"
-    gum spin --spinner pulse --padding="0 0 0 2" --title "  $CTX_LABEL cluster" \
-        -- bash -c "kubectl cluster-info &>/dev/null" && ok=0 || ok=1
+    gum spin --spinner pulse --padding="0 0 0 2" --title "  $ENV cluster" \
+        -- bash -c "kubectl --context '$KUBE_CONTEXT' cluster-info &>/dev/null" && ok=0 || ok=1
 fi
-tool_line "$CTX_LABEL" "Kubernetes connection" "$ok"
+tool_line "$ENV" "Kubernetes connection" "$ok"
 
 # ── Secrets ───────────────────────────────────────────────────────────────────
 

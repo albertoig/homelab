@@ -37,7 +37,7 @@ if ! command -v kubectl &>/dev/null; then
 fi
 
 source "$SCRIPT_DIR/../lib/env.sh" "$ENV_ARG"
-KUBE_CONTEXT="homelab-$ENV"
+KUBE_CONTEXT="$(kube_context)"
 
 # All cluster reads/writes target the selected environment's context
 k() { kubectl --context "$KUBE_CONTEXT" "$@"; }

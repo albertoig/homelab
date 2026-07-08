@@ -43,7 +43,7 @@ fi
 
 # Select the target environment (prompts when no argument is given).
 source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
-KUBE_CONTEXT="homelab-$ENV"
+KUBE_CONTEXT="$(kube_context)"
 
 # OIDC endpoints derived from the env's root_dns (matches the Authentik provider
 # and the openbao ingress host).

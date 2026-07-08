@@ -43,3 +43,13 @@ if [ "$ENV" != "dev" ] && [ "$ENV" != "prod" ] && [ "$ENV" != "test" ]; then
 fi
 
 unset _sel_arg
+
+# Map an environment to its kubectl context, following the homelab-<env>
+# convention used across the repo. Defaults to the resolved $ENV, so callers
+# that already sourced this file can simply do: ctx=$(kube_context)
+#   kube_context        -> homelab-$ENV
+#   kube_context dev    -> homelab-dev
+kube_context() {
+    local env="${1:-${ENV:-}}"
+    printf 'homelab-%s' "$env"
+}

@@ -27,7 +27,9 @@ show_subheader() {
     [[ -n "${HOMELAB_SUBHEADER_SHOWN:-}" ]] && return
     export HOMELAB_SUBHEADER_SHOWN=1
     local env="${1:-${ENV:-}}"
-    local ctx="${2:-homelab-${env}}"
+    # Default to the homelab-<env> context via the shared helper (lib/env.sh),
+    # which every caller sources before show_subheader.
+    local ctx="${2:-$(kube_context "$env")}"
     if [ "$#" -gt 2 ]; then shift 2; else set --; fi
     gum_secondary "  environment → $(gum_primary --bold "${env}")"
     gum_secondary "  cluster     → $(gum_primary --bold "${ctx}")"

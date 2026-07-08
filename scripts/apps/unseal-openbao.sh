@@ -21,7 +21,7 @@ fi
 
 # Select the target environment (prompts when no argument is given).
 source "$SCRIPT_DIR/../lib/env.sh" "${1:-}"
-KUBE_CONTEXT="homelab-$ENV"
+KUBE_CONTEXT="$(kube_context)"
 ROOT_DNS=$(yq -r '.general.root_dns' "$SCRIPT_DIR/../../helmfile/environments/$ENV/config.yaml")
 OPENBAO_URL="https://openbao.internal.${ROOT_DNS}"
 
