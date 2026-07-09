@@ -45,8 +45,18 @@ server:
       enabled: true
       interval: 30s
       scrapeTimeout: 3s
-      labels: 
+      labels:
         release: prometheus-stack
+  # Requests lift the server out of BestEffort QoS so it is not the first pod
+  # starved under node CPU pressure — starvation makes the 3s liveness probe
+  # (/-/health/live/) time out and the kubelet restart-loops the pod.
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
 
 worker:
   env:
