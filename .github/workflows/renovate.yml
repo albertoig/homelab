@@ -49,7 +49,7 @@ jobs:
           persist-credentials: false
 
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@v46.1.17
+        uses: renovatebot/github-action@v46.1.18
         with:
           configurationFile: renovate.json
           token: ${{ secrets.RENOVATE_TOKEN }}
