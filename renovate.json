@@ -107,12 +107,12 @@
     }
   ],
   "helmfile": {
-    "fileMatch": ["^helmfile/releases/.*\\.yaml\\.gotmpl$"]
+    "managerFilePatterns": ["/^helmfile/releases/.*\\.yaml\\.gotmpl$/"]
   },
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^\\.mise\\.toml$"],
+      "managerFilePatterns": ["/^\\.mise\\.toml$/"],
       "matchStrings": ["helm\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "helm/helm",
       "datasourceTemplate": "github-releases",
@@ -120,21 +120,21 @@
     },
     {
       "customType": "regex",
-      "fileMatch": ["^\\.mise\\.toml$"],
+      "managerFilePatterns": ["/^\\.mise\\.toml$/"],
       "matchStrings": ["node\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "node",
       "datasourceTemplate": "node-version"
     },
     {
       "customType": "regex",
-      "fileMatch": ["^\\.mise\\.toml$"],
+      "managerFilePatterns": ["/^\\.mise\\.toml$/"],
       "matchStrings": ["python\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "python",
       "datasourceTemplate": "python-version"
     },
     {
       "customType": "regex",
-      "fileMatch": ["^metal/k3s/inventory\\.example\\.yml$"],
+      "managerFilePatterns": ["/^metal/k3s/inventory\\.example\\.yml$/"],
       "matchStrings": ["k3s_version:\\s*(?<currentValue>v[\\d.]+\\+k3s\\d+)"],
       "depNameTemplate": "k3s-io/k3s",
       "datasourceTemplate": "github-releases"
