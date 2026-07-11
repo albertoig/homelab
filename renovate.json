@@ -2,13 +2,11 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "baseBranches": ["beta"],
-  "timezone": "America/New_York",
   "labels": ["dependencies"],
   "reviewers": ["albertoig"],
   "assignees": ["albertoig"],
   "prConcurrentLimit": 10,
   "minimumReleaseAge": "3 days",
-  "schedule": ["* 9-16 * * 1-5"],
   "semanticCommits": "enabled",
   "packageRules": [
     {
