@@ -4,8 +4,12 @@ name: Renovate
 # on this repo, so we run the same engine ourselves on a schedule. It reuses the
 # existing renovate.json unchanged and opens dependency PRs against `beta`.
 #
-# Requires a repository secret RENOVATE_TOKEN — a PAT (classic: repo + workflow) or
-# a GitHub App installation token with contents+pull-requests write. The default
+# Runs under a dedicated GitHub App bot (renovate-homelab[bot]). The workflow mints
+# a short-lived installation token from two repository secrets:
+#   RENOVATE_BOT_ID          — the GitHub App's App ID
+#   RENOVATE_BOT_PRIVATE_KEY — the full .pem private key contents
+# With RENOVATE_PLATFORM_COMMIT enabled, Renovate commits through the GitHub API, so
+# GitHub auto-signs the commits ("Verified") with no GPG keys to manage. The default
 # GITHUB_TOKEN is intentionally NOT used: PRs it opens cannot trigger the validate
 # workflow, and it cannot manage the Dependency Dashboard issue.
 
@@ -48,14 +52,26 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Generate Renovate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RENOVATE_BOT_ID }}
+          private-key: ${{ secrets.RENOVATE_BOT_PRIVATE_KEY }}
+
       - name: Self-hosted Renovate
         uses: renovatebot/github-action@v46.1.17
         with:
           configurationFile: renovate.json
-          token: ${{ secrets.RENOVATE_TOKEN }}
+          token: ${{ steps.bot-token.outputs.token }}
         env:
           # Restrict to this repo (no org-wide autodiscovery).
           RENOVATE_REPOSITORIES: ${{ github.repository }}
+          # Commit via the GitHub API so commits are auto-signed → "Verified".
+          # The App bot is the (signing) committer; the author is pinned below so
+          # commits are attributed to the dependency-bot-ai account.
+          RENOVATE_PLATFORM_COMMIT: "enabled"
+          RENOVATE_GIT_AUTHOR: "dependency-bot-ai <302342843+dependency-bot-ai@users.noreply.github.com>"
           LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
           # Empty string on scheduled runs = live; "full" only on a manual dry run.
           RENOVATE_DRY_RUN: ${{ inputs.dryRun && 'full' || '' }}
