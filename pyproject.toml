@@ -16,7 +16,7 @@ pytest-html = "^4.0"
 pytest-check = "^2.3"
 pytest-bdd = "^7.3"
 requests = "^2.32"
-kubernetes = "^32.0"
+kubernetes = "^36.0.0"
 pyyaml = "^6.0"
 
 [tool.pytest.ini_options]
