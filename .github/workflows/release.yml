@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
 
       - name: Install tools via mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
 
       - name: Cache node_modules
         id: cache-node-modules
