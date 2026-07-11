@@ -19,7 +19,7 @@ python = "3.12"
 poetry = "latest"
 
 # Spec Kit: `specify` CLI runs via `uvx` (see the `spec:init` task)
-uv     = "0.11.17"
+uv     = "0.11.28"
 
 # CLI scripting
 gum              = "0.17.0"
