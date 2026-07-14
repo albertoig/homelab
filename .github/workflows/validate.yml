@@ -26,7 +26,7 @@ jobs:
       helmfile: ${{ steps.filter.outputs.helmfile }}
       shell: ${{ steps.filter.outputs.shell }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install tools via mise
         uses: jdx/mise-action@v2
@@ -81,7 +81,7 @@ jobs:
     if: needs.changes.outputs.helm == 'true' || github.event_name == 'workflow_call'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install tools via mise
         uses: jdx/mise-action@v2
@@ -119,7 +119,7 @@ jobs:
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'workflow_call'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install tools via mise
         uses: jdx/mise-action@v2
@@ -134,7 +134,7 @@ jobs:
     # @online scenarios need a live cluster and run locally via `mise run verify`.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install tools via mise
         uses: jdx/mise-action@v2
@@ -149,7 +149,7 @@ jobs:
     name: Commitlint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
