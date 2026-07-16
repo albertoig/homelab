@@ -75,6 +75,11 @@ ansible all -i "$INVENTORY" -m ping || {
 info "Applying sysctl tuning for inotify..."
 ansible-playbook playbooks/sysctl-tuning.yml -i "$INVENTORY" -v
 
+# ─── Blacklist Longhorn devices from multipathd ───────────────────────────────
+
+info "Blacklisting Longhorn iSCSI devices from multipathd..."
+ansible-playbook playbooks/longhorn-multipath.yml -i "$INVENTORY" -v
+
 # ─── Run Playbook ─────────────────────────────────────────────────────────────
 
 header "Running playbook: $PLAYBOOK"
