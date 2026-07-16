@@ -1,0 +1,55 @@
+---
+# Stop multipathd from claiming Longhorn's iSCSI block devices.
+#
+# Longhorn presents each volume as an iSCSI target (vendor "IET", product
+# "VIRTUAL-DISK"). By default multipathd grabs any SCSI device, so it wraps
+# these into dm-multipath maps and holds the block device open. kubelet's
+# mkfs/mount then fails with "apparently in use by the system", and the pod
+# hangs indefinitely in ContainerCreating. Blacklisting them is Longhorn's
+# documented fix. See issue #84.
+- name: Prevent multipathd from claiming Longhorn iSCSI devices
+  hosts: k3s_cluster
+  become: true
+  handlers:
+    - name: Reconfigure multipathd
+      # `reconfigure` re-reads config AND drops maps that are now blacklisted
+      # and not mounted — which clears any already-wrapped Longhorn devices.
+      ansible.builtin.command: multipathd reconfigure
+      changed_when: true
+  tasks:
+    - name: Check whether multipath-tools is present
+      ansible.builtin.stat:
+        path: /etc/multipath
+      register: multipath_dir
+
+    - name: Ensure multipath conf.d directory exists
+      ansible.builtin.file:
+        path: /etc/multipath/conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      when: multipath_dir.stat.exists
+
+    - name: Blacklist Longhorn (IET/VIRTUAL-DISK) devices via a drop-in
+      ansible.builtin.copy:
+        dest: /etc/multipath/conf.d/longhorn.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          # Managed by homelab Ansible (metal/k3s/playbooks/longhorn-multipath.yml).
+          # Do not edit by hand — see issue #84.
+          #
+          # Longhorn volumes are iSCSI targets (vendor IET, product VIRTUAL-DISK).
+          # multipathd must ignore them, or it holds the block device open and
+          # kubelet's mkfs/mount fails with "in use by the system", hanging pods
+          # in ContainerCreating.
+          blacklist {
+              device {
+                  vendor "IET"
+                  product "VIRTUAL-DISK"
+              }
+          }
+      when: multipath_dir.stat.exists
+      notify: Reconfigure multipathd
