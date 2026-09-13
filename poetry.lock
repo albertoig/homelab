@@ -21,14 +21,14 @@ subprocess-tee = ">=0.4.1"
 
 [[package]]
 name = "ansible-core"
-version = "2.21.1"
+version = "2.21.4"
 description = "Radically simple IT automation"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "ansible_core-2.21.1-py3-none-any.whl", hash = "sha256:1403ff56bb69484ef90788126d06c65b4e28e8d2dcdcfb7f027d4c1495052d7e"},
-    {file = "ansible_core-2.21.1.tar.gz", hash = "sha256:a5536ece95be84de15212b3644cdbbe9cbd9efd62e4e8a544cd6b0b27a083039"},
+    {file = "ansible_core-2.21.4-py3-none-any.whl", hash = "sha256:ebe74d9c8fadcb41ad2151e031bf1e785e3098aaa015019b4e19a0a96f0dcc4f"},
+    {file = "ansible_core-2.21.4.tar.gz", hash = "sha256:81a9329f4f12cfa5008dcab5d1bf23ae69b7effc08c0f00048ab2461147ae95a"},
 ]
 
 [package.dependencies]
@@ -1733,4 +1733,4 @@ dev = ["doc8", "flake8", "flake8-import-order", "rstcheck[sphinx]", "ruff", "sph
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "d058198c9069cf18222e81240327692a1820e956a66d3ba84ea2502e8395531e"
+content-hash = "4dd9242d8a0907ec1712f5292c9c7fe7e05fb154cbec2efff6a29d7e5c77d0d8"
