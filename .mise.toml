@@ -4,7 +4,7 @@ kubectl  = "1.33.0"
 kind     = "latest"   # ephemeral throwaway cluster for @online BDD (issue #35)
 
 # Helm ecosystem
-helm     = "4.2.2"
+helm     = "4.2.3"
 helmfile = "1.4.1"
 
 # Secrets
