@@ -11,7 +11,7 @@ ansible-lint = "26.4.0"
 pre-commit = "3.8.0"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.0"
+pytest = "^9.0.0"
 pytest-html = "^4.0"
 pytest-check = "^2.3"
 pytest-bdd = "^7.3"
